@@ -1,0 +1,191 @@
+{% extends 'Sourcing/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="">
+        
+        <div class="container">
+                <h2>Collected Quotation List for {{rfp_no}}</h2>
+                <a href="/sourcing/{{rfp_no}}/lineitems/" class="btn btn-danger"><span class="glyphicon glyphicon-backward"></span></a>
+                <a href="single_price_request/" class="btn btn-info">Request for Single Price Sourcing <span class="glyphicon glyphicon-piggy-bank"></span></a> 
+                {% if message %}
+                <div class="alert alert-{{message_type}}">
+                    <strong>{{message}}</strong>
+                </div>
+                {% endif %}
+            
+            <div class="table-responsive" style="height:400px;">          
+                    <table id="quotation_list" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Vendor Name</th>
+                          <th>Location</th>
+                          <th>Contact Person</th>
+                          <th>Quotation Date</th>
+                          <th>Quotation Reference</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for supplier in selected_supplier_list %}
+                            <tr>
+                                <td>
+                                  <a href="/sourcing/{{rfp_no}}/lineitems/vendor_quotation/{{supplier.id}}/edit/" data-toggle="tooltip" data-placement="top" title="Edit"> <span class="glyphicon glyphicon-pencil" style="color: orange"></span></a> &nbsp;
+                                  <a href="/sourcing/{{rfp_no}}/lineitems/vendor_quotation/{{supplier.id}}/view/" data-toggle="tooltip" data-placement="top" title="View"> <span class="glyphicon glyphicon-play-circle" style="color: blue"></span></a> &nbsp;
+                                  <a href="/sourcing/{{rfp_no}}/lineitems/vendor_quotation/{{supplier.id}}/delete/" data-toggle="tooltip" data-placement="top" title="Delete"> <span class="glyphicon glyphicon-trash" style="color: red"></span></a>
+                                </td>
+                                <td>{{supplier.supplier__name}}</td>
+                                <td>{{supplier.supplier__location}}</td>
+                                <td>{{supplier.supplier_contact_person__name}}</td>
+                                <td>{{supplier.offer_date}}</td>
+                                <td>{{supplier.offer_reference}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Vendor Quotation found for this RFP</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>  
+            <h2>Select Vendor from this Vendor Master <button class="btn btn-success" data-toggle="modal" data-target="#ADDNew">ADD New Vendor &nbsp;<span class="glyphicon glyphicon-plus"></span></button></h2> 
+    
+     <!-- Modal -->
+ <div class="modal fade" id="ADDNew" role="dialog">
+        <div class="modal-dialog">
+        
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Fill the Supplier Details</span></h4>
+            </div>
+            <div class="modal-body">
+              <form type="submit" id="vendor-form" method="POST" action="new_vendor/">
+                {% csrf_token %}
+                <div class="form-group">
+                        <label class="form-input" for="name">Supplier Name <a style="color: red">*</a></label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Organization Name" required>
+                        <label class="form-input" for="location">Location <a style="color: red">*</a></label>
+                        <input type="text" class="form-control" id="location" name="location" placeholder="Branch" required> 
+                        <label class="form-input" for="address">Address <a style="color: red"></a></label>
+                        <textarea type="text" class="form-control" id="address" name="address"></textarea>
+                        <label class="form-input" for="code">City <a style="color: red">*</a></label>
+                        <input type="text" class="form-control" id="city" name="city" required>
+                        <label class="form-input" for="state">State </label>
+                        <select class="form-control" id="state" name="state">
+                          <option></option>
+                          {% for state in StateList %}
+                            <option>{{state}}</option>
+                          {% endfor %}
+                        </select>
+                        <label class="form-input" for="pin">Pin </label>
+                        <input type="number" class="form-control" id="pin" name="pin">
+
+                        <label class="form-input" for="country">Country </label>
+                        <input type="text" class="form-control" id="country" name="country" value="India" required>
+
+                        <label class="form-input" for="officeemail1">Office Email ID 1 </label>
+                        <input type="email" class="form-control" id="offieemail1" name="officeemail1">
+
+                        <label class="form-input" for="officeemail2">Office Email ID 2 </label>
+                        <input type="email" class="form-control" id="offieemail2" name="officeemail2">
+
+                        <label class="form-input" for="officephone1">Office Phone No 1 </label>
+                        <input type="number" class="form-control" id="offiephone1" name="officephone1">
+
+                        <label class="form-input" for="officephone2">Office Phone No 2 </label>
+                        <input type="number" class="form-control" id="offiephone2" name="officephone2">
+
+                        <label class="form-input" for="GSTNo">GST No / Tax Code </label>
+                        <input type="text" class="form-control" id="GSTNo" name="GSTNo">
+
+                        <label class="form-input" for="PaymentTerm">Payment Term (in Days)</label>
+                        <input type="number" class="form-control" id="PaymentTerm" name="PaymentTerm">
+
+                        <label class="form-input" for="advance">Advance (in %)</label>
+                        <input type="number" class="form-control" id="advance" name="advance">
+
+                        <label class="form-input" for="IncoTerm">Inco Term </label>
+                        <input type="text" class="form-control" id="IncoTerm" name="IncoTerm">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                    <input type="submit" class="btn btn-success" value="Confirm">
+              </form>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+            <div class="table-responsive" style="height:400px;">          
+                    <table id="vendor_list" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Supplier Name</th>
+                          <th>Location</th>
+                          <th>Contact No</th>
+                          <th>Email ID</th>
+                          <th>City</th>
+                          <th>State</th>
+                          <th>Country</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for supplier in Supplier_list %}
+                            <tr>
+                              <td>
+                                  <a href="/sourcing/{{rfp_no}}/lineitems/{{supplier.id}}/contact_person_selection/" data-toggle="tooltip" data-placement="top" title="Select this vendor for Entering new quotation"> <span class="glyphicon glyphicon-arrow-right" style="color: green"></span></a> &nbsp;
+                              </td>
+                              <td>{{supplier.name}}</td>
+                              <td>{{supplier.location}}</td>
+                              <td>{{supplier.office_phone1}}</td>
+                              <td>{{supplier.office_email1}}</td>
+                              <td>{{supplier.city}}</td>
+                              <td>{{supplier.state}}</td>
+                              <td>{{supplier.country}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Vendor Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>  
+        </div>
+<br><br>
+        <div class="container">
+              <button class="btn btn-info" data-toggle="modal" data-target="#Completed" type="submit">Mark as Sourcing Completed &nbsp;<span class="glyphicon glyphicon-forward"></span></button>
+          <div class="modal fade" id="Completed" role="dialog">
+              <div class="modal-dialog">
+              
+                <!-- Modal content-->
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Warning  <span class="glyphicon glyphicon-fire"></span></h4>
+                  </div>
+                  <div class="modal-body">
+                    <p>Do you want to mark as completed ?</p>
+                  </div>
+                  <div class="modal-footer">
+                    <form method="POST" action="mark_as_completed/">
+                      {% csrf_token %}
+                      <input type="button" class="btn btn-success" data-dismiss="modal" value="Cancel">
+                      <input type="submit" class="btn btn-danger" value="Confirm">
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+        
+        </div>
+        
+        <br>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#quotation_list').DataTable();
+                $('#vendor_list').DataTable();
+            } );
+            </script>     
+{% endblock content %}

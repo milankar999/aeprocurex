@@ -1,0 +1,69 @@
+{% extends 'Sourcing/base.html' %}
+{% load static %}
+
+{% block content %}
+<div>
+        <style>
+            .content {
+                max-width: 500px;
+                margin: auto;
+                background: white;
+                padding: 10px;
+            }
+            </style>        
+        <form type="submit" id="vendor-form" method="POST">
+            <div class="content">
+              <h3>Edit the pricing details</h3>
+                {% csrf_token %}
+                <div class="form-group">
+                        <label class="form-input" for="product_title">Product Title <a style="color: red">*</a></label>
+                        <input type="text" class="form-control" id="product_title" name="product_title" value="{{price.product_title}}" required>
+                        
+                        <label class="form-input" for="description">Product Description <a style="color: red">*</a></label>
+                        <textarea type="text" class="form-control" id="description" name="description" required>{{price.description}}</textarea>
+   
+                        <label class="form-input" for="model">Model </label>
+                        <input type="text" class="form-control" id="model" name="model" value={{price.model}}>
+   
+                        <label class="form-input" for="brand">Brand</label>
+                        <input type="text" class="form-control" id="brand" name="brand" value={{price.brand}}>
+
+                        <label class="form-input" for="product_code">Product Code (Manufacturer Part No)</label>
+                        <input type="text" class="form-control" id="product_code" name="product_code" value={{price.product_code}}>
+                        
+                        <hr>
+
+                        <label class="form-input" for="pack_size">Pack Size <a style="color: red">*</a></label>
+                        <input type="text" class="form-control" id="pack_size" name="pack_size" value="{{price.pack_size}}" required>
+
+                        <label class="form-input" for="moq">MOQ</label>
+                        <input type="text" class="form-control" id="moq" name="moq" value="{{price.moq}}">
+
+                        <label class="form-input" for="lead_time">Lead Time</label>
+                        <input type="text" class="form-control" id="lead_time" name="lead_time" value="{{price.lead_time}}">
+
+                        <label class="form-input" for="price_validity">Price Validity (in Days)</label>
+                        <input type="number" class="form-control" id="price_validity" name="price_validity" value="{{price.price_validity}}">
+
+                        <hr>
+
+                        <label class="form-input" for="mrp">MRP (In INR) </label>
+                        <input type="number" class="form-control" id="mrp" step="0.01" name="mrp" value={{price.mrp}}>
+
+                        <label class="form-input" for="price1">Round One Quoted Price ( In INR ) <a style="color: red">*</a></label>
+                        <input type="number" class="form-control" id="price1" step="0.01" name="price1" value="{{price.price1}}" required>
+
+                        <hr>
+
+                        <label class="form-input" for="freight">Expected Freight charge ( % of basic price)</label>
+                        <input type="number" class="form-control" id="freight" step="0.01" name="freight" value="{{price.expected_freight}}" required>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                    <input type="submit" class="btn btn-success" value="Confirm">
+            </div>
+        </form>
+    </div>
+
+{% endblock content %}

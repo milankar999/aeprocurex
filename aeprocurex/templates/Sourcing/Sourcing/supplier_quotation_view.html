@@ -1,0 +1,58 @@
+{% extends 'Sourcing/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <h2>Received quotation details for {{supplier_name}}</h2>
+
+    <div class="table-responsive">
+        <table id="price_list" class="table table-hover table-bordered table-sm" width="100%">
+                     <thead>
+                       <tr>
+                         <th>Product Title</th>
+                         <th>Description</th>
+                         <th>Model</th>
+                         <th>Brand</th>
+                         <th>Product Code</th>
+                         <th>Pack Size</th>
+                         <th>MOQ</th>
+                         <th>Lead Time</th>
+                         <th>Price Validity</th>
+                         <th>Expected Freight (%)</th>
+                         <th>MRP</th>
+                         <th>Round 1 Price</th>
+                         <th>Round 2 Price</th>
+                       </tr>
+                     </thead>
+                     <tbody>   
+                         {% for price in sourcing_lineitems %}
+                           <tr>
+                               <td>{{price.product_title}}</td>
+                               <td>{{price.description}}</td>
+                               <td>{{price.model}}</td>
+                               <td>{{price.brand}}</td>
+                               <td>{{price.product_code}}</td>
+                               <td>{{price.pack_size}}</td>
+                               <td>{{price.moq}}</td>
+                               <td>{{price.lead_time}}</td>
+                               <td>{{price.price_validity}}</td>
+                               <td>{{price.expected_freight}}</td>
+                               <td>{{price.mrp}}</td>
+                               <td>{{price.price1}}</td>
+                               <td>{{price.price2}}</td>
+                           </tr>
+                         {% empty %}
+                           <p>No Price Found form this vendor</p>
+                         {% endfor %}
+                     </tbody>
+        </table>          
+     </div>
+     <script type="text/javascript">
+        $(document).ready( function () {
+            $('#price_list').DataTable();
+        } );
+        </script> 
+</div>
+
+{% endblock content %}

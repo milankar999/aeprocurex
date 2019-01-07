@@ -1,0 +1,47 @@
+{% extends 'Sales/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <h2>Pending COQ List</h2>
+            <div class="table-responsive">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>RFP No</th>
+                          <th>Customer</th>
+                          <th>Location</th>
+                          <th>Contact Person</th>
+                          <th>Creation Date</th>
+                          <th>Sourcing Person</th>
+                          <th>Priority</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for rfp in rfp_list %}
+                            <tr>
+                               <td>
+                                   <a href="{{rfp.rfp_no}}/details/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td>{{rfp.rfp_no}}</td>
+                                <td>{{rfp.customer__name}}</td>
+                                <td>{{rfp.customer__location}}</td>
+                                <td>{{rfp.customer_contact_person__name}}</td>
+                                <td>{{rfp.rfp_creation_details__creation_date}}</td>
+                                <td>{{rfp.rfp_sourcing_detail__sourcing_completed_by__first_name}}</td>
+                                <td>{{rfp.priority}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Pending COQ Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable();
+            } );
+            </script>     
+{% endblock content %}

@@ -1,0 +1,33 @@
+{% extends 'Sourcing/base.html' %}
+{% load static %}
+
+{% block content %}
+<div>
+    <style>
+        .content {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 10px;
+        }
+        </style>        
+        <div class="content">
+          <h3>Update the tax details for: -</h3>
+          <label>{{lineitem.product_title}}</label>
+          <form type="submit" id="vendor-form" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                    <label class="form-input" for="hsn">HSN Code </label>
+                    <input type="text" class="form-control" id="hsn" name="hsn" value="{{lineitem.hsn_code}}">
+                     
+                    <label class="form-input" for="gst">GST %</label>
+                    <input type="number" class="form-control" id="gst" step="0.01" name="gst" value="{{lineitem.gst}}">
+                    
+            </div>
+            <div class="modal-footer">
+                    <input type="submit" class="btn btn-success" value="Confirm">
+            </div>
+          </form>
+        </div>
+</div>
+{% endblock %}

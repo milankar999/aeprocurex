@@ -1,0 +1,49 @@
+{% extends 'Sales/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <h2>Quoted List</h2>
+            <div class="table-responsive">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>RFP No</th>
+                          <th>Customer</th>
+                          <th>Location</th>
+                          <th>Contact Person</th>
+                          <th>Creation Date</th>
+                          <th>Sourcing Person</th>
+                          <th>Quotation No</th>
+                          <th>quotation Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for item in quoted_list %}
+                            <tr>
+                               <td>
+                                   <a href="/quotation/quoted/{{item.rfp__rfp_no}}/{{item.quotation_no}}/lineitems/" data-toggle="tooltip" data-placement="top" title="Select this Quotation"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td><a href="/quotation/quoted/{{item.rfp__rfp_no}}/quotation_list/" data-toggle="tooltip" data-placement="top" title="All Quotation List"> <span class="glyphicon glyphicon-plus" style="color: blue"></span></a>{{item.rfp__rfp_no}}</td>
+                                <td>{{item.customer__name}}</td>
+                                <td>{{item.customer__location}}</td>
+                                <td>{{item.customer_contact_person__name}}</td>
+                                <td>{{item.rfp__rfp_creation_details__creation_date}}</td>
+                                <td>{{item.rfp__rfp_sourcing_detail__sourcing_completed_by__first_name}}</td>
+                                <td>{{item.quotation_no}}</td>
+                                <td>{{item.quotation_date}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Quoted Item Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable();
+            } );
+            </script>     
+{% endblock content %}

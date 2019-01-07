@@ -1,0 +1,16 @@
+{% extends 'Sales/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container">
+<div class="row justify-content-center">
+    
+    <label>Please Select the Quotation type</label><br>
+        <a href="/quotation/immediate_quotation/selection/psp/customer_selection/" class="btn btn-info">PSP</a>
+        <a href="/quotation/immediate_quotation/selection/easy_rfq/customer_selection/" class="btn btn-info">Easy RFQ</a>
+        <a href="/quotation/immediate_quotation/selection/others/customer_selection/" class="btn btn-info">Others</a>
+</div>
+</div><br>
+
+{% endblock %}

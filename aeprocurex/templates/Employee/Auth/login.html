@@ -1,0 +1,37 @@
+{% load static %}
+<html>
+    <head>
+        <title>Aeprocurex</title>
+        <link rel="stylesheet" href="{% static 'css/login.css' %}">
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+        <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    </head>
+    <body>
+        <div class="tile-body">
+            <form id="form" method="POST">
+                {% csrf_token %}
+              <label class="form-input">
+                <i class="material-icons">person</i>
+                <input type="text" name="username" autofocus="true" required />
+                <span class="label">Username</span>
+                <span class="underline"></span>
+              </label>
+              
+              <label class="form-input">
+                <i class="material-icons">lock</i>
+                <input type="password" name="password" required />
+                <span class="label">Password</span>
+                <div class="underline"></div>
+              </label>
+              
+              <div class="submit-container clearfix" style="margin-top: 2rem;">          
+                    <button type="submit" class="btn btn-irenic float-right" tabindex="0">
+                        <span>SIGN IN</span>
+                    </button>
+                    
+              </div><p>{{error}}</p>
+            </form>
+        </div>
+    </body>
+</html>

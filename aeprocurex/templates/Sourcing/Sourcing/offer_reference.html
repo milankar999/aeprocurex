@@ -1,0 +1,32 @@
+{% extends 'Sourcing/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div>
+    <style>
+        .content {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 10px;
+        }
+        </style>        
+        <div class="content">
+          <h3>Please Mention the Offer Reference</h3>
+          <form type="submit" id="vendor-form" method="POST" action="">
+            {% csrf_token %}
+            <div class="form-group">
+                    <label class="form-input" for="reference">Offer Reference <a style="color: red">*</a></label>
+                    <input type="text" class="form-control" id="reference" name="reference" placeholder="Supplier Quotation No" required>
+                    <label class="form-input" for="oDate">Offer Date <a style="color: red">*</a></label>
+                    <input type="date" class="form-control" id="oDate" name="oDate" placeholder="Supplier Quotation No" required>
+            </div>
+        </div>
+        <div class="modal-footer">
+                <input type="submit" class="btn btn-success" value="Confirm">
+          </form>
+        </div>
+</div>
+
+{% endblock content %}

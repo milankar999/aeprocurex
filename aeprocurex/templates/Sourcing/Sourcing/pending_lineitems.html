@@ -1,0 +1,78 @@
+{% extends 'Sourcing/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="">
+        <h2>RFP Lineitems of RFP No {{rfp_no}}</h2>
+        <div class="container">
+                {% if message %}
+                <div class="alert alert-{{message_type}}">
+                    <strong>{{message}}</strong>
+                </div>
+                {% endif %}
+            
+                <a href="/sourcing/pending_list" class="btn btn-danger"><span class="glyphicon glyphicon-backward"></span></a> 
+                <button class="btn btn-info">Suggestion From History &nbsp;<span class="glyphicon glyphicon-cloud"></span></button>
+                            
+        </div>
+            <div class="table-responsive">          
+                    <table id="lineitems" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Product Title</th>
+                          <th>Description</th>
+                          <th>Model</th>
+                          <th>Brand</th>
+                          <th>Product Code</th>
+                          <th>Part no</th>
+                          <th>Category</th>
+                          <th>HSN Code</th>
+                          <th>GST</th>
+                          <th>UOM</th>
+                          <th>Quantity</th>
+                          <th>Target Price</th>
+                          <th>Remarks</th>
+                          <th>Customer Lead Time</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for item in lineitems %}
+                            <tr>
+                                <td>
+                                    <a href="{{item.lineitem_id}}/edit-tax/" data-toggle="tooltip" data-placement="top" title="Edit Tax Details"> <span class="glyphicon glyphicon-edit" style="color: blue"></span></a>
+                                </td>
+                                <td>{{item.product_title}}</td>
+                                <td>{{item.description}}</td>
+                                <td>{{item.model}}</td>
+                                <td>{{item.brand}}</td>
+                                <td>{{item.product_code}}</td>
+                                <td>{{item.part_no}}</td>
+                                <td>{{item.category}}</td>
+                                <td>{{item.hsn_code}}</td>
+                                <td>{{item.gst}}</td>
+                                <td>{{item.uom}}</td>
+                                <td>{{item.quantity}}</td>
+                                <td>{{item.target_price}}</td>
+                                <td>{{item.remarks}}</td>
+                                <td>{{item.customer_lead_time}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Pending RFP Approval Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+<div class="container">
+    <form method="GET" action="vendor_selection/">
+        <button type="submit" class="btn btn-success">Add Quotation from Vendor &nbsp;<span class="glyphicon glyphicon-forward"></span></button>
+    </form>
+</div>
+       <br>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#lineitems').DataTable();
+            } );
+            </script>     
+{% endblock content %}

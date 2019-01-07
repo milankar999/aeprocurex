@@ -1,0 +1,219 @@
+{% extends 'Sales/base.html' %}
+{% load static %}
+{% load mathfilters %}
+
+{% block content %}
+<div class="container-fluid">
+    <h3>Lineitem Details for Quotation {{quotation_no}}</h3>
+    <div>
+      <button type="submit" data-toggle="modal" data-target="#resourcing" class="btn btn-info">RESOURCING &nbsp;<span class="glyphicon glyphicon-screenshot"></span></button>
+
+
+      <div class="modal fade" id="resourcing" role="dialog">
+          <div class="modal-dialog">
+          
+            <!-- Modal content-->
+            <div class="modal-content">
+              <form method="POST" action="resourcing/">
+                {% csrf_token %}
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Warning  <span class="glyphicon glyphicon-fire"></span></h4>
+              </div>
+              <div class="modal-body">
+                <p>Are you sure want to mark this for resourcing ?</p>
+              </div>
+               <div class="modal-footer">
+                  <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                  <input type="submit" class="btn btn-success" value="Continue">
+              </div>
+              </form>
+            </div>
+            
+          </div>
+      </div>  
+  
+
+      <button type="submit" data-toggle="modal" data-target="#coq" class="btn btn-info">COQ &nbsp;<span class="glyphicon glyphicon-screenshot"></span></button>
+
+
+
+      <div class="modal fade" id="coq" role="dialog">
+        <div class="modal-dialog">
+        
+          <!-- Modal content-->
+          <div class="modal-content">
+            <form method="POST" action="coq/">
+              {% csrf_token %}
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Warning  <span class="glyphicon glyphicon-fire"></span></h4>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure want to mark this for COQ ?</p>
+            </div>
+             <div class="modal-footer">
+                <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                <input type="submit" class="btn btn-success" value="Continue">
+            </div>
+            </form>
+          </div>
+          
+        </div>
+    </div>   
+  
+
+
+
+      <button type="submit" data-toggle="modal" data-target="#revised_quotation" class="btn btn-info">REVISED QUOTATION &nbsp;<span class="glyphicon glyphicon-screenshot"></span></button>
+
+
+      <div class="modal fade" id="revised_quotation" role="dialog">
+        <div class="modal-dialog">
+        
+          <!-- Modal content-->
+          <div class="modal-content">
+            <form method="POST" action="revised_quotation/">
+              {% csrf_token %}
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Warning  <span class="glyphicon glyphicon-fire"></span></h4>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure want to mark this for Generate revised quotation?</p>
+            </div>
+             <div class="modal-footer">
+                <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                <input type="submit" class="btn btn-success" value="Continue">
+            </div>
+            </form>
+          </div>
+          
+        </div>
+    </div>
+  
+
+    </div>
+    <br>
+    <div class="table-responsive">          
+          <table class="table table-hover table-bordered table-sm" id="uotation" width="100%">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Product Title</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Margin (%)</th>
+                <th>Basic Price</th>
+                <th>Total Basic Price</th>
+                <th>GST (%)</th>
+                <th>Total Price with GST</th>
+                <th>Total Buying Price</th>
+                <th>Total Buying Price with GST</th>
+                <th>Lead Time</th>
+                <th>Description</th>
+                <th>Model</th>
+                <th>Brand</th>
+                <th>Product Code</th>
+                <th>Part no</th>
+                <th>Pack Size</th>
+                <th>MOQ</th>
+                <th>Expected Freight (%)</th>
+                <th>HSN Code</th>
+                <th>UOM</th>
+                <th>Customer Target Price</th>
+                <th>Supplier Name</th>
+                <th>Supplier City</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for item in quotation_lineitem %}
+                  
+                      {% if item.margin < 10 %}
+                        <tr style="background-color:darksalmon">
+                      {% elif item.margin < 15 %}
+                        <tr style="background-color:azure">
+                      {% elif item.margin < 20 %}
+                        <tr style="background-color:aqua">
+                      {% elif item.margin < 25 %}
+                        <tr style="background-color:lightskyblue">
+                      {% elif item.margin < 30 %}
+                        <tr style="background-color:lavender">
+                      {% else %}
+                        <tr style="background-color:gainsboro">
+                      {% endif %}
+                      
+                          <td>{{forloop.counter}}</td>                         
+                          <td>{{item.product_title}}</td>
+                          <td align="right">{{item.quantity|floatformat:2}}</td>                          
+                          <td align="right">{{item.unit_price|floatformat:2}}</td>
+                          <td align="right">{{item.margin}}</td>
+                         
+                          <td align="right">{{item.basic_value|floatformat:2}}</td>
+                            
+                          <td align="right">{{item.total_basic_value|floatformat:2}}</td>
+                          <td align="right">{{item.gst|floatformat:2}}</td>
+                              
+                          <td align="right">{{item.total_with_gst|floatformat:2}}</td>
+                              
+                          <td align="right">{{item.total_buying_price|floatformat:2}}</td>
+                          <td align="right">{{item.total_buying_price_with_gst|floatformat:2}}</td>
+                                
+                          <td>{{item.lead_time}}</td>
+                          <td>{{item.description}}</td>
+                          <td>{{item.model}}</td>
+                          <td>{{item.brand}}</td>
+                          <td>{{item.product_code}}</td>
+                          <td>{{item.part_no}}</td>
+                          <td>{{item.pack_size}}</td>
+                          <td>{{item.moq}}</td>
+                          <td>{{item.expected_freight}}</td>
+                          <td>{{item.hsn_code}}</td>                          
+                          <td>{{item.uom}}</td>
+                          <td>{{item.sourcing_lineitem__rfp_lineitem__customer_lead_time}}</td>
+                          <td>{{item.sourcing_lineitem__sourcing__supplier__name}}</td>
+                          <td>{{item.sourcing_lineitem__sourcing__supplier__location}}</td>
+                      </tr>
+                {% empty %}
+                      <p>No Lineitems found for displaying</p>
+                {% endfor %}
+              </tbody>
+           </table>
+      </div> <br>   
+      <lavel>{{grand_buying_price}}</lavel>
+      <label>{{grand_buying_price_with_gst}}</label>
+      <label>{{grand_selling_price}}</label>
+      <label>{{grand_selling_price_with_gst}}</label> 
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-success" data-toggle="modal" data-target="#CopyQuotation">Generate the Same Copy Of this Qoutation &nbsp;<span class="glyphicon glyphicon-retweet"></span></button>
+    </div>
+    <div class="modal fade" id="CopyQuotation" role="dialog">
+        <div class="modal-dialog">
+        
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">  <span class="glyphicon glyphicon-fire"></span></h4>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure want to get the same quotation ?</p>
+            </div>
+            <div class="modal-footer">
+              <form method="GET" action="get_copy/">
+                <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                <input type="submit" class="btn btn-success" value="Continue">
+              </form>
+            </div>
+          </div>
+          
+        </div>
+    </div>  
+
+</div>
+<script type="text/javascript">
+  $(document).ready( function () {
+      $('#quotation').DataTable();
+  } );
+  </script> 
+{% endblock %}

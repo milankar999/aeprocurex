@@ -1,0 +1,93 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="container">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+    
+    
+                        <!--Form with header-->
+    
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="card border-primary rounded-0">
+                                <div class="card-header p-0">
+                                    <div class="bg-info text-white text-center py-2">
+                                        <h3>Do you really want to delete this ?</h3>
+                                    </div>
+                                </div>
+                                <div class="card-body p-3">
+    
+                            <label class="form-input" for="product_title">Product Title <a style="color: red">*</a></label>
+                           <p>{{quotation_lineitem.product_title}}</p>
+
+                           <label class="form-input" for="description">Product Description <a style="color: red">*</a></label>
+                           <p>{{quotation_lineitem.description}}</p>
+   
+                           <label class="form-input" for="model">Model </label>
+                           <p>{{quotation_lineitem.model}}</p>
+                           
+                           <label class="form-input" for="brand">Brand</label>
+                           <p>{{quotation_lineitem.brand}}</p>
+
+                           <label class="form-input" for="product_code">Product Code (Manufacturer Part No)</label>
+                           <p>{{quotation_lineitem.product_code}}</p>
+                           
+                           <label class="form-input" for="part_number">Customer Part No</label>
+                           <p>{{quotation_lineitem.part_no}}</p>
+                           
+                           <label class="form-input" for="pack_size">Pack Size</label>
+                           <p>{{quotation_lineitem.pack_size}}</p>
+                           
+                           <label class="form-input" for="moq">MOQ</label>
+                           <p>{{quotation_lineitem.moq}}</p>
+                           
+                           <label class="form-input" for="hsn_code">HSN Code</label>
+                           <p>{{quotation_lineitem.hsn_code}}</p>
+                           
+                           <label class="form-input" for="gst">GST %</label>
+                           <p>{{quotation_lineitem.gst}}</p>
+                           
+                           <label class="form-input" for="quantity">Quantity <a style="color: red">*</a></label>
+                           <p>{{quotation_lineitem.quantity}}</p>
+                           
+                           <label class="form-input" for="uom">UOM <a style="color: red">*</a></label>
+                           <p>{{quotation_lineitem.uom}}</p>
+                           
+                           <label class="form-input" for="unit_price">Unit Price </label>
+                           <p>{{quotation_lineitem.unit_price}}</p>
+                           
+                           <label class="form-input" for="margin">Margin </label>
+                           <p>{{quotation_lineitem.margin}}</p>
+                           
+                           <label class="form-input" for="lead_time">Lead Time </label>
+                           <p>{{quotation_lineitem.lead_time}}</p>
+                           
+                           <br>    
+                                    
+    
+                            <div class="text-center">
+                                <input type="submit" value="Delete" class="btn btn-danger btn-block rounded-0 py-2">
+                            </div>
+                            </div><br>
+    
+                            </div>
+                        </form>
+                        <!--Form with header-->
+                        <form method="GET" action="/quotation/generate/{{rfp_no}}/lineitems/">
+                            <div class="text-center">
+                                <input type="submit" value="Cancel" class="btn btn-success btn-block rounded-0 py-2">
+                            </div>
+                        </form>
+        </div>
+</div>
+
+{% endblock content %}

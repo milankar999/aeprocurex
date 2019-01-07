@@ -1,0 +1,83 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="container">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+    
+    
+                        <!--Form with header-->
+    
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="card border-primary rounded-0">
+                                <div class="card-header p-0">
+                                    <div class="bg-info text-white text-center py-2">
+                                        <h3>Edit Lineitem</h3>
+                                    </div>
+                                </div>
+                                <div class="card-body p-3">
+    
+                                    <label class="form-input" for="product_title">Product Title <a style="color: red">*</a></label>
+                           <input type="text" class="form-control" id="product_title" name="product_title" required value={{lineitems.product_title}}>
+
+                           <label class="form-input" for="description">Product Description <a style="color: red">*</a></label>
+                           <textarea type="text" class="form-control" id="description" name="description" required>{{lineitems.description}}</textarea>
+   
+                           <label class="form-input" for="model">Model </label>
+                           <input type="text" class="form-control" id="model" name="model" value={{lineitems.model}}>
+   
+                           <label class="form-input" for="brand">Brand</label>
+                           <input type="text" class="form-control" id="brand" name="brand" value={{lineitems.brand}}>
+
+                           <label class="form-input" for="product_code">Product Code (Manufacturer Part No)</label>
+                           <input type="text" class="form-control" id="product_code" name="product_code" value={{lineitems.product_code}}>
+
+                           <label class="form-input" for="part_no">Customer Part No</label>
+                           <input type="text" class="form-control" id="part_no" name="part_no" value={{lineitems.part_no}}>
+
+                           <label class="form-input" for="category">Category <a style="color: red">*</a></label>
+                           <input type="text" class="form-control" id="category" name="category" value={{lineitems.category}}>
+   
+                           <label class="form-input" for="hsn_code">HSN Code</label>
+                           <input type="text" class="form-control" id="hsn_code" name="hsn_code" value={{lineitems.hsn_code}}>
+
+                           <label class="form-input" for="gst">GST %</label>
+                           <input type="number" class="form-control" id="gst" name="gst" >
+
+                           <label class="form-input" for="quantity">Quantity <a style="color: red">*</a></label>
+                           <input type="number" class="form-control" id="quantity" name="quantity" required value={{lineitems.quantity}}>
+
+                           <label class="form-input" for="uom">UOM <a style="color: red">*</a></label>
+                           <input type="text" class="form-control" id="uom" name="uom" required value={{lineitems.uom}}>
+
+                           <label class="form-input" for="target_price">Target Price </label>
+                           <input type="number" class="form-control" id="target_price" name="target_price" value={{lineitems.target_price}}>
+
+                           <label class="form-input" for="CLT">Customer Lead Time </label>
+                           <input type="number" class="form-control" id="CLT" name="CLT" value={{lineitems.customer_lead_time}}>
+
+                           <label class="form-input" for="remarks">Remarks </label>
+                           <input type="text" class="form-control" id="remarks" name="remarks" value={{lineitems.remarks}}>  <br>    
+                                    
+    
+                                    <div class="text-center">
+                                        <input type="submit" value="Save Changes" class="btn btn-info btn-block rounded-0 py-2">
+                                    </div>
+                                </div><br>
+    
+                            </div>
+                        </form>
+                        <!--Form with header-->
+        </div>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,47 @@
+{% extends 'Sales/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h2>Pending Approval List for Single Sourcing</h2>
+        <div class="table-responsive">          
+                <table id="pending_list" class="table table-hover table-bordered table-sm" width="100%">
+                  <thead>
+                    <tr>
+                      <th>RFP No</th>
+                      <th>Customer</th>
+                      <th>Location</th>
+                      <th>Customer Contact Person</th>
+                      <th>Creation Date</th>
+                      <th>Requested By</th>
+                      <th>Reason</th>
+                      <th>Approval Status</th>
+                      <th>Priority</th>
+                    </tr>
+                  </thead>
+                  <tbody>   
+                      {% for rfp in rfp_list %}
+                        <tr>
+                            <td>{{rfp.rfp_no}}</td>
+                            <td>{{rfp.customer__name}}</td>
+                            <td>{{rfp.customer__location}}</td>
+                            <td>{{rfp.customer_contact_person__name}}</td>
+                            <td>{{rfp.rfp_creation_details__creation_date}}</td>
+                            <td>{{rfp.rfp_assign1__assign_to1__first_name}}</td>
+                            <td>{{rfp.single_vendor_reason}}</td>
+                            <td>{{rfp.single_vendor_approval}}</td>
+                            <td>{{rfp.priority}}</td>
+                        </tr>
+                      {% empty %}
+                        <p>No Pending RFP Approval Found</p>
+                      {% endfor %}
+                  </tbody>
+                </table>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(document).ready( function () {
+            $('#pending_list').DataTable();
+        } );
+        </script>  
+{% endblock %}

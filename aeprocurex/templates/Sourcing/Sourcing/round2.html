@@ -1,0 +1,31 @@
+{% extends 'Sourcing/base.html' %}
+{% load static %}
+
+{% block content %}
+<div>
+        <style>
+            .content {
+                max-width: 500px;
+                margin: auto;
+                background: white;
+                padding: 10px;
+            }
+            </style>        
+            <div class="content">
+              <h3>Enter the negotiated price for {{price.product_title}}</h3>
+              <form type="submit" id="vendor-form" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                        <h4>Round 1 price INR: {{price.price1}}</h4>
+                        <hr>
+                        <label class="form-input" for="round2">Round 2 Price <a style="color: red">*</a></label>
+                        <input type="number" step="0.01" class="form-control" id="round2" name="round2" value={{price.price2}} required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                    <input type="submit" class="btn btn-success" value="Confirm">
+              </form>
+            </div>
+    </div>
+
+{% endblock content %}

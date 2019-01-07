@@ -1,0 +1,39 @@
+{% extends 'Sourcing/base.html' %}
+{% load static %}
+
+{% block content %}
+<div>
+        <style>
+            .content {
+                max-width: 500px;
+                margin: auto;
+                background: white;
+                padding: 10px;
+            }
+            </style>        
+            <div class="content">
+              <h3>Do want to delete this Quotation ?</h3><hr>
+              <form type="submit" id="vendor-form" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                        <label>Vendor Name</label>
+                        <h3>{{sourcing_details.supplier__name}}</h3>
+                         
+                        <label>Contact Person</label>
+                        <h3>{{sourcing_details.supplier_contact_person__name}}</h3>
+                        
+                        <label>Offer Reference</label>
+                        <h3>{{sourcing_details.offer_reference}}</h3>
+                        
+                        <label>Offer Date</label>
+                        <h3>{{sourcing_details.offer_date}}</h3>
+                        
+                </div>
+            </div>
+            <div class="modal-footer">
+                    <input type="submit" class="btn btn-success" value="Confirm">
+              </form>
+            </div>
+    </div>
+
+{% endblock content %}

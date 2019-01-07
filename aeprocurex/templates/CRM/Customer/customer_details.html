@@ -1,0 +1,31 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+        <div class="panel panel-primary ">
+                <div class="panel-heading">{{Customer.name}}</div>
+                <div class="panel-body">
+                    <h4>Location : {{Customer.location}}</h4>
+                    <h4>Code : {{Customer.code}}</h4>
+                    <h4>Address : {{Customer.address}}</h4>
+                    <h4>Billing Address : {{Customer.billing_address}}</h4>
+                    <h4>Shipping Address : {{Customer.shipping_address}}</h4>
+                    <h4>City : {{Customer.city}}</h4>
+                    <h4>State : {{Customer.state}}</h4>
+                    <h4>Pin : {{Customer.pin}}</h4>
+                    <h4>Country : {{Customer.country}}</h4>
+                    <h4>Office Email : {{Customer.office_email1}}</h4>
+                    <h4>Office Email (Optional) : {{Customer.office_email2}}</h4>
+                    <h4>Office phone : {{Customer.office_phone1}}</h4>
+                    <h4>Office phone (Optional) : {{Customer.office_phone2}}</h4>
+                    <h4>GST # : {{Customer.gst_number}}</h4>
+                    <h4>Vendor Code : {{Customer.vendor_code}}</h4>
+                    <h4>Payment Term (in Days): {{Customer.payment_term}}</h4>
+                    <h4>Inco Term : {{Customer.inco_term}}</h4>
+                    <h4>Tax Type : {{Customer.tax_type}}</h4>
+                </div>
+        </div>
+</div>
+
+{% endblock content %}

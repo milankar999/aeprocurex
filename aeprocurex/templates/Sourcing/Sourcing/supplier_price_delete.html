@@ -1,0 +1,69 @@
+{% extends 'Sourcing/base.html' %}
+{% load static %}
+
+{% block content %}
+<div>
+        <style>
+            .content {
+                max-width: 500px;
+                margin: auto;
+                background: white;
+                padding: 10px;
+            }
+            </style>        
+            <div class="content">
+              <h3>Do want to delete this Price ?</h3>
+              <form type="submit" id="vendor-form" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                        <label class="form-input" for="product_title">Product Title <a style="color: red">*</a></label>
+                        <h3>{{price.product_title}}</h3>
+                         
+                        <label class="form-input" for="description">Product Description <a style="color: red">*</a></label>
+                        <h3>{{price.description}}</h3>
+                        
+                        <label class="form-input" for="model">Model </label>
+                        <h3>{{price.model}}</h3>
+                        
+                        <label class="form-input" for="brand">Brand</label>
+                        <h3>{{price.brand}}</h3>
+                        
+                        <label class="form-input" for="product_code">Product Code (Manufacturer Part No)</label>
+                        <h3>{{price.product_code}}</h3>
+                        
+                        <hr>
+
+                        <label class="form-input" for="pack_size">Pack Size <a style="color: red">*</a></label>
+                        <h3>{{price.pack_size}}</h3>
+                        
+                        <label class="form-input" for="moq">MOQ</label>
+                        <h3>{{price.moq}}</h3>
+                        
+                        <label class="form-input" for="lead_time">Lead Time</label>
+                        <h3>{{price.lead_time}}</h3>
+                        
+                        <label class="form-input" for="price_validity">Price Validity (in Days)</label>
+                        <h3>{{price.price_validity}}</h3>
+                        
+                        <hr>
+
+                        <label class="form-input" for="mrp">MRP (In INR) </label>
+                        <h3>{{price.mrp}}</h3>
+                        
+                        <label class="form-input" for="price1">Round One Quoted Price ( In INR ) <a style="color: red">*</a></label>
+                        <h3>{{price.price1}}</h3>
+                        
+                        <hr>
+
+                        <label class="form-input" for="freight">Expected Freight charge ( % of basic price)</label>
+                        <h3>{{price.expected_freight}}</h3>
+                        
+                </div>
+            </div>
+            <div class="modal-footer">
+                    <input type="submit" class="btn btn-success" value="Confirm">
+              </form>
+            </div>
+    </div>
+
+{% endblock content %}

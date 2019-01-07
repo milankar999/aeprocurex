@@ -1,0 +1,16 @@
+{% extends 'Sourcing/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <label>Please Mention the reason of single vendor</label>
+    <form method="POST">
+        {% csrf_token %}
+        <textarea type="text" class="form-control" id="reasons" name="reasons" required></textarea>
+        <hr>
+        <div class="modal-footer">
+                <input type="submit" class="btn btn-success" value="Confirm">
+        </div>
+    </form>
+</div>
+{% endblock content %}

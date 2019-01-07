@@ -1,0 +1,101 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+
+    <h2>Manage End Users for {{CustomerName}} <button class="btn btn-success" data-toggle="modal" data-target="#ADDNew">ADD New &nbsp;<span class="glyphicon glyphicon-plus"></span></button></h2> 
+    
+        <!-- Modal -->
+    <div class="modal fade" id="ADDNew" role="dialog">
+           <div class="modal-dialog">
+           
+             <!-- Modal content-->
+             <div class="modal-content">
+               <div class="modal-header">
+                 <button type="button" class="close" data-dismiss="modal">&times;</button>
+                 <h4 class="modal-title">Fill the Customer ConDetails</span></h4>
+               </div>
+               <div class="modal-body">
+                 <form type="submit" id="customer-form" method="POST">
+                   {% csrf_token %}
+                   <div class="form-group">
+                           <label class="form-input" for="name">User Name <a style="color: red">*</a></label>
+                           <input type="text" class="form-control" id="name" name="name" required>
+
+                           <label class="form-input" for="dept">Department Name <a style="color: red">*</a></label>
+                           <input type="text" class="form-control" id="dept" name="dept" required>
+   
+                           <label class="form-input" for="email1">Email ID </label>
+                           <input type="email" class="form-control" id="email1" name="email1" required>
+   
+                           <label class="form-input" for="email2">Email ID (Optional)</label>
+                           <input type="email" class="form-control" id="email2" name="email2">
+   
+                           <label class="form-input" for="phone1">Phone No </label>
+                           <input type="number" class="form-control" id="phone1" name="phone1" required>
+   
+                           <label class="form-input" for="phone2">Phone No (Optional)</label>
+                           <input type="number" class="form-control" id="phone2" name="phone2">
+
+                   </div>
+               </div>
+               <div class="modal-footer">
+                   <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                       <input type="submit" class="btn btn-success" value="Confirm">
+                 </form>
+               </div>
+             </div>
+             
+           </div>
+         </div>
+        
+       <div class="table-responsive">          
+               <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                 <thead>
+                   <tr>
+                     <th>ID</th>
+                     <th>User Name</th>
+                     <th>Department</th>
+                     <th>Mobile No</th>
+                     <th>Mobile No (Optional)</th>
+                     <th>Email ID</th>
+                     <th>Email ID (Optional)</th>
+                     <th></th>
+                   </tr>
+                 </thead>
+                 <tbody>   
+                     {% for user in EndUser %}
+                       <tr>
+                           <td>{{user.id}}</td>
+                           <td>{{user.user_name}}</td>
+                           <td>{{user.department_name}}</td>
+                           <td>{{user.mobileNo1}}</td>
+                           <td>{{user.mobileNo2}}</td>
+                           <td>{{user.email1}}</td>
+                           <td>{{user.email2}}</td>
+                           <td class="list-inline">    
+                               <a href="{{user.id}}/edit/" data-toggle="tooltip" data-placement="top" title="Edit Customer Details"> <span class="glyphicon glyphicon-pencil" style="color: orange"></span></a> &nbsp;
+                           </td>
+                       </tr>
+                     {% empty %}
+                       <p>No End User Found</p>
+                     {% endfor %}
+                 </tbody>
+               </table>
+       </div>
+   </div>
+   <script type="text/javascript">
+       $(document).ready( function () {
+           $('#dcustomer').DataTable();
+       } );
+       </script>
+</div>
+
+{% endblock content %}
