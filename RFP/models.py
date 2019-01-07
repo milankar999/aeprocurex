@@ -75,6 +75,8 @@ class RFP(models.Model):
     rfp_assign3 = models.ForeignKey(RFPAssign3,on_delete = models.SET_NULL,null=True, blank=True)
     rfp_sourcing_detail = models.ForeignKey(RFPSourcingDetail,on_delete = models.SET_NULL,null=True, blank=True)
 
+    creation_type = models.CharField(max_length=200,default='DEP')
+
     single_vendor_approval = models.CharField(max_length=10,default='No')
     single_vendor_reason = models.TextField(null=True,blank=True)
 

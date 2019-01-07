@@ -1519,3 +1519,45 @@ def immediate_quotation_enduser_selection(request,quotation_type=None,cust_id=No
             customer = CustomerProfile.objects.get(id=cust_id)
             context['CustomerName'] = customer.name
             return render(request,"Sales/Quotation/Immediate_Quotation/enduser_selection.html",context)
+
+@login_required(login_url="/employee/login/")
+def immediate_quotation_process(request,quotation_type=None,cust_id=None,contact_person_id=None,enduser_id=None):
+    context={}
+    context['quotation'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type
+    context['cust_id'] = cust_id
+    context['contact_person_id'] = contact_person_id
+    context['quotation_type'] = quotation_type
+
+    if request.method == "GET":
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        enduser = EndUser.objects.filter(customer_name__pk=cust_id)
+        context['EndUser'] = enduser
+        customer = CustomerProfile.objects.get(id=cust_id)
+        rfp_no = 'RFP' + customer.id + customer.code + str(RFP.objects.count()+1) + '-INDP'
+        customer = CustomerProfile.objects.get(id=cust_id)
+        customer_contact_person = CustomerContactPerson.objects.get(id=contact_person_id)
+        
+        if enduser_id == 'none':
+                creation_details = RFPCreationDetail.objects.create(id=rfp_no+'C1',created_by=user)
+                new_rfp = RFP.objects.create(rfp_no=rfp_no,customer=customer,customer_contact_person=customer_contact_person,rfp_creation_details=creation_details,creation_type='INDEP')
+        else:
+                end_user = EndUser.objects.get(id=enduser_id)
+                creation_details = RFPCreationDetail.objects.create(id=rfp_no+'C1',created_by=user)
+                new_rfp = RFP.objects.create(rfp_no=rfp_no,customer=customer,customer_contact_person=customer_contact_person,end_user=end_user,rfp_creation_details=creation_details,creation_type='INDEP')
+        context['rfp_no'] = rfp_no
+
+        if new_rfp:
+                if creation_details:
+                        if type == 'Sales':
+                                return render(request,"Sales/Quotation/Immediate_Quotation/process.html",context)
+    
+@login_required(login_url="/employee/login/")
+def immediate_quotation_product_selection(request,rfp_no=None):
+    context={}
+    context['quotation'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type

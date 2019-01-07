@@ -28,4 +28,6 @@ urlpatterns = [
     path('immediate_quotation/selection/<quotation_type>/customer_selection/',immediate_quotation_customer_selection,name='immediate-quotation-customer-selection'),
     path('immediate_quotation/selection/<quotation_type>/customer_selection/<cust_id>/contact_person_selection/',immediate_quotation_cperson_selection,name='immediate-quotation-customer-cperson-selection'),
     path('immediate_quotation/selection/<quotation_type>/customer_selection/<cust_id>/contact_person_selection/<contact_person_id>/enduser_selection/',immediate_quotation_enduser_selection,name='immediate-quotation-enduser-selection'),
+    path('immediate_quotation/selection/<quotation_type>/customer_selection/<cust_id>/contact_person_selection/<contact_person_id>/enduser_selection/<enduser_id>/process/',immediate_quotation_process,name='immediate-quotation-processing'),
+    path('immediate_quotation/product_selection/<rfp_no>/product_list/',immediate_quotation_product_selection,name='immediate-quotation-product-selection'),
 ]   
