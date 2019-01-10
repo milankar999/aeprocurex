@@ -25,6 +25,9 @@ def rfp_create(request):
         if type == 'CRM':
                 return render(request,"CRM/RFP/rfp_create_1.html",context)
 
+        if type == 'Sourcing':
+                return render(request,"Sourcing/RFP/rfp_create_1.html",context)
+
     if request.method == "POST":
         user = User.objects.get(username=request.user)
         data = request.POST
@@ -41,6 +44,8 @@ def rfp_create(request):
                 context['message_type'] = 'success'
                 if type == 'CRM':
                         return render(request,"CRM/RFP/rfp_create_1.html",context)
+                if type == 'Sourcing':
+                        return render(request,"Sourcing/RFP/rfp_create_1.html",context)
         
         else:
                 u = User.objects.get(username=request.user)
@@ -53,6 +58,9 @@ def rfp_create(request):
                 context['message_type'] = 'danger'
                 if type == 'CRM':
                         return render(request,"CRM/RFP/rfp_create_1.html",context)
+
+                if type == 'Sourcing':
+                        return render(request,"Sourcing/RFP/rfp_create_1.html",context)
 
 @login_required(login_url="/employee/login/")
 def contact_person(request, cust_id=None):
@@ -71,6 +79,8 @@ def contact_person(request, cust_id=None):
 
         if type == 'CRM':
                 return render(request,"CRM/RFP/rfp_create_2.html",context)
+        if type == 'Sourcing':
+                return render(request,"Sourcing/RFP/rfp_create_2.html",context)
 
     if request.method == "POST":
         user = User.objects.get(username=request.user)
@@ -98,6 +108,9 @@ def contact_person(request, cust_id=None):
         if type == 'CRM':
                 return render(request,"CRM/RFP/rfp_create_2.html",context)
 
+        if type == 'Sourcing':
+                return render(request,"Sourcing/RFP/rfp_create_2.html",context)
+
 @login_required(login_url="/employee/login/")
 def end_user(request, cust_id=None,contactperson_id=None):
     context={}
@@ -116,6 +129,9 @@ def end_user(request, cust_id=None,contactperson_id=None):
 
         if type == 'CRM':
                 return render(request,"CRM/RFP/rfp_create_3.html",context)
+
+        if type == 'Sourcing':
+                return render(request,"Sourcing/RFP/rfp_create_3.html",context)
 
     if request.method == "POST":
         user = User.objects.get(username=request.user)
@@ -141,6 +157,8 @@ def end_user(request, cust_id=None,contactperson_id=None):
         
         if type == 'CRM':
                 return render(request,"CRM/RFP/rfp_create_3.html",context)
+        if type == 'Sourcing':
+                return render(request,"Sourcing/RFP/rfp_create_3.html",context)
 
 @login_required(login_url="/employee/login/")
 def processing(request, cust_id=None,contactperson_id=None,enduser_id=None):
@@ -172,6 +190,9 @@ def processing(request, cust_id=None,contactperson_id=None,enduser_id=None):
                         if type == 'CRM':
                                 return render(request,"CRM/RFP/process.html",context)
 
+                        if type == 'Sourcing':
+                                return render(request,"Sourcing/RFP/process.html",context)
+
 
 @login_required(login_url="/employee/login/")
 def rfp_creation_inprogress(request):
@@ -191,6 +212,17 @@ def rfp_creation_inprogress(request):
                         )
                     context['rfp_list'] = rfp
                     return render(request,"CRM/RFP/creation_in_progress.html",context)  
+
+            if type == 'Sourcing':
+                    rfp = RFP.objects.filter(enquiry_status='',rfp_creation_details__created_by=u).values(
+                            'rfp_no',
+                            'customer__name',
+                            'customer__location',
+                            'customer_contact_person__name',
+                            'rfp_creation_details__creation_date'
+                        )
+                    context['rfp_list'] = rfp
+                    return render(request,"Sourcing/RFP/creation_in_progress.html",context)  
                      
 
 
@@ -210,6 +242,9 @@ def product_selection(request, rfp_no=None):
 
         if type == 'CRM':
                 return render(request,"CRM/RFP/product_selection.html",context)
+
+        if type == 'Sourcing':
+                return render(request,"Sourcing/RFP/product_selection.html",context)
  
     if request.method == "POST":
         user = User.objects.get(username=request.user)
@@ -243,6 +278,9 @@ def product_selection(request, rfp_no=None):
         if type == 'CRM':
                 return render(request,"CRM/RFP/product_selection.html",context)
 
+        if type == 'Sourcing':
+                return render(request,"Sourcing/RFP/product_selection.html",context)
+
 @login_required(login_url="/employee/login/")
 def lineitem_edit(request, rfp_no=None, lineitem_id=None):
     context={}
@@ -259,6 +297,8 @@ def lineitem_edit(request, rfp_no=None, lineitem_id=None):
         print(lineitems)
         if type == 'CRM':
                 return render(request,"CRM/RFP/rfp_lineitem_edit.html",context)
+        if type == 'Sourcing':
+                return render(request,"Sourcing/RFP/rfp_lineitem_edit.html",context)
  
     if request.method == "POST":
         lineitem = RFPLineitem.objects.get(lineitem_id=lineitem_id)
@@ -297,6 +337,8 @@ def lineitem_edit(request, rfp_no=None, lineitem_id=None):
 
         if type == 'CRM':
                 return HttpResponseRedirect(reverse('product-selection',args=[rfp_no]))
+        if type == 'Sourcing':
+                return HttpResponseRedirect(reverse('product-selection',args=[rfp_no]))
 
 @login_required(login_url="/employee/login/")
 def lineitem_delete(request, rfp_no=None, lineitem_id=None):
@@ -311,6 +353,9 @@ def lineitem_delete(request, rfp_no=None, lineitem_id=None):
         lineitem.delete()
 
         if type == 'CRM':
+                return HttpResponseRedirect(reverse('product-selection',args=[rfp_no]))
+
+        if type == 'Sourcing':
                 return HttpResponseRedirect(reverse('product-selection',args=[rfp_no]))
 
 
@@ -335,6 +380,10 @@ def rfp_generate(request, rfp_no=None):
         if type == 'CRM':
                 context['rfp_no'] = rfp_no
                 return render(request,"CRM/RFP/success.html",context)
+        
+        if type == 'Sourcing':
+                context['rfp_no'] = rfp_no
+                return render(request,"Sourcing/RFP/success.html",context)
 
 @login_required(login_url="/employee/login/")
 def rfp_approval_list(request):
@@ -402,13 +451,13 @@ def rfp_approve(request, rfp_no=None):
             if request.method == "POST":
                     data = request.POST
 
-                    key_instance = User.objects.get(username=data['keyPerson'][0:7])    
+                    key_instance = User.objects.get(username=data['keyPerson'])    
                     keyaccounts = RFPKeyAccountsDetail.objects.create(id=rfp_no+str(random.randint(1000,99999)),key_accounts_manager = key_instance)
-                    assign1 = RFPAssign1.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to1=User.objects.get(username=data['assign1'][0:7]))
+                    assign1 = RFPAssign1.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to1=User.objects.get(username=data['assign1']))
                     if data['assign2'] != '' :
-                             assign2 = RFPAssign2.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to2=User.objects.get(username=data['assign2'][0:7]))
+                             assign2 = RFPAssign2.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to2=User.objects.get(username=data['assign2']))
                     if data['assign3'] != '' :
-                             assign3 = RFPAssign3.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to3=User.objects.get(username=data['assign3'][0:7]))
+                             assign3 = RFPAssign3.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to3=User.objects.get(username=data['assign3']))
                     rfp = RFP.objects.get(rfp_no=rfp_no)
                     rfpapprovaldetail = RFPApprovalDetail.objects.create(id=rfp_no+str(random.randint(1000,99999)),approved_by=user)
                     rfp.enquiry_status = 'Approved'

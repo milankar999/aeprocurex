@@ -1559,5 +1559,16 @@ def immediate_quotation_process(request,quotation_type=None,cust_id=None,contact
 def immediate_quotation_product_selection(request,rfp_no=None):
     context={}
     context['quotation'] = 'active'
-    u = User.objects.get(username=request.user)
-    type = u.profile.type
+
+    if request.method == "GET":
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['rfp_no'] = rfp_no
+
+        lineitems = RFPLineitem.objects.filter(rfp_no__pk=rfp_no)
+        context['lineitems'] = lineitems
+
+        if type == 'Sales':
+            return render(request,"Sales/Quotation/Immediate_Quotation/product_selection.html",context)
+
