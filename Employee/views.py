@@ -10,7 +10,6 @@ def user_login(request):
         try:
                 u = User.objects.get(username=request.user)
                 type = u.profile.type
-    
                 if type == 'Sales':
                         return render(request,"Sales/sales_home.html")
 
