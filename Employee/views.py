@@ -49,7 +49,7 @@ def success(request):
         return render(request,"Sales/sales_home.html")
 
     if type == 'Sourcing':
-        return render(request,"Sourcing/sourcing_home.html")
+        return render(request,"Sourcing/Sourcing_home.html")
 
     if type == 'CRM':
         return render(request,"CRM/crm_home.html")
