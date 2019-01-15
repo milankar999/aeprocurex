@@ -3,11 +3,14 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
+from Employee.models import *
 from .models import *
 from State.models import *
 from Customer.models import *
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMessage
+from django.core import mail
 import random
+from django.conf import settings
 
 @login_required(login_url="/employee/login/")
 def rfp_create(request):
@@ -376,6 +379,71 @@ def rfp_generate(request, rfp_no=None):
         rfp.enquiry_status = 'Created'
         rfp.save()
 
+        email_list = []
+        sales_team_email = Profile.objects.filter(type='Sales').values('user__email')
+        for email in sales_team_email:
+                email_list.append(email['user__email']) 
+        print(email_list)
+
+        lineitems = RFPLineitem.objects.filter(rfp_no=rfp)
+        #Sending mail Notification
+        email_body = '<head>'\
+        '<style>'\
+        'table {'\
+        'width:100%;'\
+        '}'\
+        'table, th, td {'\
+        'border: 1px solid black;'\
+        'border-collapse: collapse;'\
+        '}'\
+        'th, td {'\
+        'padding: 15px;'\
+        'text-align: left;'\
+        '}'\
+        'table#t01 tr:nth-child(even) {'\
+        'background-color: #eee;'\
+        '}'\
+        'table#t01 tr:nth-child(odd) {'\
+        'background-color: #fff;'\
+        '}'\
+        'table#t01 th {'\
+        'background-color: #1E2DFF;'\
+        'color: white;'\
+        '}'\
+        '</style>'\
+        '</head>'\
+        '<body>'\
+        '<h1 style="text-align: center;"><span style="color: #0000ff;"><strong>AEPROCUREX ERP</strong></span></h1>'\
+        '<p><span style="color: #0000ff;"><strong>A New Enquiry Has Been Created By :' + rfp.rfp_creation_details.created_by.first_name + ' ' + rfp.rfp_creation_details.created_by.last_name + ' | '\
+        ' At : ' + str(rfp.rfp_creation_details.creation_date) + ' '\
+        '</strong></span><span style="color: #0000ff;">'\
+        '<p><span style="color: #0000ff;"><strong>RFP No : '+ rfp_no +'</strong></span></p>'\
+        '<p><span style="color: #0000ff;"><strong>Customer : '+ rfp.customer.name +'</strong></span></p>'\
+        '<p><span style="color: #0000ff;"><strong>Requester : '+ rfp.customer_contact_person.name +'</strong></span></p>'\
+        '<table id="t01">'\
+        '<tr>'\
+        '<th align="Centre">Sl #</th>'\
+        '<th align="Centre">Product Title</th>'\
+        '<th align="Centre">Description</th>' \
+        '<th align="Centre">Quantity</th>'\
+        '<th align="Centre">UOM</th>'\
+        '</tr>'
+        i = 1
+        for items in lineitems:      
+                email_body = email_body + '<tr>'\
+                '<td>'+ str(i) +'</td>'\
+                '<td>'+ items.product_title +'</td>'\
+                '<td>'+ items.description +'</td>'\
+                '<td>'+ str(items.quantity) +'</td>'\
+                '<td>'+ items.uom +'</td>'\
+                '</tr>'
+                i = i + 1
+        email_body = email_body + '</table>'\
+        '<p><span style="color: #ff0000;">Please Assign this RFP to a sourcing Person</span></p>'\
+        '</body>'
+        msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL, to = email_list ,bcc = ['sales.p@aeprocurex.com,milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex.com'])
+        msg.content_subtype = "html"  # Main content is now text/html
+        msg.send()
         
         if type == 'CRM':
                 context['rfp_no'] = rfp_no
@@ -411,7 +479,6 @@ def rfp_approval_lineitems(request, rfp_no=None):
             if request.method == "GET":
                     rfp_lineitems = RFPLineitem.objects.filter(rfp_no=rfp_no)
                     rfp = RFP.objects.filter(rfp_no=rfp_no).values('customer__name','customer__location','customer_contact_person__name','customer_contact_person__mobileNo1','customer_contact_person__email1','end_user__user_name','end_user__department_name','end_user__mobileNo1','end_user__email1','rfp_creation_details__creation_date','priority','reference','rfp_creation_details__created_by__username')                  
-                    user
                     context['rfp_no'] = rfp_no
                     context['lineitems'] = rfp_lineitems
                     context['rfp_details'] = rfp
@@ -430,14 +497,77 @@ def rfp_reject(request, rfp_no=None):
     type = u.profile.type
 
     if type == 'Sales':
-            if request.method == "POST":
-                    data = request.POST
-                    rfp = RFP.objects.get(rfp_no=rfp_no)
-                    rfp.rejection_reason = data['rejection']
-                    rfp.enquiry_status = 'Reject'
-                    rfp.save()
-                    context['message'] = 'RFP No ' + rfp_no + ' has been rejected successfully'
-                    return render(request,"Sales/RFP/success.html",context)
+        if request.method == "POST":
+                data = request.POST
+                rfp = RFP.objects.get(rfp_no=rfp_no)
+                rfp.rejection_reason = data['rejection']
+                rfp.enquiry_status = 'Reject'
+                rfp.save()
+                    
+                #Sending mail Notification
+                email_receiver = rfp.rfp_creation_details.created_by.email
+                lineitems = RFPLineitem.objects.filter(rfp_no=rfp)
+                email_body = '<head>'\
+                '<style>'\
+                'table {'\
+                'width:100%;'\
+                '}'\
+                'table, th, td {'\
+                'border: 1px solid black;'\
+                'border-collapse: collapse;'\
+                '}'\
+                'th, td {'\
+                'padding: 15px;'\
+                'text-align: left;'\
+                '}'\
+                'table#t01 tr:nth-child(even) {'\
+                'background-color: #eee;'\
+                '}'\
+                'table#t01 tr:nth-child(odd) {'\
+                'background-color: #fff;'\
+                '}'\
+                'table#t01 th {'\
+                'background-color: #1E2DFF;'\
+                'color: white;'\
+                '}'\
+                '</style>'\
+                '</head>'\
+                '<body>'\
+                '<h1 style="text-align: center;"><span style="color: #0000ff;"><strong>AEPROCUREX ERP</strong></span></h1>'\
+                '<p><span style="color: #0000ff;"><strong>A RFP Been Rejected by ' + request.user.first_name + ' ' + request.user.last_name + ' '\
+                'At : ' + str(rfp.rfp_creation_details.creation_date) + ' '\
+                '</strong></span><span style="color: #0000ff;">'\
+                '<p><span style="color: #0000ff;"><strong>RFP No : '+ rfp_no +'</strong></span></p>'\
+                '<p><span style="color: #0000ff;"><strong>Rejection Reason : '+ data['rejection'] +'</strong></span></p>'\
+                '<p><span style="color: #0000ff;"><strong>Customer : '+ rfp.customer.name +'</strong></span></p>'\
+                '<p><span style="color: #0000ff;"><strong>Requester : '+ rfp.customer_contact_person.name +'</strong></span></p>'\
+                '<table id="t01">'\
+                '<tr>'\
+                '<th align="Centre">Sl #</th>'\
+                '<th align="Centre">Product Title</th>'\
+                '<th align="Centre">Description</th>' \
+                '<th align="Centre">Quantity</th>'\
+                '<th align="Centre">UOM</th>'\
+                '</tr>'
+                i = 1
+                for items in lineitems:      
+                        email_body = email_body + '<tr>'\
+                        '<td>'+ str(i) +'</td>'\
+                        '<td>'+ items.product_title +'</td>'\
+                        '<td>'+ items.description +'</td>'\
+                        '<td>'+ str(items.quantity) +'</td>'\
+                        '<td>'+ items.uom +'</td>'\
+                        '</tr>'
+                        i = i + 1
+                email_body = email_body + '</table>'\
+                '<p><span style="color: #ff0000;">Please Rectify this Enquiry</span></p>'\
+                '</body>'
+                msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@eprocurex.com,milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex.com'])
+                msg.content_subtype = "html"  # Main content is now text/html
+                msg.send()
+
+                context['message'] = 'RFP No ' + rfp_no + ' has been rejected successfully'
+                return render(request,"Sales/RFP/success.html",context)
 
 @login_required(login_url="/employee/login/")
 def rfp_approve(request, rfp_no=None):
@@ -448,28 +578,90 @@ def rfp_approve(request, rfp_no=None):
     type = u.profile.type
 
     if type == 'Sales':
-            if request.method == "POST":
-                    data = request.POST
+        if request.method == "POST":
+                data = request.POST
 
-                    key_instance = User.objects.get(username=data['keyPerson'])    
-                    keyaccounts = RFPKeyAccountsDetail.objects.create(id=rfp_no+str(random.randint(1000,99999)),key_accounts_manager = key_instance)
-                    assign1 = RFPAssign1.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to1=User.objects.get(username=data['assign1']))
-                    if data['assign2'] != '' :
-                             assign2 = RFPAssign2.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to2=User.objects.get(username=data['assign2']))
-                    if data['assign3'] != '' :
-                             assign3 = RFPAssign3.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to3=User.objects.get(username=data['assign3']))
-                    rfp = RFP.objects.get(rfp_no=rfp_no)
-                    rfpapprovaldetail = RFPApprovalDetail.objects.create(id=rfp_no+str(random.randint(1000,99999)),approved_by=user)
-                    rfp.enquiry_status = 'Approved'
-                    rfp.rfp_keyaccounts_details = keyaccounts
-                    rfp.rfp_assign1 = assign1
-                    if data['assign2'] != '' :
+                key_instance = User.objects.get(username=data['keyPerson'])    
+                keyaccounts = RFPKeyAccountsDetail.objects.create(id=rfp_no+str(random.randint(1000,99999)),key_accounts_manager = key_instance)
+                assign1 = RFPAssign1.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to1=User.objects.get(username=data['assign1']))
+                if data['assign2'] != '' :
+                        assign2 = RFPAssign2.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to2=User.objects.get(username=data['assign2']))
+                if data['assign3'] != '' :
+                        assign3 = RFPAssign3.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to3=User.objects.get(username=data['assign3']))
+                rfp = RFP.objects.get(rfp_no=rfp_no)
+                rfpapprovaldetail = RFPApprovalDetail.objects.create(id=rfp_no+str(random.randint(1000,99999)),approved_by=user)
+                rfp.enquiry_status = 'Approved'
+                rfp.rfp_keyaccounts_details = keyaccounts
+                rfp.rfp_assign1 = assign1
+                if data['assign2'] != '' :
                         rfp.rfp_assign2 = assign2
-                    if data['assign3'] != '' :
+                if data['assign3'] != '' :
                         rfp.rfp_assign3 = assign3
-                    rfp.save()
-                    context['message'] = 'RFP No ' + rfp_no + ' has been approved successfully'
-                    return render(request,"Sales/RFP/success.html",context)
+                rfp.save()
+
+                #Sending mail Notification
+                email_receiver = rfp.rfp_assign1.assign_to1.email
+                lineitems = RFPLineitem.objects.filter(rfp_no=rfp)
+                email_body = '<head>'\
+                '<style>'\
+                'table {'\
+                'width:100%;'\
+                '}'\
+                'table, th, td {'\
+                'border: 1px solid black;'\
+                'border-collapse: collapse;'\
+                '}'\
+                'th, td {'\
+                'padding: 15px;'\
+                'text-align: left;'\
+                '}'\
+                'table#t01 tr:nth-child(even) {'\
+                'background-color: #eee;'\
+                '}'\
+                'table#t01 tr:nth-child(odd) {'\
+                'background-color: #fff;'\
+                '}'\
+                'table#t01 th {'\
+                'background-color: #1E2DFF;'\
+                'color: white;'\
+                '}'\
+                '</style>'\
+                '</head>'\
+                '<body>'\
+                '<h1 style="text-align: center;"><span style="color: #0000ff;"><strong>AEPROCUREX ERP</strong></span></h1>'\
+                '<h2><span style="color: #008000;">Hello, ' + rfp.rfp_assign1.assign_to1.first_name + ' ' + rfp.rfp_assign1.assign_to1.last_name + '</span></h2>'\
+                '<h2><span style="color: #008000;">&nbsp; &nbsp; &nbsp; One New RFP Has Been Assigned to You, Please Complete the Sourcing Earliest</span></h2>'\
+                '<p><span style="color: #0000ff;"><strong>Assigned By ' + request.user.first_name + ' ' + request.user.last_name + ' '\
+                'At : ' + str(rfp.rfp_approval_details.approved_date) + ' '\
+                '</strong></span><span style="color: #0000ff;">'\
+                '<p><span style="color: #0000ff;"><strong>RFP No : '+ rfp_no +'</strong></span></p>'\
+                '<p><span style="color: #0000ff;"><strong>Customer : '+ rfp.customer.name +'</strong></span></p>'\
+                '<p><span style="color: #0000ff;"><strong>Requester : '+ rfp.customer_contact_person.name +'</strong></span></p>'\
+                '<table id="t01">'\
+                '<tr>'\
+                '<th align="Centre">Sl #</th>'\
+                '<th align="Centre">Product Title</th>'\
+                '<th align="Centre">Description</th>' \
+                '<th align="Centre">Quantity</th>'\
+                '<th align="Centre">UOM</th>'\
+                '</tr>'
+                i = 1
+                for items in lineitems:
+                        email_body = email_body + '<tr>'\
+                        '<td>'+ str(i) +'</td>'\
+                        '<td>'+ items.product_title +'</td>'\
+                        '<td>'+ items.description +'</td>'\
+                        '<td>'+ str(items.quantity) +'</td>'\
+                        '<td>'+ items.uom +'</td>'\
+                        '</tr>'
+                        i = i + 1
+                email_body = email_body + '</table>'\
+                '</body>'
+                msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@eprocurex.com,milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex.com'])
+                msg.content_subtype = "html"  # Main content is now text/html
+                msg.send()
+                context['message'] = 'RFP No ' + rfp_no + ' has been approved successfully'
+                return render(request,"Sales/RFP/success.html",context)
 
 
 @login_required(login_url="/employee/login/")

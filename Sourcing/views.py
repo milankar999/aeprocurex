@@ -8,7 +8,11 @@ from RFP.models import *
 from State.models import *
 from Customer.models import *
 from Supplier.models import *
+from Employee.models import *
+from django.core.mail import send_mail, EmailMessage
+from django.core import mail
 import random
+from django.conf import settings
 
 @login_required(login_url="/employee/login/")
 def rfp_pending_list(request):
@@ -192,6 +196,86 @@ def single_price_request(request,rfp_no=None):
             rfp_obj.single_vendor_approval = 'Request'
             rfp_obj.single_vendor_reason = data['reasons']
             rfp_obj.save()
+
+            email_list = []
+            sales_team_email = Profile.objects.filter(type='Sales').values('user__email')
+            for email in sales_team_email:
+                email_list.append(email['user__email']) 
+
+            #Sending mail Notification
+            email_receiver = rfp_obj.rfp_creation_details.created_by.email
+            lineitems = RFPLineitem.objects.filter(rfp_no=rfp_obj)
+            email_body = '<head>'\
+            '<style>'\
+            'table {'\
+            'width:100%;'\
+            '}'\
+            'table, th, td {'\
+            'border: 1px solid black;'\
+            'border-collapse: collapse;'\
+            '}'\
+            'th, td {'\
+            'padding: 15px;'\
+            'text-align: left;'\
+            '}'\
+            'table#t01 tr:nth-child(even) {'\
+            'background-color: #eee;'\
+            '}'\
+            'table#t01 tr:nth-child(odd) {'\
+            'background-color: #fff;'\
+            '}'\
+            'table#t01 th {'\
+            'background-color: #1E2DFF;'\
+            'color: white;'\
+            '}'\
+            '</style>'\
+            '</head>'\
+            '<body>'\
+            '<h1 style="text-align: center;"><span style="color: #0000ff;"><strong>AEPROCUREX ERP</strong></span></h1>'\
+            '<p><span style="color: #0000ff;"><strong> ' + request.user.first_name + ' ' + request.user.last_name + ' is asking your permission for single Vendor Sourcing'\
+            '</strong></span><span style="color: #0000ff;">'\
+            '<h4><strong>Reason :' + data['reasons'] + '</strong></h4>'\
+            '<p><span style="color: #0000ff;"><strong>RFP No : '+ rfp_no +'</strong></span></p>'\
+            '<p><span style="color: #0000ff;"><strong>Customer : '+ rfp_obj.customer.name +'</strong></span></p>'\
+            '<p><span style="color: #0000ff;"><strong>Requester : '+ rfp_obj.customer_contact_person.name +'</strong></span></p>'\
+            '<h2><span style="text-decoration: underline;"><span style="color: #000080; text-decoration: underline;">Enquiry Details :</span></span></h2>'\
+            '<table id="t01">'\
+            '<tr>'\
+            '<th align="Centre">Sl #</th>'\
+            '<th align="Centre">Product Title</th>'\
+            '<th align="Centre">Description</th>' \
+            '<th align="Centre">Quantity</th>'\
+            '<th align="Centre">UOM</th>'\
+            '</tr>'
+            i = 1
+            for items in lineitems:      
+                email_body = email_body + '<tr>'\
+                '<td>'+ str(i) +'</td>'\
+                '<td>'+ items.product_title +'</td>'\
+                '<td>'+ items.description +'</td>'\
+                '<td>'+ str(items.quantity) +'</td>'\
+                '<td>'+ items.uom +'</td>'\
+                '</tr>'
+                i = i + 1
+            email_body = email_body + '</table>'\
+            '<h2><span style="text-decoration: underline;"><span style="color: #000080; text-decoration: underline;">Sourcing Details :</span></span></h2>'\
+            #sourcing_list = Sourcing.objects.filter(rfp=rfp_obj)
+            #for sourcing in sourcing_list:
+            #    email_body = email_body + '<table id="t01">'\
+                #'<tr>'\
+                #'<th align="Centre">Sl #</th>'\
+                #'<th align="Centre">Product Title</th>'\
+                #'<th align="Centre">Description</th>' \
+                #'<th align="Centre">MRP</th>'\
+                #'<th align="Centre">Initial Price</th>'\
+                #'<th align="Centre">Negotiate Price</th>'\
+                #'<th align="Centre">Lead Time</th>'\
+                #'</tr>'
+            #'<p><span style="color: #0000ff;"><strong>Vendor : '+ rfp_obj.customer.name +'</strong></span></p>'\
+            #'</body>'
+            #msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@eprocurex.com'])
+            #msg.content_subtype = "html"  # Main content is now text/html
+            #msg.send()
             return HttpResponseRedirect(reverse('vendor-selection', args=[rfp_no]))
 
 
