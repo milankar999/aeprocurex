@@ -258,24 +258,42 @@ def single_price_request(request,rfp_no=None):
                 '</tr>'
                 i = i + 1
             email_body = email_body + '</table>'\
-            '<h2><span style="text-decoration: underline;"><span style="color: #000080; text-decoration: underline;">Sourcing Details :</span></span></h2>'\
-            #sourcing_list = Sourcing.objects.filter(rfp=rfp_obj)
-            #for sourcing in sourcing_list:
-            #    email_body = email_body + '<table id="t01">'\
-                #'<tr>'\
-                #'<th align="Centre">Sl #</th>'\
-                #'<th align="Centre">Product Title</th>'\
-                #'<th align="Centre">Description</th>' \
-                #'<th align="Centre">MRP</th>'\
-                #'<th align="Centre">Initial Price</th>'\
-                #'<th align="Centre">Negotiate Price</th>'\
-                #'<th align="Centre">Lead Time</th>'\
-                #'</tr>'
-            #'<p><span style="color: #0000ff;"><strong>Vendor : '+ rfp_obj.customer.name +'</strong></span></p>'\
-            #'</body>'
-            #msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@eprocurex.com'])
-            #msg.content_subtype = "html"  # Main content is now text/html
-            #msg.send()
+            '<h2><span style="text-decoration: underline;"><span style="color: #000080; text-decoration: underline;">Sourcing Details :</span></span></h2>'
+            
+            #Sourcing Details
+            sourcing_list = Sourcing.objects.filter(rfp=rfp_obj)
+            for sourcing in sourcing_list:
+                print(sourcing.supplier.name)
+                email_body = email_body + '<h3>Supplier Name : '+ sourcing.supplier.name +'</h3>'\
+                '<p>Location : '+ sourcing.supplier.location +'</p>'\
+                '<table id="t01">'\
+                '<tr>'\
+                '<th align="Centre">Sl #</th>'\
+                '<th align="Centre">Product Title</th>'\
+                '<th align="Centre">Description</th>' \
+                '<th align="Centre">MRP</th>'\
+                '<th align="Centre">Initial Price</th>'\
+                '<th align="Centre">Negotiate Price</th>'\
+                '<th align="Centre">Lead Time</th>'\
+                '</tr>'
+                i = 1
+                sourcing_lineitems = SourcingLineitem.objects.filter(sourcing=sourcing)
+                for item in sourcing_lineitems:      
+                    email_body = email_body + '<tr>'\
+                    '<td>'+ str(i) +'</td>'\
+                    '<td>'+ item.product_title +'</td>'\
+                    '<td>'+ item.description +'</td>'\
+                    '<td>'+ str(item.mrp) +'</td>'\
+                    '<td>'+ str(item.price1) +'</td>'\
+                    '<td>'+ str(item.price2) +'</td>'\
+                    '<td>'+ str(item.lead_time) +'</td>'\
+                    '</tr>'
+                    i = i + 1
+                email_body = email_body + '</table>'
+            email_body = email_body + '</body>'
+            msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@eprocurex.com','milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex'])
+            msg.content_subtype = "html"  # Main content is now text/html
+            msg.send()
             return HttpResponseRedirect(reverse('vendor-selection', args=[rfp_no]))
 
 
@@ -333,6 +351,100 @@ def single_vendor_approve(request,rfp_no=None):
             rfp=RFP.objects.get(rfp_no=rfp_no)
             rfp.single_vendor_approval = 'Approved'
             rfp.save()
+            
+            #Sending mail Notification
+            email_receiver = rfp.rfp_assign1.assign_to1.email
+            lineitems = RFPLineitem.objects.filter(rfp_no=rfp)
+            email_body = '<head>'\
+            '<style>'\
+            'table {'\
+            'width:100%;'\
+            '}'\
+            'table, th, td {'\
+            'border: 1px solid black;'\
+            'border-collapse: collapse;'\
+            '}'\
+            'th, td {'\
+            'padding: 15px;'\
+            'text-align: left;'\
+            '}'\
+            'table#t01 tr:nth-child(even) {'\
+            'background-color: #eee;'\
+            '}'\
+            'table#t01 tr:nth-child(odd) {'\
+            'background-color: #fff;'\
+            '}'\
+            'table#t01 th {'\
+            'background-color: #1E2DFF;'\
+            'color: white;'\
+            '}'\
+            '</style>'\
+            '</head>'\
+            '<body>'\
+            '<h1 style="text-align: center;"><span style="color: #0000ff;"><strong>AEPROCUREX ERP</strong></span></h1>'\
+            '<h4><strong>Hello, ' + rfp.rfp_assign1.assign_to1.first_name + ' ' + rfp.rfp_assign1.assign_to1.last_name + '</strong></h4>'\
+            '<p><span style="color: #0000ff;"><strong> ' + request.user.first_name + ' ' + request.user.last_name + ' has approved your request for single Vendor Sourcing'\
+            '</strong></span><span style="color: #0000ff;">'\
+            '<p><span style="color: #0000ff;"><strong>RFP No : '+ rfp_no +'</strong></span></p>'\
+            '<p><span style="color: #0000ff;"><strong>Customer : '+ rfp.customer.name +'</strong></span></p>'\
+            '<p><span style="color: #0000ff;"><strong>Requester : '+ rfp.customer_contact_person.name +'</strong></span></p>'\
+            '<h2><span style="text-decoration: underline;"><span style="color: #000080; text-decoration: underline;">Enquiry Details :</span></span></h2>'\
+            '<table id="t01">'\
+            '<tr>'\
+            '<th align="Centre">Sl #</th>'\
+            '<th align="Centre">Product Title</th>'\
+            '<th align="Centre">Description</th>' \
+            '<th align="Centre">Quantity</th>'\
+            '<th align="Centre">UOM</th>'\
+            '</tr>'
+            i = 1
+            for items in lineitems:      
+                email_body = email_body + '<tr>'\
+                '<td>'+ str(i) +'</td>'\
+                '<td>'+ items.product_title +'</td>'\
+                '<td>'+ items.description +'</td>'\
+                '<td>'+ str(items.quantity) +'</td>'\
+                '<td>'+ items.uom +'</td>'\
+                '</tr>'
+                i = i + 1
+            email_body = email_body + '</table>'\
+            '<h2><span style="text-decoration: underline;"><span style="color: #000080; text-decoration: underline;">Sourcing Details :</span></span></h2>'
+            
+            #Sourcing Details
+            sourcing_list = Sourcing.objects.filter(rfp=rfp)
+            for sourcing in sourcing_list:
+                print(sourcing.supplier.name)
+                email_body = email_body + '<h3>Supplier Name : '+ sourcing.supplier.name +'</h3>'\
+                '<p>Location : '+ sourcing.supplier.location +'</p>'\
+                '<table id="t01">'\
+                '<tr>'\
+                '<th align="Centre">Sl #</th>'\
+                '<th align="Centre">Product Title</th>'\
+                '<th align="Centre">Description</th>' \
+                '<th align="Centre">MRP</th>'\
+                '<th align="Centre">Initial Price</th>'\
+                '<th align="Centre">Negotiate Price</th>'\
+                '<th align="Centre">Lead Time</th>'\
+                '</tr>'
+                i = 1
+                sourcing_lineitems = SourcingLineitem.objects.filter(sourcing=sourcing)
+                for item in sourcing_lineitems:      
+                    email_body = email_body + '<tr>'\
+                    '<td>'+ str(i) +'</td>'\
+                    '<td>'+ item.product_title +'</td>'\
+                    '<td>'+ item.description +'</td>'\
+                    '<td>'+ str(item.mrp) +'</td>'\
+                    '<td>'+ str(item.price1) +'</td>'\
+                    '<td>'+ str(item.price2) +'</td>'\
+                    '<td>'+ str(item.lead_time) +'</td>'\
+                    '</tr>'
+                    i = i + 1
+                email_body = email_body + '</table>'
+            email_body = email_body + '<p><span style="color: #ff0000;">Now you can mark sourcing complete with single vendor</span></p>'\
+            '</body>'
+            msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@eprocurex.com','milan.kar@aeprocurex.com'])
+            msg.content_subtype = "html"  # Main content is now text/html
+            msg.send()
             return HttpResponseRedirect(reverse('single-vendor-approval-list'))
 
 @login_required(login_url="/employee/login/")
@@ -348,6 +460,101 @@ def single_vendor_reject(request,rfp_no=None):
             rfp=RFP.objects.get(rfp_no=rfp_no)
             rfp.single_vendor_approval = 'Rejected'
             rfp.save()
+
+            #Sending mail Notification
+            email_receiver = rfp.rfp_assign1.assign_to1.email
+            lineitems = RFPLineitem.objects.filter(rfp_no=rfp)
+            email_body = '<head>'\
+            '<style>'\
+            'table {'\
+            'width:100%;'\
+            '}'\
+            'table, th, td {'\
+            'border: 1px solid black;'\
+            'border-collapse: collapse;'\
+            '}'\
+            'th, td {'\
+            'padding: 15px;'\
+            'text-align: left;'\
+            '}'\
+            'table#t01 tr:nth-child(even) {'\
+            'background-color: #eee;'\
+            '}'\
+            'table#t01 tr:nth-child(odd) {'\
+            'background-color: #fff;'\
+            '}'\
+            'table#t01 th {'\
+            'background-color: #1E2DFF;'\
+            'color: white;'\
+            '}'\
+            '</style>'\
+            '</head>'\
+            '<body>'\
+            '<h1 style="text-align: center;"><span style="color: #0000ff;"><strong>AEPROCUREX ERP</strong></span></h1>'\
+            '<h4><strong>Hello, ' + rfp.rfp_assign1.assign_to1.first_name + ' ' + rfp.rfp_assign1.assign_to1.last_name + '</strong></h4>'\
+            '<p><span style="color: #0000ff;"><strong> ' + request.user.first_name + ' ' + request.user.last_name + ' has rejected your request for single Vendor Sourcing'\
+            '</strong></span><span style="color: #0000ff;">'\
+            '<p><span style="color: #0000ff;"><strong>RFP No : '+ rfp_no +'</strong></span></p>'\
+            '<p><span style="color: #0000ff;"><strong>Customer : '+ rfp.customer.name +'</strong></span></p>'\
+            '<p><span style="color: #0000ff;"><strong>Requester : '+ rfp.customer_contact_person.name +'</strong></span></p>'\
+            '<h2><span style="text-decoration: underline;"><span style="color: #000080; text-decoration: underline;">Enquiry Details :</span></span></h2>'\
+            '<table id="t01">'\
+            '<tr>'\
+            '<th align="Centre">Sl #</th>'\
+            '<th align="Centre">Product Title</th>'\
+            '<th align="Centre">Description</th>' \
+            '<th align="Centre">Quantity</th>'\
+            '<th align="Centre">UOM</th>'\
+            '</tr>'
+            i = 1
+            for items in lineitems:      
+                email_body = email_body + '<tr>'\
+                '<td>'+ str(i) +'</td>'\
+                '<td>'+ items.product_title +'</td>'\
+                '<td>'+ items.description +'</td>'\
+                '<td>'+ str(items.quantity) +'</td>'\
+                '<td>'+ items.uom +'</td>'\
+                '</tr>'
+                i = i + 1
+            email_body = email_body + '</table>'\
+            '<h2><span style="text-decoration: underline;"><span style="color: #000080; text-decoration: underline;">Sourcing Details :</span></span></h2>'
+            
+            #Sourcing Details
+            sourcing_list = Sourcing.objects.filter(rfp=rfp)
+            for sourcing in sourcing_list:
+                print(sourcing.supplier.name)
+                email_body = email_body + '<h3>Supplier Name : '+ sourcing.supplier.name +'</h3>'\
+                '<p>Location : '+ sourcing.supplier.location +'</p>'\
+                '<table id="t01">'\
+                '<tr>'\
+                '<th align="Centre">Sl #</th>'\
+                '<th align="Centre">Product Title</th>'\
+                '<th align="Centre">Description</th>' \
+                '<th align="Centre">MRP</th>'\
+                '<th align="Centre">Initial Price</th>'\
+                '<th align="Centre">Negotiate Price</th>'\
+                '<th align="Centre">Lead Time</th>'\
+                '</tr>'
+                i = 1
+                sourcing_lineitems = SourcingLineitem.objects.filter(sourcing=sourcing)
+                for item in sourcing_lineitems:      
+                    email_body = email_body + '<tr>'\
+                    '<td>'+ str(i) +'</td>'\
+                    '<td>'+ item.product_title +'</td>'\
+                    '<td>'+ item.description +'</td>'\
+                    '<td>'+ str(item.mrp) +'</td>'\
+                    '<td>'+ str(item.price1) +'</td>'\
+                    '<td>'+ str(item.price2) +'</td>'\
+                    '<td>'+ str(item.lead_time) +'</td>'\
+                    '</tr>'
+                    i = i + 1
+                email_body = email_body + '</table>'
+            email_body = email_body + '<p><span style="color: #ff0000;">Please Search Some other Vendors for this enquiry</span></p>'\
+            '</body>'
+            msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@eprocurex.com','milan.kar@aeprocurex.com'])
+            msg.content_subtype = "html"  # Main content is now text/html
+            msg.send()
+
             return HttpResponseRedirect(reverse('single-vendor-approval-list'))
 
 @login_required(login_url="/employee/login/")
@@ -625,6 +832,100 @@ def sourcing_completed(request,rfp_no=None):
                 rfp.enquiry_status = 'Sourcing_Completed'
                 rfp.rfp_sourcing_detail = sourcing_completed_details
                 rfp.save()
+
+                #Sending mail Notification
+                email_receiver = rfp.rfp_creation_details.created_by.email
+                lineitems = RFPLineitem.objects.filter(rfp_no=rfp)
+                email_body = '<head>'\
+                '<style>'\
+                'table {'\
+                'width:100%;'\
+                '}'\
+                'table, th, td {'\
+                'border: 1px solid black;'\
+                'border-collapse: collapse;'\
+                '}'\
+                'th, td {'\
+                'padding: 15px;'\
+                'text-align: left;'\
+                '}'\
+                'table#t01 tr:nth-child(even) {'\
+                'background-color: #eee;'\
+                '}'\
+                'table#t01 tr:nth-child(odd) {'\
+                'background-color: #fff;'\
+                '}'\
+                'table#t01 th {'\
+                'background-color: #1E2DFF;'\
+                'color: white;'\
+                '}'\
+                '</style>'\
+                '</head>'\
+                '<body>'\
+                '<h1 style="text-align: center;"><span style="color: #0000ff;"><strong>AEPROCUREX ERP</strong></span></h1>'\
+                '<p><span style="color: #0000ff;"><strong> ' + request.user.first_name + ' ' + request.user.last_name + ' has marked one RFP as Sourcing Completed'\
+                '</strong></span><span style="color: #0000ff;">'\
+                '<h4><strong>Reason :' + data['reasons'] + '</strong></h4>'\
+                '<p><span style="color: #0000ff;"><strong>RFP No : '+ rfp_no +'</strong></span></p>'\
+                '<p><span style="color: #0000ff;"><strong>Customer : '+ rfp.customer.name + ' - ' + rfp.customer.location +'</strong></span></p>'\
+                '<p><span style="color: #0000ff;"><strong>Requester : '+ rfp.customer_contact_person.name +'</strong></span></p>'\
+                '<h2><span style="text-decoration: underline;"><span style="color: #000080; text-decoration: underline;">Enquiry Details :</span></span></h2>'\
+                '<table id="t01">'\
+                '<tr>'\
+                '<th align="Centre">Sl #</th>'\
+                '<th align="Centre">Product Title</th>'\
+                '<th align="Centre">Description</th>' \
+                '<th align="Centre">Quantity</th>'\
+                '<th align="Centre">UOM</th>'\
+                '</tr>'
+                i = 1
+                for items in lineitems:      
+                    email_body = email_body + '<tr>'\
+                    '<td>'+ str(i) +'</td>'\
+                    '<td>'+ items.product_title +'</td>'\
+                    '<td>'+ items.description +'</td>'\
+                    '<td>'+ str(items.quantity) +'</td>'\
+                    '<td>'+ items.uom +'</td>'\
+                    '</tr>'
+                    i = i + 1
+                email_body = email_body + '</table>'\
+                '<h2><span style="text-decoration: underline;"><span style="color: #000080; text-decoration: underline;">Sourcing Details :</span></span></h2>'
+            
+                #Sourcing Details
+                sourcing_list = Sourcing.objects.filter(rfp=rfp)
+                for sourcing in sourcing_list:
+                    print(sourcing.supplier.name)
+                    email_body = email_body + '<h3>Supplier Name : '+ sourcing.supplier.name +'</h3>'\
+                    '<p>Location : '+ sourcing.supplier.location +'</p>'\
+                    '<table id="t01">'\
+                    '<tr>'\
+                    '<th align="Centre">Sl #</th>'\
+                    '<th align="Centre">Product Title</th>'\
+                    '<th align="Centre">Description</th>' \
+                    '<th align="Centre">MRP</th>'\
+                    '<th align="Centre">Initial Price</th>'\
+                    '<th align="Centre">Negotiate Price</th>'\
+                    '<th align="Centre">Lead Time</th>'\
+                    '</tr>'
+                    i = 1
+                    sourcing_lineitems = SourcingLineitem.objects.filter(sourcing=sourcing)
+                    for item in sourcing_lineitems:      
+                        email_body = email_body + '<tr>'\
+                        '<td>'+ str(i) +'</td>'\
+                        '<td>'+ item.product_title +'</td>'\
+                        '<td>'+ item.description +'</td>'\
+                        '<td>'+ str(item.mrp) +'</td>'\
+                        '<td>'+ str(item.price1) +'</td>'\
+                        '<td>'+ str(item.price2) +'</td>'\
+                        '<td>'+ str(item.lead_time) +'</td>'\
+                        '</tr>'
+                        i = i + 1
+                    email_body = email_body + '</table>'\
+                    '<p><span style="color: #ff0000;"> Please do the COQ and release the quotation as soon as possible </span></p>'
+                email_body = email_body + '</body>'
+                msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@eprocurex.com','milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex'])
+                msg.content_subtype = "html"  # Main content is now text/html
+                msg.send()
                 context['message'] = 'RFP No ' + rfp_no + ' has been maked as sourcing completed successfully'
                 return render(request,"Sourcing/Sourcing/success.html",context)
             else:
