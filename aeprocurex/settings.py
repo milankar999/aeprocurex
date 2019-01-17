@@ -19,7 +19,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'qc$&2=v&b3929b(&o@ih91ou==sj+1wpyd=(3-wcvcm*phs@+b'
+SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -189,5 +189,5 @@ EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'website.aep.milan@gmail.com'
-EMAIL_HOST_PASSWORD = '9735318660'
+EMAIL_HOST_PASSWORD = ''
 DEFAULT_FROM_EMAIL = 'website.aep.milan@gmail.com'

@@ -7,6 +7,9 @@ from .models import *
 from State.models import StateList
 from RFP.models import *
 import random
+from django.conf import settings
+from django.core import mail
+from django.core.mail import send_mail, EmailMessage
 
 @login_required(login_url="/employee/login/")
 def enquiry_list(request):
@@ -86,8 +89,69 @@ def enquiry_lineitems(request,rfp_no=None):
                         target_price = data['target_price']
                 
         
-                    rfp_lineitem = RFPLineitem.objects.create(rfp_no=RFP.objects.get(rfp_no=rfp_no),lineitem_id=lineitemID,product_title = data['product_title'],description=data['description'],model=data['model'],brand=data['brand'],product_code=data['product_code'],part_no=data['part_no'],category = data['category'],hsn_code=data['hsn_code'],gst=gst,uom=data['uom'],quantity=data['quantity'],target_price=target_price,customer_lead_time=CLT,remarks=data['remarks'])
+                    RFPLineitem.objects.create(rfp_no=RFP.objects.get(rfp_no=rfp_no),lineitem_id=lineitemID,product_title = data['product_title'],description=data['description'],model=data['model'],brand=data['brand'],product_code=data['product_code'],part_no=data['part_no'],category = data['category'],hsn_code=data['hsn_code'],gst=gst,uom=data['uom'],quantity=data['quantity'],target_price=target_price,customer_lead_time=CLT,remarks=data['remarks'])
+                    
+                    #Sending Email Notification
+                    rfp = RFP.objects.get(rfp_no=rfp_no)
+                    email_receiver = rfp.rfp_assign1.assign_to1.email
+                    lineitems = RFPLineitem.objects.filter(rfp_no=rfp)
+                    email_body = '<head>'\
+                    '<style>'\
+                    'table {'\
+                    'width:100%;'\
+                    '}'\
+                    'table, th, td {'\
+                    'border: 1px solid black;'\
+                    'border-collapse: collapse;'\
+                    '}'\
+                    'th, td {'\
+                    'padding: 15px;'\
+                    'text-align: left;'\
+                    '}'\
+                    'table#t01 tr:nth-child(even) {'\
+                    'background-color: #eee;'\
+                    '}'\
+                    'table#t01 tr:nth-child(odd) {'\
+                    'background-color: #fff;'\
+                    '}'\
+                    'table#t01 th {'\
+                    'background-color: #1E2DFF;'\
+                    'color: white;'\
+                    '}'\
+                    '</style>'\
+                    '</head>'\
+                    '<body>'\
+                    '<h1 style="text-align: center;"><span style="color: #0000ff;"><strong>AEPROCUREX ERP</strong></span></h1>'\
+                    '<h2><span style="color: #008000;">Hello, ' + rfp.rfp_assign1.assign_to1.first_name + ' ' + rfp.rfp_assign1.assign_to1.last_name + '</span></h2>'\
+                    '<h2><span style="color: #008000;">&nbsp; &nbsp; &nbsp; One New Lineitem Has Been added to RFP No - '+ rfp_no +'</span></h2>'\
+                    '<p><span style="color: #0000ff;"><strong>Added By ' + request.user.first_name + ' ' + request.user.last_name + ' '\
+                    '</strong></span><span style="color: #0000ff;">'\
+                    '<p><span style="color: #0000ff;"><strong>Customer : '+ rfp.customer.name +'</strong></span></p>'\
+                    '<p><span style="color: #0000ff;"><strong>Requester : '+ rfp.customer_contact_person.name +'</strong></span></p>'\
+                    '<table id="t01">'\
+                    '<tr>'\
+                    '<th align="Centre">Sl #</th>'\
+                    '<th align="Centre">Product Title</th>'\
+                    '<th align="Centre">Description</th>' \
+                    '<th align="Centre">Quantity</th>'\
+                    '<th align="Centre">UOM</th>'\
+                    '</tr>'
+                    i = 1
 
+                    for items in lineitems:
+                        email_body = email_body + '<tr>'\
+                        '<td>'+ str(i) +'</td>'\
+                        '<td>'+ items.product_title +'</td>'\
+                        '<td>'+ items.description +'</td>'\
+                        '<td>'+ str(items.quantity) +'</td>'\
+                        '<td>'+ items.uom +'</td>'\
+                        '</tr>'
+                        i = i + 1
+                    email_body = email_body + '</table>'\
+                    '</body>'
+                    msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@eprocurex.com','milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex.com'])
+                    msg.content_subtype = "html"  # Main content is now text/html
+                    msg.send()
                     return HttpResponseRedirect(reverse('key_accounts_enquiry_lineitems',args=[rfp_no]))
 
 

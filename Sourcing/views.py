@@ -203,7 +203,7 @@ def single_price_request(request,rfp_no=None):
                 email_list.append(email['user__email']) 
 
             #Sending mail Notification
-            email_receiver = rfp_obj.rfp_creation_details.created_by.email
+            #email_receiver = rfp_obj.rfp_creation_details.created_by.email
             lineitems = RFPLineitem.objects.filter(rfp_no=rfp_obj)
             email_body = '<head>'\
             '<style>'\
@@ -291,7 +291,7 @@ def single_price_request(request,rfp_no=None):
                     i = i + 1
                 email_body = email_body + '</table>'
             email_body = email_body + '</body>'
-            msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@eprocurex.com','milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex'])
+            msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_list], bcc = ['sales.p@eprocurex.com','milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex'])
             msg.content_subtype = "html"  # Main content is now text/html
             msg.send()
             return HttpResponseRedirect(reverse('vendor-selection', args=[rfp_no]))
@@ -865,7 +865,6 @@ def sourcing_completed(request,rfp_no=None):
                 '<h1 style="text-align: center;"><span style="color: #0000ff;"><strong>AEPROCUREX ERP</strong></span></h1>'\
                 '<p><span style="color: #0000ff;"><strong> ' + request.user.first_name + ' ' + request.user.last_name + ' has marked one RFP as Sourcing Completed'\
                 '</strong></span><span style="color: #0000ff;">'\
-                '<h4><strong>Reason :' + data['reasons'] + '</strong></h4>'\
                 '<p><span style="color: #0000ff;"><strong>RFP No : '+ rfp_no +'</strong></span></p>'\
                 '<p><span style="color: #0000ff;"><strong>Customer : '+ rfp.customer.name + ' - ' + rfp.customer.location +'</strong></span></p>'\
                 '<p><span style="color: #0000ff;"><strong>Requester : '+ rfp.customer_contact_person.name +'</strong></span></p>'\
@@ -921,7 +920,7 @@ def sourcing_completed(request,rfp_no=None):
                         '</tr>'
                         i = i + 1
                     email_body = email_body + '</table>'\
-                    '<p><span style="color: #ff0000;"> Please do the COQ and release the quotation as soon as possible </span></p>'
+                    
                 email_body = email_body + '</body>'
                 msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@eprocurex.com','milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex'])
                 msg.content_subtype = "html"  # Main content is now text/html
