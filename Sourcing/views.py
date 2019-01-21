@@ -291,7 +291,7 @@ def single_price_request(request,rfp_no=None):
                     i = i + 1
                 email_body = email_body + '</table>'
             email_body = email_body + '</body>'
-            msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_list], bcc = ['sales.p@eprocurex.com','milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex'])
+            msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = email_list, bcc = ['sales.p@aeprocurex.com','milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex.com'])
             msg.content_subtype = "html"  # Main content is now text/html
             msg.send()
             return HttpResponseRedirect(reverse('vendor-selection', args=[rfp_no]))
@@ -833,8 +833,12 @@ def sourcing_completed(request,rfp_no=None):
                 rfp.rfp_sourcing_detail = sourcing_completed_details
                 rfp.save()
 
+                email_list = []
+                sales_team_email = Profile.objects.filter(type='Sales').values('user__email')
+                for email in sales_team_email:
+                    email_list.append(email['user__email'])
                 #Sending mail Notification
-                email_receiver = rfp.rfp_creation_details.created_by.email
+                #email_receiver = rfp.rfp_creation_details.created_by.email
                 lineitems = RFPLineitem.objects.filter(rfp_no=rfp)
                 email_body = '<head>'\
                 '<style>'\
@@ -922,7 +926,7 @@ def sourcing_completed(request,rfp_no=None):
                     email_body = email_body + '</table>'\
                     
                 email_body = email_body + '</body>'
-                msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@eprocurex.com','milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex'])
+                msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_list], bcc = ['sales.p@eprocurex.com','milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex'])
                 msg.content_subtype = "html"  # Main content is now text/html
                 msg.send()
                 context['message'] = 'RFP No ' + rfp_no + ' has been maked as sourcing completed successfully'
