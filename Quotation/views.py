@@ -99,6 +99,35 @@ def generate_quotation_lineitem(request,rfp_no=None):
             return HttpResponseRedirect(reverse('coq_pending_list'))
 
 @login_required(login_url="/employee/login/")
+def generate_quotation_resourcing(request,rfp_no=None):
+    context={}
+    context['quotation'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type
+        
+    if type == 'Sales':
+        if request.method == 'POST':
+            rfp_object = RFP.objects.get(rfp_no=rfp_no)
+            rfp_object.enquiry_status = 'Approved'
+            rfp_object.save()
+            return HttpResponseRedirect(reverse('generate-quotation-list'))
+
+@login_required(login_url="/employee/login/")
+def generate_quotation_recoq(request,rfp_no=None):
+    context={}
+    context['quotation'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type
+        
+    if type == 'Sales':
+        if request.method == 'POST':
+            rfp_object = RFP.objects.get(rfp_no=rfp_no)
+            rfp_object.enquiry_status = 'Sourcing_Completed'
+            rfp_object.save()
+            return HttpResponseRedirect(reverse('generate-quotation-list'))
+
+
+@login_required(login_url="/employee/login/")
 def generate_quotation_lineitem_edit(request,rfp_no=None,item_id=None):
     context={}
     context['quotation'] = 'active'
@@ -658,7 +687,7 @@ def Add_To(pdf,customer_name,address,gst,shipping_address,billing_address):
     pdf.drawString(10,605,customer_name)
     pdf.setFont('Helvetica', 11)
     
-    wrapper = textwrap.TextWrapper(width=120) 
+    wrapper = textwrap.TextWrapper(width=115) 
     word_list = wrapper.wrap(text=address)
     y = 590
     for element in word_list:

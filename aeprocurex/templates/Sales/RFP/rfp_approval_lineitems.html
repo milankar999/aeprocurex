@@ -16,6 +16,9 @@
                       <h4 class="modal-title">RFP Details</span></h4>
                     </div class="container">
                     {% for info in rfp_details %}
+                    <h6>&nbsp;&nbsp;RFP Type</h6>
+                    <h4>&nbsp;&nbsp;{{info.rfp_type}}</h4>
+                    <hr> 
                     <h6>&nbsp;&nbsp;Customer Name</h6>
                     <h4>&nbsp;&nbsp;{{info.customer__name}}</h4>
                     <hr> 

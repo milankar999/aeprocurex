@@ -4,6 +4,8 @@ from .views import *
 urlpatterns = [
     path('ready_to_generate/list/',generate_quotation_list,name='generate-quotation-list'),
     path('generate/<rfp_no>/lineitems/',generate_quotation_lineitem,name='generate-quotation-lineitem'),
+    path('generate/<rfp_no>/lineitems/resourcing/',generate_quotation_resourcing,name='generate-quotation-lineitem-resourcing'),
+    path('generate/<rfp_no>/lineitems/recoq/',generate_quotation_recoq,name='generate-quotation-lineitem-recoq'),
     path('generate/<rfp_no>/lineitems/<item_id>/edit/',generate_quotation_lineitem_edit,name='generate-quotation-lineitem-edit'),
     path('generate/<rfp_no>/lineitems/<item_id>/delete/',generate_quotation_lineitem_delete,name='generate-quotation-lineitem-delete'),
     path('generate/<rfp_no>/lineitems/<item_id>/price_fixing/',generate_quotation_price_fixing,name='generate-quotation-lineitem-price-fixing'),

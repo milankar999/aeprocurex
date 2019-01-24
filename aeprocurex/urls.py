@@ -17,9 +17,11 @@ from django.contrib import admin
 from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
+from Employee.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('',include('Employee.urls')),
     path('employee/',include('Employee.urls')),
     path('api/employee/',include('Employee.api_urls')),
     path('customer/',include('Customer.urls')),

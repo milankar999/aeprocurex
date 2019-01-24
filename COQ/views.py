@@ -167,3 +167,17 @@ def reset_coq(request,rfp_no=None):
                 item.mark='False'
                 item.save()
             return HttpResponseRedirect(reverse('coq_pending_details', args=[rfp_no]))
+
+@login_required(login_url="/employee/login/")
+def resourcing(request,rfp_no=None,quotation_no=None):
+    context={}
+    context['quotation'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type
+        
+    if type == 'Sales':
+        if request.method == 'POST':
+            rfp_object = RFP.objects.get(rfp_no=rfp_no)
+            rfp_object.enquiry_status = 'Approved'
+            rfp_object.save()
+            return HttpResponseRedirect(reverse('coq_pending_list'))

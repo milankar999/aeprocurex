@@ -3,6 +3,28 @@
 
 {% block content %}
 <div class="container-fluid">
+    <div class="modal fade" id="resourcing" role="dialog">
+        <div class="modal-dialog">  
+          <!-- Modal content-->
+          <div class="modal-content">
+            <form method="POST" action="resourcing/">
+              {% csrf_token %}
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Warning  <span class="glyphicon glyphicon-fire"></span></h4>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure want to mark this for resourcing ?</p>
+            </div>
+             <div class="modal-footer">
+                <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                <input type="submit" class="btn btn-success" value="Continue">
+            </div>
+            </form>
+          </div> 
+        </div>
+    </div>  
+    <button type="submit" data-toggle="modal" data-target="#resourcing" class="btn btn-info">RESOURCING &nbsp;<span class="glyphicon glyphicon-screenshot"></span></button>
     <h3>Please mark the selected price</h3>
     <button type="button" class="btn btn-info navbar-btn" data-toggle="modal" data-target="#AutoCOQ">Auto COQ &nbsp;<span class="glyphicon glyphicon-send"></span></button>
     <div class="modal fade" id="AutoCOQ" role="dialog">

@@ -4,13 +4,63 @@
 
 {% block content %}
 <div class="container-fluid">
-    <h3>Lineitem Details for generating Quotation</h3>
+    <h3>Lineitem Details for generating Quotation  
+        <button type="submit" data-toggle="modal" data-target="#resourcing" class="btn btn-info">RESOURCING &nbsp;<span class="glyphicon glyphicon-screenshot"></span></button>
+        <button type="submit" data-toggle="modal" data-target="#recoq" class="btn btn-info">RE COQ &nbsp;<span class="glyphicon glyphicon-screenshot"></span></button>
+    </h3>
+    <div class="modal fade" id="resourcing" role="dialog">
+        <div class="modal-dialog">  
+          <!-- Modal content-->
+          <div class="modal-content">
+            <form method="POST" action="resourcing/">
+              {% csrf_token %}
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Warning  <span class="glyphicon glyphicon-fire"></span></h4>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure want to mark this for resourcing ?</p>
+            </div>
+             <div class="modal-footer">
+                <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                <input type="submit" class="btn btn-success" value="Continue">
+            </div>
+            </form>
+          </div> 
+        </div>
+    </div>
+    
+    <div class="modal fade" id="recoq" role="dialog">
+        <div class="modal-dialog">  
+          <!-- Modal content-->
+          <div class="modal-content">
+            <form method="POST" action="recoq/">
+              {% csrf_token %}
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Warning  <span class="glyphicon glyphicon-fire"></span></h4>
+            </div>
+            <div class="modal-body">
+              <p>Do you Really Want to do Re-COQ ?</p>
+            </div>
+             <div class="modal-footer">
+                <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                <input type="submit" class="btn btn-success" value="Continue">
+            </div>
+            </form>
+          </div> 
+        </div>
+    </div>
+    
     <div>
+      
       <form action="add/">
           <button type="submit" class="btn btn-success">Add New Lineitem &nbsp;<span class="glyphicon glyphicon-plus"></span></button>
-      </form><br>
+      </form>
+      
+      <br>
       <button type="submit" data-toggle="modal" data-target="#FillMargin" class="btn btn-info">Fill Margin &nbsp;<span class="glyphicon glyphicon-screenshot"></span></button>
-
+      
 
       <div class="modal fade" id="FillMargin" role="dialog">
           <div class="modal-dialog">

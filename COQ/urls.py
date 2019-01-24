@@ -7,4 +7,5 @@ urlpatterns = [
     path('pending_list/<rfp_no>/details/<sourcing_id>/select/',coq_price_select,name='coq_price_select'),
     path('pending_list/<rfp_no>/details/auto_coq/',auto_coq,name='auto-coq'),
     path('pending_list/<rfp_no>/details/reset_coq/',reset_coq,name='reset-coq'),
+    path('pending_list/<rfp_no>/details/resourcing/',resourcing,name='coq-resourcing'),
 ]   
