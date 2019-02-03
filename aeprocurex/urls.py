@@ -31,6 +31,7 @@ urlpatterns = [
     path('key_accounts/',include('KeyAccounts.urls')),
     path('COQ/',include('COQ.urls')),
     path('quotation/',include('Quotation.urls')),
+    path('api/po_from_customer/',include('POFromCustomer.urls')),
     path('api/leaves/',include('Leaves.urls')),
     path('api/expences/',include('Expences.urls')),
 ]

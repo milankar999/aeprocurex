@@ -19,6 +19,7 @@ urlpatterns = [
     path('generate/<rfp_no>/lineitems/next_step/process/revised_new/',generate_revised_new,name='generate-revised-new'),
     path('generate/<rfp_no>/lineitems/next_step/process/<cust_id>/edit/',generate_quotation_edit_customer,name='generate-quotation-process-edit-customer'),
     path('generate/<rfp_no>/lineitems/next_step/process/<quotation_no>/column_selection/',generate_quotation_column_selection,name='generate-quotation-column-selection'),
+    path('generate/<rfp_no>/lineitems/next_step/process/<quotation_no>/quotation_download/',download_quotation,name='download-quotation'),
     path('quoted/list/',quoted_list,name='quoted-list'),
     path('quoted/<rfp_no>/quotation_list/',quoted_quotation_list,name='quoted-quotation-list'),
     path('quoted/<rfp_no>/<quotation_no>/lineitems/',quotation_lineitems,name='quotation_lineitems'),

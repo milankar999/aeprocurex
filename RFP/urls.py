@@ -8,6 +8,7 @@ urlpatterns = [
     path('create/<cust_id>/<contactperson_id>/<enduser_id>/',processing,name='processings'),
     path('in_progress/list/',rfp_creation_inprogress,name='rfp-creation-progress'),
     path('create/product_selection/1/2/3/<rfp_no>/',product_selection,name='product-selection'),
+    path('create/product_selection/1/2/3/<rfp_no>/upload/',upload_product,name='upload_product'),
     path('create/product_selection/1/2/3/<rfp_no>/<lineitem_id>/',lineitem_edit,name='lineitem-edit'),
     path('create/product_selection/1/2/3/<rfp_no>/<lineitem_id>/delete/',lineitem_delete,name='lineitem-delete'),
     path('<rfp_no>/generate/',rfp_generate,name='rfp_generate'),

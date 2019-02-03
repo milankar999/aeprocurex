@@ -11,6 +11,7 @@ from django.core.mail import send_mail, EmailMessage
 from django.core import mail
 import random
 from django.conf import settings
+import openpyxl
 
 @login_required(login_url="/employee/login/")
 def rfp_create(request):
@@ -196,7 +197,6 @@ def processing(request, cust_id=None,contactperson_id=None,enduser_id=None):
                                 if type == 'Sourcing':
                                         return render(request,"Sourcing/RFP/process.html",context)
 
-
 @login_required(login_url="/employee/login/")
 def rfp_creation_inprogress(request):
         context={}
@@ -227,8 +227,6 @@ def rfp_creation_inprogress(request):
                         context['rfp_list'] = rfp
                         return render(request,"Sourcing/RFP/creation_in_progress.html",context)  
                      
-
-
 @login_required(login_url="/employee/login/")
 def product_selection(request, rfp_no=None):
         context={}
@@ -283,6 +281,49 @@ def product_selection(request, rfp_no=None):
 
                 if type == 'Sourcing':
                         return render(request,"Sourcing/RFP/product_selection.html",context)
+
+#Upload Product
+@login_required(login_url="/employee/login/")
+def upload_product(request, rfp_no=None):
+        context={}
+        context['rfp'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+
+        if request.method == "POST":
+                try:
+                        data_file = request.FILES['product_file']
+                        wb = openpyxl.load_workbook(data_file)
+                        worksheet = wb['ProductDetails']
+                        for row in worksheet.iter_rows():
+                                lineitemID = rfp_no + str(random.randint(100000,9999999))
+                                try:
+                                        RFPLineitem.objects.create(
+                                                rfp_no=RFP.objects.get(rfp_no=rfp_no),
+                                                lineitem_id=lineitemID,
+                                                product_title = row[1].value,
+                                                description=row[2].value,
+                                                model=row[3].value,
+                                                brand=row[4].value,
+                                                product_code=row[5].value,
+                                                part_no=row[6].value,
+                                                category = row[7].value,
+                                                hsn_code=row[8].value,
+                                                gst=row[9].value,
+                                                uom=row[10].value,
+                                                quantity=row[11].value,
+                                                target_price=row[12].value,
+                                                customer_lead_time=row[14].value,
+                                                remarks=row[13].value
+                                                )   
+
+                                except:
+                                        pass      
+
+                except:
+                        pass
+                return HttpResponseRedirect(reverse('product-selection',args=[rfp_no]))
 
 @login_required(login_url="/employee/login/")
 def lineitem_edit(request, rfp_no=None, lineitem_id=None):

@@ -11,6 +11,7 @@ urlpatterns = [
     path('<rfp_no>/lineitems/<vendor_id>/contact_person_selection/',vendor_contact_person_selection,name='vendor-contact-person-selection'),
     path('<rfp_no>/supplier/<vendor_id>/contact_person/<contact_person_id>/offer_reference/',offer_reference,name='offer_reference'),
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/',vendor_quotation_edit,name='vendor-quotation-edit'),
+    path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/price_upload/',vendor_quotation_price_upload,name='vendor-quotation-price-upload'),
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/delete/',vendor_quotation_delete,name='vendor-quotation-delete'),
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/view/',vendor_quotation_view,name='vendor-quotation-view'),
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/<lineitem_id>/add/',vendor_quotation_price_add,name='vendor-quotation-price-add'),

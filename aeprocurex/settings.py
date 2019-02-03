@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'KeyAccounts',
     'COQ',
     'Quotation',
+    'POFromCustomer',
     'Leaves',
     'Expences',
 ]

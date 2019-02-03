@@ -13,6 +13,7 @@ from django.core.mail import send_mail, EmailMessage
 from django.core import mail
 import random
 from django.conf import settings
+import openpyxl
 
 @login_required(login_url="/employee/login/")
 def rfp_pending_list(request):
@@ -602,6 +603,73 @@ def vendor_quotation_edit(request,rfp_no=None,sourcing_id=None):
 
                         context['supplier_name'] = Sourcing.objects.filter(id=sourcing_id).values('supplier__name')[0]['supplier__name']
                         return render(request,"Sourcing/Sourcing/supplier_quotation_details.html",context)
+
+@login_required(login_url="/employee/login/")
+def vendor_quotation_price_upload(request,rfp_no=None,sourcing_id=None):
+        context={}
+        context['sourcing'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+
+        if type == 'Sourcing':
+                if request.method == "GET":
+                        context['rfp_no'] = rfp_no
+                        context['sourcing_id'] = sourcing_id
+                        try:
+                                wb = openpyxl.load_workbook(filename = 'media/xl_template/SourcingTemplate.xlsx')
+                                worksheet = wb['ProductDetails']
+                                worksheet['B1'] = sourcing_id
+                                rfp_lineitems = RFPLineitem.objects.filter(rfp_no=RFP.objects.get(rfp_no=rfp_no))
+                                i = 1
+                                for item in rfp_lineitems:
+                                        worksheet.append([
+                                                i,
+                                                item.lineitem_id,
+                                                item.product_title,
+                                                item.description,
+                                                item.model,
+                                                item.brand,
+                                                item.product_code])
+                                        i = i + 1
+                                wb.save('media/xl_template/' + sourcing_id+'.xlsx')
+                                return render(request,"Sourcing/Sourcing/upload_sourcing.html",context)
+                        except:
+                                pass
+                
+                if request.method == 'POST':
+                        data_file = request.FILES['sourcing_file']
+                        wb = openpyxl.load_workbook(data_file)
+                        worksheet = wb['ProductDetails']
+                        i = 1
+                        for row in worksheet.iter_rows():
+                                if i > 2 :
+                                        if row[1].value != '' and row[12].value != '' and row[13].value != '' and row[7].value != '':
+                                                sourcing_lineitem_id = sourcing_id + str(random.randint(100000,9999999))
+                                                try :
+                                                
+                                                        SourcingLineitem.objects.create(
+                                                                id=sourcing_lineitem_id,
+                                                                sourcing=Sourcing.objects.get(id=sourcing_id),
+                                                                rfp_lineitem=RFPLineitem.objects.get(lineitem_id=row[1].value),
+                                                                product_title=row[2].value,
+                                                                description=row[3].value,
+                                                                model=row[4].value,
+                                                                brand=row[5].value,
+                                                                product_code=row[6].value,
+                                                                pack_size = row[7].value,
+                                                                moq = row[8].value,
+                                                                lead_time = row[9].value,
+                                                                price_validity = row[10].value,
+                                                                expected_freight = row[14].value,
+                                                                mrp = row[11].value,
+                                                                price1 = row[12].value,
+                                                                price2 = row[13].value )
+                                                except:
+                                                        pass
+                                i = i + 1
+                        return HttpResponseRedirect(reverse('vendor-quotation-edit', args=[rfp_no,sourcing_id]))
+
 
 @login_required(login_url="/employee/login/")
 def vendor_quotation_view(request,rfp_no=None,sourcing_id=None):

@@ -3,188 +3,225 @@
 {% block content %}
 <div class="">
 
-        {% if message %}
-        <div class="alert alert-{{message_type}}">
-            <strong>{{message}}</strong>
-        </div>
-        {% endif %}
-        <h2>Enter the lineitem details for RFP No - {{rfp_no}} <button class="btn btn-success" data-toggle="modal" data-target="#ADDNew">ADD New Lineitem &nbsp;<span class="glyphicon glyphicon-plus"></span></button></h2> 
-        
-        <!-- Modal -->
-    <div class="modal fade" id="ADDNew" role="dialog">
-           <div class="modal-dialog">
-           
-             <!-- Modal content-->
-             <div class="modal-content">
-               <div class="modal-header">
-                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                 <h4 class="modal-title">Fill the Product Details</h4>
+    {% if message %}
+    <div class="alert alert-{{message_type}}">
+        <strong>{{message}}</strong>
+    </div>
+    {% endif %}
+    <h2>Enter the lineitem details for RFP No - {{rfp_no}} 
+      <button class="btn btn-success" data-toggle="modal" data-target="#ADDNew">ADD New Lineitem &nbsp;<span class="glyphicon glyphicon-plus"></span></button>
+      <button class="btn btn-success" data-toggle="modal" data-target="#UploadProduct">Upload Product &nbsp;<span class="glyphicon glyphicon-chevron-up"></span></button>
+    </h2> 
+    
+    <!--New Product Modal -->
+<div class="modal fade" id="ADDNew" role="dialog">
+       <div class="modal-dialog">
+       
+         <!-- Modal content-->
+         <div class="modal-content">
+           <div class="modal-header">
+             <button type="button" class="close" data-dismiss="modal">&times;</button>
+             <h4 class="modal-title">Fill the Product Details</h4>
+           </div>
+           <div class="modal-body">
+             <form type="submit" id="customer-form" method="POST">
+               {% csrf_token %}
+               <div class="form-group">
+                       <label class="form-input" for="product_title">Product Title <a style="color: red">*</a></label>
+                       <input type="text" class="form-control" id="product_title" name="product_title" required>
+
+                       <label class="form-input" for="description">Product Description <a style="color: red">*</a></label>
+                       <textarea type="text" class="form-control" id="description" name="description" required></textarea>
+
+                       <label class="form-input" for="model">Model </label>
+                       <input type="text" class="form-control" id="model" name="model">
+
+                       <label class="form-input" for="brand">Brand</label>
+                       <input type="text" class="form-control" id="brand" name="brand">
+
+                       <label class="form-input" for="product_code">Product Code (Manufacturer Part No)</label>
+                       <input type="text" class="form-control" id="product_code" name="product_code">
+
+                       <label class="form-input" for="part_no">Customer Part No</label>
+                       <input type="text" class="form-control" id="part_no" name="part_no">
+
+                       <label class="form-input" for="category">Category <a style="color: red">*</a></label>
+                       <input type="text" class="form-control" id="category" name="category">
+
+                       <label class="form-input" for="hsn_code">HSN Code</label>
+                       <input type="text" class="form-control" id="hsn_code" name="hsn_code">
+
+                       <label class="form-input" for="gst">GST %</label>
+                       <input type="number" class="form-control" step="0.01" id="gst" name="gst">
+
+                       <label class="form-input" for="quantity">Quantity <a style="color: red">*</a></label>
+                       <input type="number" class="form-control" id="quantity" name="quantity" required>
+
+                       <label class="form-input" for="uom">UOM <a style="color: red">*</a></label>
+                       <input type="text" class="form-control" id="uom" name="uom" required>
+
+                       <label class="form-input" for="target_price">Target Price </label>
+                       <input type="number" class="form-control" id="target_price" step="0.01" name="target_price">
+
+                       <label class="form-input" for="CLT">Customer Lead Time </label>
+                       <input type="number" class="form-control" id="CLT" name="CLT">
+
+                       <label class="form-input" for="remarks">Remarks </label>
+                       <input type="text" class="form-control" id="remarks" name="remarks">                      
+
                </div>
-               <div class="modal-body">
-                 <form type="submit" id="customer-form" method="POST">
-                   {% csrf_token %}
-                   <div class="form-group">
-                           <label class="form-input" for="product_title">Product Title <a style="color: red">*</a></label>
-                           <input type="text" class="form-control" id="product_title" name="product_title" required>
-
-                           <label class="form-input" for="description">Product Description <a style="color: red">*</a></label>
-                           <textarea type="text" class="form-control" id="description" name="description" required></textarea>
-   
-                           <label class="form-input" for="model">Model </label>
-                           <input type="text" class="form-control" id="model" name="model">
-   
-                           <label class="form-input" for="brand">Brand</label>
-                           <input type="text" class="form-control" id="brand" name="brand">
-
-                           <label class="form-input" for="product_code">Product Code (Manufacturer Part No)</label>
-                           <input type="text" class="form-control" id="product_code" name="product_code">
-
-                           <label class="form-input" for="part_no">Customer Part No</label>
-                           <input type="text" class="form-control" id="part_no" name="part_no">
-
-                           <label class="form-input" for="category">Category <a style="color: red">*</a></label>
-                           <input type="text" class="form-control" id="category" name="category">
-   
-                           <label class="form-input" for="hsn_code">HSN Code</label>
-                           <input type="text" class="form-control" id="hsn_code" name="hsn_code">
-
-                           <label class="form-input" for="gst">GST %</label>
-                           <input type="number" class="form-control" step="0.01" id="gst" name="gst">
-
-                           <label class="form-input" for="quantity">Quantity <a style="color: red">*</a></label>
-                           <input type="number" class="form-control" id="quantity" name="quantity" required>
-
-                           <label class="form-input" for="uom">UOM <a style="color: red">*</a></label>
-                           <input type="text" class="form-control" id="uom" name="uom" required>
-
-                           <label class="form-input" for="target_price">Target Price </label>
-                           <input type="number" class="form-control" id="target_price" step="0.01" name="target_price">
-
-                           <label class="form-input" for="CLT">Customer Lead Time </label>
-                           <input type="number" class="form-control" id="CLT" name="CLT">
-
-                           <label class="form-input" for="remarks">Remarks </label>
-                           <input type="text" class="form-control" id="remarks" name="remarks">                      
-
-                   </div>
-               </div>
-               <div class="modal-footer">
-                   <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
-                       <input type="submit" class="btn btn-success" value="Confirm">
-                 </form>
-               </div>
-             </div>
-             
+           </div>
+           <div class="modal-footer">
+               <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                   <input type="submit" class="btn btn-success" value="Confirm">
+             </form>
            </div>
          </div>
-       
-        
-       <div class="table-responsive">          
-               <table id="product" class="table table-hover table-bordered table-sm" width="100%">
-                 <thead>
-                   <tr>
-                     <th></th>
-                     <th>Product Title</th>
-                     <th>Description</th>
-                     <th>Model</th>
-                     <th>Brand</th>
-                     <th>Product Code</th>
-                     <th>Part no</th>
-                     <th>Category</th>
-                     <th>HSN Code</th>
-                     <th>GST</th>
-                     <th>UOM</th>
-                     <th>Quantity</th>
-                     <th>Target Price</th>
-                     <th>Remarks</th>
-                     <th>Customer Lead Time</th>
-                   </tr>
-                 </thead>
-                 <tbody>
-                     {% with i=1 %}   
-                     {% for item in lineitems %}
-                       <tr>
-                          <form method="POST" id="{{item.lineitem_id}}" action="/rfp/create/product_selection/1/2/3/{{rfp_no}}/{{item.lineitem_id}}/delete/">
-                          {% csrf_token %}
-                          </form>
-                          <td>
-                              <a href="/rfp/create/product_selection/1/2/3/{{rfp_no}}/{{item.lineitem_id}}/" data-toggle="tooltip" data-placement="top" title="Edit"> <span class="glyphicon glyphicon-pencil" style="color: orange"></span></a>
-                             &nbsp;&nbsp;
-                                <a href="" onclick="$('#{{item.lineitem_id}}').submit(); return false;" data-placement="top" title="Delete"> <span class="glyphicon glyphicon-trash" style="color: red"></span></a>
-                                              
-                           </td>
-                           <td>{{item.product_title}}</td>
-                           <td>{{item.description}}</td>
-                           <td>{{item.model}}</td>
-                           <td>{{item.brand}}</td>
-                           <td>{{item.product_code}}</td>
-                           <td>{{item.part_no}}</td>
-                           <td>{{item.category}}</td>
-                           <td>{{item.hsn_code}}</td>
-                           <td>{{item.gst}}</td>
-                           <td>{{item.uom}}</td>
-                           <td>{{item.quantity}}</td>
-                           <td>{{item.target_price}}</td>
-                           <td>{{item.remarks}}</td>
-                           <td>{{item.customer_lead_time}}</td>
-                       </tr>
-                     {% empty %}
-                       <p>No Lineitem Found</p>
-                     {% endfor %}
-                     {% endwith %}
-                 </tbody>
-               </table>
-       </div><br>
-
-       <div class="row">
-        <div class="text-center">
-          <button type="button" class="btn btn-info btn-block rounded-0 py-2" id="btnGenerate" onclick="LineitemsCheck()">Generate RFP</button>
-      </div>
+         
        </div>
-       <div class="modal fade" id="generate" role="dialog">
-        <div class="modal-dialog">
+</div>
+  <!--End of New Product Model-->
+  <!--Product Upload Modal -->
+<div class="modal fade" id="UploadProduct" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Bulk Product Upload Form</h4>
+        </div>
         
-          <!-- Modal content-->
-          <div class="modal-content">
-             <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal">&times;</button>
-              <h4 class="modal-title">Fill the product Details</span></h4>
-            </div>
-            <div class="modal-body">
-              <form type="submit" id="customer-form" method="POST" action="/rfp/{{rfp_no}}/generate/">
-                {% csrf_token %}
-                <div class="form-group">
-
-                        <label class="form-input" for="rfp_reference">RFP Reference <a style="color: red">*</a></label>
-                        <input type="text" class="form-control" id="rfp_reference" name="rfp_reference" required>
-                        
-                        <label class="form-input" for="priority">Please Select the type of the RFP<a style="color: red">*</a></label>
-                        <select class="form-control" id="rfp_type" name="rfp_type" required>
-                            <option>Regular</option>
-                            <option>Easy RFQ</option>
-                            <option>PSP</option>
-                          </select> 
-
-                        <label class="form-input" for="priority">Priority (For immediate select 1 or for regular select 0) <a style="color: red">*</a></label>
-                        <select class="form-control" id="priority" name="priority" required>
-                            <option>0</option>
-                            <option>1</option>
-                          </select>
-
-                </div>
+        <div class="modal-body">
+          <form method="POST" action="upload/" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">   
+              
+                    <a href='/api/media/xl_template/New_RFP_Product.xlsx'>Get Template</a>
+                    <br>
+                    <label class="form-input" for="remarks">Browse Your Product File</label>
+                    <input type="file" id="product_file" name="product_file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" required>                      
             </div>
             <div class="modal-footer">
-                <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                    <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
                     <input type="submit" class="btn btn-success" value="Confirm">
-              </form>
-            </div>
-          </div>
-          
+            </div>  
+          </form>
         </div>
       </div>
-     
+      
+    </div>
+</div>
+<!--End of Product Upload Model-->
+   
+    
+   <div class="table-responsive">          
+           <table id="product" class="table table-hover table-bordered table-sm" width="100%">
+             <thead>
+               <tr>
+                 <th></th>
+                 <th>Sl No</th>
+                 <th>Product Title</th>
+                 <th>Description</th>
+                 <th>Model</th>
+                 <th>Brand</th>
+                 <th>Product Code</th>
+                 <th>Part no</th>
+                 <th>Category</th>
+                 <th>HSN Code</th>
+                 <th>GST</th>
+                 <th>UOM</th>
+                 <th>Quantity</th>
+                 <th>Target Price</th>
+                 <th>Remarks</th>
+                 <th>Customer Lead Time</th>
+               </tr>
+             </thead>
+             <tbody>
+                    
+                 {% for item in lineitems %}
+                   <tr>
+                      <form method="POST" id="{{item.lineitem_id}}" action="/rfp/create/product_selection/1/2/3/{{rfp_no}}/{{item.lineitem_id}}/delete/">
+                      {% csrf_token %}
+                      </form>
+                      <td>
+                          <a href="/rfp/create/product_selection/1/2/3/{{rfp_no}}/{{item.lineitem_id}}/" data-toggle="tooltip" data-placement="top" title="Edit"> <span class="glyphicon glyphicon-pencil" style="color: orange"></span></a>
+                         &nbsp;&nbsp;
+                            <a href="" onclick="$('#{{item.lineitem_id}}').submit(); return false;" data-placement="top" title="Delete"> <span class="glyphicon glyphicon-trash" style="color: red"></span></a>
+                                          
+                       </td>
+                       <td>{{forloop.counter}}</td>
+                       <td>{{item.product_title}}</td>
+                       <td>{{item.description}}</td>
+                       <td>{{item.model}}</td>
+                       <td>{{item.brand}}</td>
+                       <td>{{item.product_code}}</td>
+                       <td>{{item.part_no}}</td>
+                       <td>{{item.category}}</td>
+                       <td>{{item.hsn_code}}</td>
+                       <td>{{item.gst}}</td>
+                       <td>{{item.uom}}</td>
+                       <td>{{item.quantity}}</td>
+                       <td>{{item.target_price}}</td>
+                       <td>{{item.remarks}}</td>
+                       <td>{{item.customer_lead_time}}</td>
+                   </tr>
+                 {% empty %}
+                   <p>No Lineitem Found</p>
+                 {% endfor %}
+             </tbody>
+           </table>
+   </div><br>
 
+   <div class="row">
+    <div class="text-center">
+      <button type="button" class="btn btn-info btn-block rounded-0 py-2" id="btnGenerate" onclick="LineitemsCheck()">Generate RFP</button>
+  </div>
    </div>
+   <div class="modal fade" id="generate" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+         <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Fill the product Details</span></h4>
+        </div>
+        <div class="modal-body">
+          <form type="submit" id="customer-form" method="POST" action="/rfp/{{rfp_no}}/generate/">
+            {% csrf_token %}
+            <div class="form-group">
+
+                    <label class="form-input" for="rfp_reference">RFP Reference <a style="color: red">*</a></label>
+                    <input type="text" class="form-control" id="rfp_reference" name="rfp_reference" required>
+                    
+                    <label class="form-input" for="priority">Please Select the type of the RFP<a style="color: red">*</a></label>
+                    <select class="form-control" id="rfp_type" name="rfp_type" required>
+                        <option>Regular</option>
+                        <option>Easy RFQ</option>
+                        <option>PSP</option>
+                      </select>
+
+                    <label class="form-input" for="priority">Priority (For immediate select 1 or for regular select 0) <a style="color: red">*</a></label>
+                    <select class="form-control" id="priority" name="priority" required>
+                        <option>0</option>
+                        <option>1</option>
+                      </select>
+
+            </div>
+        </div>
+        <div class="modal-footer">
+            <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                <input type="submit" class="btn btn-success" value="Confirm">
+          </form>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+ 
+
+</div>
    <script type="text/javascript">
     function LineitemsCheck(){
       var totalRowCount = 0;
@@ -205,6 +242,6 @@
         }
 
     }
-       </script>      
+  </script>      
 
 {% endblock content %}

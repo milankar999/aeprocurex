@@ -52,7 +52,6 @@ class ApplicableLeavesListView(generics.GenericAPIView,
     authentication_classes=[TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated,]
 
-
     def get(self,request,id=None):
         if self.request.user.profile.hr_user_type == "Employee":
             return JsonResponse({"Message" : "Not Allowed"}, safe=False)

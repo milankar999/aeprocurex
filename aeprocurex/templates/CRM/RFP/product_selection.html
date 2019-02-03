@@ -8,9 +8,12 @@
             <strong>{{message}}</strong>
         </div>
         {% endif %}
-        <h2>Enter the lineitem details for RFP No - {{rfp_no}} <button class="btn btn-success" data-toggle="modal" data-target="#ADDNew">ADD New Lineitem &nbsp;<span class="glyphicon glyphicon-plus"></span></button></h2> 
+        <h2>Enter the lineitem details for RFP No - {{rfp_no}} 
+          <button class="btn btn-success" data-toggle="modal" data-target="#ADDNew">ADD New Lineitem &nbsp;<span class="glyphicon glyphicon-plus"></span></button>
+          <button class="btn btn-success" data-toggle="modal" data-target="#UploadProduct">Upload Product &nbsp;<span class="glyphicon glyphicon-chevron-up"></span></button>
+        </h2> 
         
-        <!-- Modal -->
+        <!--New Product Modal -->
     <div class="modal fade" id="ADDNew" role="dialog">
            <div class="modal-dialog">
            
@@ -76,7 +79,40 @@
              </div>
              
            </div>
-         </div>
+    </div>
+      <!--End of New Product Model-->
+      <!--Product Upload Modal -->
+    <div class="modal fade" id="UploadProduct" role="dialog">
+        <div class="modal-dialog">
+        
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Bulk Product Upload Form</h4>
+            </div>
+            
+            <div class="modal-body">
+              <form method="POST" action="upload/" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">   
+                  
+                        <a href='/api/media/xl_template/New_RFP_Product.xlsx'>Get Template</a>
+                        <br>
+                        <label class="form-input" for="remarks">Browse Your Product File</label>
+                        <input type="file" id="product_file" name="product_file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" required>                      
+                </div>
+                <div class="modal-footer">
+                        <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                        <input type="submit" class="btn btn-success" value="Confirm">
+                </div>  
+              </form>
+            </div>
+          </div>
+          
+        </div>
+    </div>
+   <!--End of Product Upload Model-->
        
         
        <div class="table-responsive">          
@@ -84,6 +120,7 @@
                  <thead>
                    <tr>
                      <th></th>
+                     <th>Sl No</th>
                      <th>Product Title</th>
                      <th>Description</th>
                      <th>Model</th>
@@ -101,7 +138,7 @@
                    </tr>
                  </thead>
                  <tbody>
-                     {% with i=1 %}   
+                        
                      {% for item in lineitems %}
                        <tr>
                           <form method="POST" id="{{item.lineitem_id}}" action="/rfp/create/product_selection/1/2/3/{{rfp_no}}/{{item.lineitem_id}}/delete/">
@@ -113,6 +150,7 @@
                                 <a href="" onclick="$('#{{item.lineitem_id}}').submit(); return false;" data-placement="top" title="Delete"> <span class="glyphicon glyphicon-trash" style="color: red"></span></a>
                                               
                            </td>
+                           <td>{{forloop.counter}}</td>
                            <td>{{item.product_title}}</td>
                            <td>{{item.description}}</td>
                            <td>{{item.model}}</td>
@@ -131,7 +169,6 @@
                      {% empty %}
                        <p>No Lineitem Found</p>
                      {% endfor %}
-                     {% endwith %}
                  </tbody>
                </table>
        </div><br>
@@ -203,8 +240,7 @@
         else{
           $('#generate').modal('toggle');
         }
-
     }
-       </script>      
+    </script>     
 
 {% endblock content %}

@@ -92,10 +92,10 @@ class LoginView(APIView):
                 user = serializer.validated_data["user"]
                 django_login(request,user)
                 token, created = Token.objects.get_or_create(user=user)
-                return Response({"token":token.key,"hr_user_type":user.profile.hr_user_type}, status = 200)
+                return Response({"token":token.key,"type":user.profile.type}, status = 200)
 
 class LogoutView():
-        authentication_classes = (TokenAuthentication, )
+        authentication_classes=[TokenAuthentication, ]
 
         def post(self, request):
                 django_logout(request)

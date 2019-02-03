@@ -621,18 +621,20 @@ def generate_quotation_column_selection(request,rfp_no=None,quotation_no=None):
                     total_basic_with_gst = 'Yes'
 
             Quotation_Generator(quotation_no,gst_price,image,total_basic,total_basic_with_gst)
+            return HttpResponseRedirect(reverse('download-quotation', args=[rfp_no,quotation_no]))
+
             #return FileResponse('static/doc/quotation/'+quotation_no+'.pdf', as_attachment=True, filename= quotation_no + '.pdf')
-            try:
-                filepath = 'static/doc/quotation/' + quotation_no + '.pdf'
-                quotation_obj = QuotationTracker.objects.get(quotation_no=quotation_no)
-                quotation_obj.status = 'Generated'
-                quotation_obj.save()
-                rfp_object = RFP.objects.get(rfp_no=rfp_no)
-                rfp_object.enquiry_status = 'Quoted'
-                rfp_object.save()
-                return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
-            except:
-                pass
+            #try:
+            #    filepath = 'static/doc/quotation/' + quotation_no + '.pdf'
+            #    quotation_obj = QuotationTracker.objects.get(quotation_no=quotation_no)
+            ##    quotation_obj.status = 'Generated'
+             #   quotation_obj.save()
+             #   rfp_object = RFP.objects.get(rfp_no=rfp_no)
+             #   rfp_object.enquiry_status = 'Quoted'
+             #   rfp_object.save()
+             #   #return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
+            #except:
+            #    pass
 
 def Add_Header(pdf):
     pdf.drawInlineImage("static/image/aeprocurex.jpg",360,750,220,70)
@@ -689,7 +691,7 @@ def Add_To(pdf,customer_name,address,gst,shipping_address,billing_address):
     
     wrapper = textwrap.TextWrapper(width=115) 
     word_list = wrapper.wrap(text=address)
-    y = 590
+    y = 590 
     for element in word_list:
         pdf.drawString(10,y,element)
         y = y - 13
@@ -1201,7 +1203,7 @@ def Quotation_Generator(quotation_no,gst_price,image,total_basic,total_basic_wit
     #Extract Quotation Data
     quotation_obj = QuotationTracker.objects.get(quotation_no=quotation_no)
     quotation_lineitem = QuotationLineitem.objects.filter(quotation=quotation_obj)
-    pdf = canvas.Canvas("static/doc/quotation/" + quotation_no + ".pdf", pagesize=A4)
+    pdf = canvas.Canvas("media/quotation/" + quotation_no + ".pdf", pagesize=A4)
     pdf.setTitle(quotation_no + '.pdf')
     Add_Header(pdf)
     Add_Footer(pdf)
@@ -1277,6 +1279,18 @@ def Quotation_Generator(quotation_no,gst_price,image,total_basic,total_basic_wit
         
     pdf.showPage()
     pdf.save()
+
+@login_required(login_url="/employee/login/")
+def download_quotation(request,rfp_no=None,quotation_no=None):
+    context={}
+    context['quotation'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type
+        
+    if type == 'Sales':
+        if request.method == "GET":
+            context['quotation_no'] = quotation_no
+            return render(request,"Sales/Quotation/download_quotation.html",context)
 
 @login_required(login_url="/employee/login/")
 def quoted_list(request):
@@ -1368,11 +1382,8 @@ def copy_quotation(request,rfp_no=None,quotation_no=None):
 
             Quotation_Generator(quotation_no,gst_price,image,total_basic,total_basic_with_gst)
             #return FileResponse('static/doc/quotation/'+quotation_no+'.pdf', as_attachment=True, filename= quotation_no + '.pdf')
-            try:
-                filepath = 'static/doc/quotation/' + quotation_no + '.pdf'
-                return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
-            except:
-                pass
+            Quotation_Generator(quotation_no,gst_price,image,total_basic,total_basic_with_gst)
+            return HttpResponseRedirect(reverse('download-quotation', args=[rfp_no,quotation_no]))
 
 @login_required(login_url="/employee/login/")
 def resourcing(request,rfp_no=None,quotation_no=None):
