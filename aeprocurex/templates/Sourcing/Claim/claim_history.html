@@ -1,0 +1,58 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="container">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+            <!--data table-->
+            <div class="table-responsive">          
+                <table id="lineitems" class="table table-hover table-bordered table-sm" width="100%">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Date</th>
+                      <th>Claim Type</th>
+                      <th>Description</th>
+                      <th>Basic Amount</th>
+                      <th>Applicable GST Amount</th>
+                      <th>Status</th>
+                      <th>Document</th>
+                    </tr>
+                  </thead>
+                  <tbody>   
+                      {% for item in expence_list %}
+                        <tr>
+                            <td>
+                                <a href="{{item.lineitem_id}}/edit/" data-toggle="tooltip" data-placement="top" title="Edit Tax Details"> <span class="glyphicon glyphicon-edit" style="color: blue"></span></a>
+                            </td>
+                            <td>{{item.date}}</td>
+                            <td>{{item.claim_type}}</td>
+                            <td>{{item.description}}</td>
+                            <td>{{item.total_basic_amount}}</td>
+                            <td>{{item.applicable_gst_value}}</td>
+                            <td>{{item.status}}</td>
+                            <td><a href="/api/media/{{item.document}}" target="-blank">Click Here</a></td>
+                        </tr>
+                      {% empty %}
+                        <p>No Pending RFP Approval Found</p>
+                      {% endfor %}
+                  </tbody>
+                </table>
+        </div>
+            <!--End of data table-->
+        </div>
+</div>
+<script type="text/javascript">
+    $(document).ready( function () {
+        $('#lineitems').DataTable();
+    } );
+    </script>   
+{% endblock content %}

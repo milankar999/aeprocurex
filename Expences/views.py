@@ -6,6 +6,17 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import *
 from .serializers import *
 import io
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponseRedirect
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from django.urls import reverse
+from .models import *
+from State.models import StateList
+from RFP.models import *
+from Sourcing.models import *
+import random
+from django.core.files.storage import FileSystemStorage
 
 from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
@@ -71,3 +82,63 @@ class ClaimTypesViewSet(generics.GenericAPIView,
 
     def get(self,request):
         return self.list(request)    
+
+
+
+##With out api
+
+@login_required(login_url="/employee/login/")
+def new_expence_apply(request):
+    context={}
+    context['expence'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type
+        
+    if request.method == 'GET':        
+        claim_types = ThirdClaimTypes.objects.all()
+        context['claim_types'] = claim_types
+
+        if type == 'CRM':
+            return render(request,"CRM/Claim/claim_application.html",context)
+
+        if type == 'Sourcing':
+            return render(request,"Sourcing/Claim/claim_application.html",context)
+
+        if type == 'Sales':
+            return render(request,"Sales/Claim/claim_application.html",context)
+
+    if request.method == 'POST' and request.FILES['supporting_document']:
+        data = request.POST
+        myfile = request.FILES['supporting_document']
+
+        ClaimDetails.objects.create(
+            employee=request.user,
+            claim_type=ThirdClaimTypes.objects.get(claim_type3 = data['expence_type']),
+            description=data['description'],
+            total_basic_amount = data['basic_value'],
+            applicable_gst_value = data['gst_value'],
+            date =data['date'],
+            document = myfile,
+            )
+        return HttpResponseRedirect(reverse('expence-apply-list'))
+        
+
+@login_required(login_url="/employee/login/")
+def expence_apply_list(request):
+    context={}
+    context['expence'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type
+
+    if request.method == 'GET':
+        expence_list = ClaimDetails.objects.filter(employee=request.user).order_by('-date')
+        context['expence_list'] = expence_list
+
+        if type == 'CRM':
+            return render(request,"CRM/Claim/claim_history.html",context)
+
+        if type == 'Sourcing':
+            return render(request,"Sourcing/Claim/claim_history.html",context)
+
+        if type == 'Sales':
+            return render(request,"Sales/Claim/claim_history.html",context)

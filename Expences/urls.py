@@ -1,13 +1,7 @@
-from django.urls import path,include
-from rest_framework import routers
+from django.urls import path
 from .views import *
 
 urlpatterns = [
-    #Employee Portion
-    path('claim_types/',ClaimTypesViewSet.as_view()),
-    path('new_claim/',NewClaimViewSet.as_view()),
-    path('new_claim/<id>/',NewClaimViewSet.as_view()),
-
-    #Manager Portion
-    
-]
+    path('new_expence/apply/',new_expence_apply,name='new-expence-apply'),
+    path('apply_list/',expence_apply_list,name='expence-apply-list'),
+]   

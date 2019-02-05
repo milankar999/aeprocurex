@@ -484,7 +484,7 @@ def rfp_generate(request, rfp_no=None):
                 email_body = email_body + '</table>'\
                 '<p><span style="color: #ff0000;">Please Assign this RFP to a sourcing Person</span></p>'\
                 '</body>'
-                msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL, to = email_list, bcc = ['sales.p@aeprocurex.com','milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex.com'])
+                msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL, to = email_list, bcc = ['sales.p@aeprocurex.com','milan.kar@aeprocurex.com'])
                 msg.content_subtype = "html"  # Main content is now text/html
                 msg.send()
         
@@ -619,7 +619,7 @@ def rfp_reject(request, rfp_no=None):
                         email_body = email_body + '</table>'\
                         '<p><span style="color: #ff0000;">Please Rectify this Enquiry</span></p>'\
                         '</body>'
-                        msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@aeprocurex.com','milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex.com'])
+                        msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@aeprocurex.com','milan.kar@aeprocurex.com'])
                         msg.content_subtype = "html"  # Main content is now text/html
                         msg.send()
 
@@ -714,7 +714,7 @@ def rfp_approve(request, rfp_no=None):
                                 i = i + 1
                         email_body = email_body + '</table>'\
                         '</body>'
-                        msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@eprocurex.com','milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex.com'])
+                        msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@eprocurex.com','milan.kar@aeprocurex.com'])
                         msg.content_subtype = "html"  # Main content is now text/html
                         msg.send()
                         context['message'] = 'RFP No ' + rfp_no + ' has been approved successfully'

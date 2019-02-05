@@ -29,7 +29,8 @@ class ClaimDetails(models.Model):
     employee = models.ForeignKey(User, on_delete=models.CASCADE)
     claim_type = models.ForeignKey(ThirdClaimTypes, on_delete = models.CASCADE)
     description = models.TextField(null=False,blank=False)
-    amount = models.FloatField(null=False,blank=False)
+    total_basic_amount = models.FloatField(null=False,blank=False)
+    applicable_gst_value = models.FloatField(null=False,blank=False, default = 0)
     date = models.DateField()
     document = models.FileField(upload_to='claim/')
 

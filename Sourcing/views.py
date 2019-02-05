@@ -292,7 +292,7 @@ def single_price_request(request,rfp_no=None):
                                         i = i + 1
                                 email_body = email_body + '</table>'
                                 email_body = email_body + '</body>'
-                        msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = email_list, bcc = ['sales.p@aeprocurex.com','milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex.com'])
+                        msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = email_list, bcc = ['sales.p@aeprocurex.com','milan.kar@aeprocurex.com'])
                         msg.content_subtype = "html"  # Main content is now text/html
                         msg.send()
                         return HttpResponseRedirect(reverse('vendor-selection', args=[rfp_no]))
@@ -443,7 +443,7 @@ def single_vendor_approve(request,rfp_no=None):
                                 email_body = email_body + '</table>'
                         email_body = email_body + '<p><span style="color: #ff0000;">Now you can mark sourcing complete with single vendor</span></p>'\
                         '</body>'
-                        msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@aeprocurex.com','milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex.com'])
+                        msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@aeprocurex.com','milan.kar@aeprocurex.com'])
                         msg.content_subtype = "html"  # Main content is now text/html
                         msg.send()
                         return HttpResponseRedirect(reverse('single-vendor-approval-list'))
@@ -552,7 +552,7 @@ def single_vendor_reject(request,rfp_no=None):
                                 email_body = email_body + '</table>'
                         email_body = email_body + '<p><span style="color: #ff0000;">Please Search Some other Vendors for this enquiry</span></p>'\
                         '</body>'
-                        msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@aeprocurex.com','milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex.com'])
+                        msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@aeprocurex.com','milan.kar@aeprocurex.com'])
                         msg.content_subtype = "html"  # Main content is now text/html
                         msg.send()
 
@@ -998,7 +998,7 @@ def sourcing_completed(request,rfp_no=None):
                                         email_body = email_body + '</table>'\
                     
                                 email_body = email_body + '</body>'
-                                msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = email_list, bcc = ['sales.p@aeprocurex.com','milan.kar@aeprocurex.com','prasannakumar.c@aeprocurex.com'])
+                                msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = email_list, bcc = ['sales.p@aeprocurex.com','milan.kar@aeprocurex.com'])
                                 msg.content_subtype = "html"  # Main content is now text/html
                                 msg.send()
                                 context['message'] = 'RFP No ' + rfp_no + ' has been maked as sourcing completed successfully'

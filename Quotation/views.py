@@ -621,20 +621,23 @@ def generate_quotation_column_selection(request,rfp_no=None,quotation_no=None):
                     total_basic_with_gst = 'Yes'
 
             Quotation_Generator(quotation_no,gst_price,image,total_basic,total_basic_with_gst)
-            return HttpResponseRedirect(reverse('download-quotation', args=[rfp_no,quotation_no]))
+            try:
+                filepath = 'static/doc/quotation/' + quotation_no + '.pdf'
+                quotation_obj = QuotationTracker.objects.get(quotation_no=quotation_no)
+                quotation_obj.status = 'Generated'
+                quotation_obj.save()
+                rfp_object = RFP.objects.get(rfp_no=rfp_no)
+                rfp_object.enquiry_status = 'Quoted'
+                rfp_object.save()
+                return HttpResponseRedirect(reverse('download-quotation', args=[rfp_no,quotation_no]))
+                #return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
+            except:
+                pass
+            
+
 
             #return FileResponse('static/doc/quotation/'+quotation_no+'.pdf', as_attachment=True, filename= quotation_no + '.pdf')
-            #try:
-            #    filepath = 'static/doc/quotation/' + quotation_no + '.pdf'
-            #    quotation_obj = QuotationTracker.objects.get(quotation_no=quotation_no)
-            ##    quotation_obj.status = 'Generated'
-             #   quotation_obj.save()
-             #   rfp_object = RFP.objects.get(rfp_no=rfp_no)
-             #   rfp_object.enquiry_status = 'Quoted'
-             #   rfp_object.save()
-             #   #return serve(request, os.path.basename(filepath), os.path.dirname(filepath))
-            #except:
-            #    pass
+            
 
 def Add_Header(pdf):
     pdf.drawInlineImage("static/image/aeprocurex.jpg",360,750,220,70)
