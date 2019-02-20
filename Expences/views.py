@@ -107,21 +107,34 @@ def new_expence_apply(request):
         if type == 'Sales':
             return render(request,"Sales/Claim/claim_application.html",context)
 
-    if request.method == 'POST' and request.FILES['supporting_document']:
-        data = request.POST
-        myfile = request.FILES['supporting_document']
+    try:
+        if request.method == 'POST' and request.FILES['supporting_document']:
+            data = request.POST
+            myfile = request.FILES['supporting_document']
 
-        ClaimDetails.objects.create(
-            employee=request.user,
-            claim_type=ThirdClaimTypes.objects.get(claim_type3 = data['expence_type']),
-            description=data['description'],
-            total_basic_amount = data['basic_value'],
-            applicable_gst_value = data['gst_value'],
-            date =data['date'],
-            document = myfile,
-            )
-        return HttpResponseRedirect(reverse('expence-apply-list'))
-        
+            ClaimDetails.objects.create(
+                employee=request.user,
+                claim_type=ThirdClaimTypes.objects.get(claim_type3 = data['expence_type']),
+                description=data['description'],
+                total_basic_amount = data['basic_value'],
+                applicable_gst_value = data['gst_value'],
+                date =data['date'],
+                document = myfile,
+                )
+            return HttpResponseRedirect(reverse('expence-apply-list'))
+    except:
+            if request.method == 'POST':
+                data = request.POST
+
+                ClaimDetails.objects.create(
+                    employee=request.user,
+                    claim_type=ThirdClaimTypes.objects.get(claim_type3 = data['expence_type']),
+                    description=data['description'],
+                    total_basic_amount = data['basic_value'],
+                    applicable_gst_value = data['gst_value'],
+                    date =data['date'],
+                    )
+                return HttpResponseRedirect(reverse('expence-apply-list'))        
 
 @login_required(login_url="/employee/login/")
 def expence_apply_list(request):

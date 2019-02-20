@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'COQ',
     'Quotation',
     'POFromCustomer',
+    'POToVendor',
+    'EnquiryTracker',
     'Leaves',
     'Expences',
 ]
@@ -158,7 +160,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+#Json Parser
+REST_FRAMEWORK = {
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+    )
+}
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 

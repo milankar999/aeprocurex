@@ -92,27 +92,56 @@ def coq_pending_details(request,rfp_no=None):
                 context['error'] = 'Please select atleast one product'
                 return render(request,"Sales/COQ/error.html",context)
 
-            for lineitem in sourcing_lineitem_object:
-                print(lineitem.id)
-                COQLineitem.objects.create(
-                    id=lineitem.id+str(random.randint(100000,9999999)),
-                    sourcing_lineitem=lineitem,
-                    rfp_no = rfp_no,
-                    product_title = lineitem.product_title,
-                    description = lineitem.description,
-                    model = lineitem.model,
-                    brand = lineitem.brand,
-                    product_code = lineitem.product_code,
-                    pack_size = lineitem.pack_size,
-                    moq = lineitem.moq,
-                    hsn_code = lineitem.rfp_lineitem.hsn_code,
-                    gst = lineitem.rfp_lineitem.gst,
-                    quantity = lineitem.rfp_lineitem.quantity,
-                    uom = lineitem.rfp_lineitem.uom,
-                    expected_freight = lineitem.expected_freight,
-                    unit_price = lineitem.price2,
-                    lead_time = lineitem.lead_time
-                )
+
+            rfp_object = RFP.objects.get(rfp_no=rfp_no)
+            print(rfp_object.rfp_type)
+
+            if rfp_object.rfp_type == 'PSP':
+                for lineitem in sourcing_lineitem_object:
+                    print(lineitem.id)
+                    COQLineitem.objects.create(
+                        id=lineitem.id+str(random.randint(100000,9999999)),
+                        sourcing_lineitem=lineitem,
+                        rfp_no = rfp_no,
+                        product_title = lineitem.product_title,
+                        description = lineitem.description,
+                        model = lineitem.model,
+                        brand = lineitem.brand,
+                        product_code = lineitem.product_code,
+                        pack_size = lineitem.pack_size,
+                        moq = lineitem.moq,
+                        hsn_code = lineitem.rfp_lineitem.hsn_code,
+                        gst = lineitem.rfp_lineitem.gst,
+                        quantity = lineitem.rfp_lineitem.quantity,
+                        uom = lineitem.rfp_lineitem.uom,
+                        expected_freight = lineitem.expected_freight,
+                        unit_price = lineitem.price1,
+                        lead_time = lineitem.lead_time,
+                        margin = 2.0,
+                        )
+
+            else:
+                for lineitem in sourcing_lineitem_object:
+                    print(lineitem.id)
+                    COQLineitem.objects.create(
+                        id=lineitem.id+str(random.randint(100000,9999999)),
+                        sourcing_lineitem=lineitem,
+                        rfp_no = rfp_no,
+                        product_title = lineitem.product_title,
+                        description = lineitem.description,
+                        model = lineitem.model,
+                        brand = lineitem.brand,
+                        product_code = lineitem.product_code,
+                        pack_size = lineitem.pack_size,
+                        moq = lineitem.moq,
+                        hsn_code = lineitem.rfp_lineitem.hsn_code,
+                        gst = lineitem.rfp_lineitem.gst,
+                        quantity = lineitem.rfp_lineitem.quantity,
+                        uom = lineitem.rfp_lineitem.uom,
+                        expected_freight = lineitem.expected_freight,
+                        unit_price = lineitem.price2,
+                        lead_time = lineitem.lead_time
+                        )
             rfp_obj = RFP.objects.get(rfp_no=rfp_no)
             rfp_obj.enquiry_status = 'COQ Done'
             rfp_obj.save()

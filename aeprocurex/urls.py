@@ -32,9 +32,11 @@ urlpatterns = [
     path('COQ/',include('COQ.urls')),
     path('quotation/',include('Quotation.urls')),
     path('api/po_from_customer/',include('POFromCustomer.urls')),
+    path('api/po_to_vendor/',include('POToVendor.urls')),
     path('api/leaves/',include('Leaves.urls')),
     path('api/expences/',include('Expences.api_urls')),
     path('expences/',include('Expences.urls')),
+    path('enquiry_tracker/',include('EnquiryTracker.urls')),
 ]
 
 if settings.DEBUG:
