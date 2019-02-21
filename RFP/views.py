@@ -21,6 +21,7 @@ def rfp_create(request):
         if request.method == "GET":
                 u = User.objects.get(username=request.user)
                 type = u.profile.type
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
                 customer = CustomerProfile.objects.all()
                 context['CustomerList'] = customer
                 state = StateList.objects.all()
@@ -40,6 +41,7 @@ def rfp_create(request):
                 if cust:
                         u = User.objects.get(username=request.user)
                         type = u.profile.type
+                        context['login_user_name'] = u.first_name + ' ' + u.last_name
                         customer = CustomerProfile.objects.all()
                         context['CustomerList'] = customer
                         state = StateList.objects.all()
@@ -54,6 +56,7 @@ def rfp_create(request):
                 else:
                         u = User.objects.get(username=request.user)
                         type = u.profile.type
+                        context['login_user_name'] = u.first_name + ' ' + u.last_name
                         customer = CustomerProfile.objects.all()
                         context['CustomerList'] = customer
                         state = StateList.objects.all()
@@ -75,6 +78,7 @@ def contact_person(request, cust_id=None):
                 user = User.objects.get(username=request.user)
                 u = User.objects.get(username=request.user)
                 type = u.profile.type
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
                 ContactPerson = CustomerContactPerson.objects.filter(customer_name__pk=cust_id)
                 context['ContactPerson'] = ContactPerson
                 customer = CustomerProfile.objects.get(id=cust_id)
@@ -101,6 +105,7 @@ def contact_person(request, cust_id=None):
       
                 u = User.objects.get(username=request.user)
                 type = u.profile.type
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
                 ContactPerson = CustomerContactPerson.objects.filter(customer_name__pk=cust_id)
                 context['ContactPerson'] = ContactPerson
                 customer = CustomerProfile.objects.get(id=cust_id)
@@ -124,6 +129,7 @@ def end_user(request, cust_id=None,contactperson_id=None):
                 user = User.objects.get(username=request.user)
                 u = User.objects.get(username=request.user)
                 type = u.profile.type
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
                 enduser = EndUser.objects.filter(customer_name__pk=cust_id)
                 context['EndUser'] = enduser
                 customer = CustomerProfile.objects.get(id=cust_id)
@@ -152,6 +158,7 @@ def end_user(request, cust_id=None,contactperson_id=None):
 
                 u = User.objects.get(username=request.user)
                 type = u.profile.type
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
                 user = EndUser.objects.filter(customer_name__pk=cust_id)
                 context['EndUser'] = user
                 customer = CustomerProfile.objects.get(id=cust_id)
@@ -172,6 +179,7 @@ def processing(request, cust_id=None,contactperson_id=None,enduser_id=None):
         if request.method == "GET":
                 user = User.objects.get(username=request.user)
                 u = User.objects.get(username=request.user)
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
                 type = u.profile.type
                 enduser = EndUser.objects.filter(customer_name__pk=cust_id)
                 context['EndUser'] = enduser
@@ -203,6 +211,7 @@ def rfp_creation_inprogress(request):
         context['rfp'] = 'active'
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if request.method == "GET":
                 if type == 'CRM':
@@ -236,6 +245,7 @@ def product_selection(request, rfp_no=None):
                 user = User.objects.get(username=request.user)
                 u = User.objects.get(username=request.user)
                 type = u.profile.type
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
                 context['rfp_no'] = rfp_no
 
                 lineitems = RFPLineitem.objects.filter(rfp_no__pk=rfp_no)
@@ -251,6 +261,7 @@ def product_selection(request, rfp_no=None):
                 user = User.objects.get(username=request.user)
                 u = User.objects.get(username=request.user)
                 type = u.profile.type
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
                 context['rfp_no'] = rfp_no
                 lineitemID = rfp_no + str(random.randint(100000,9999999))
                 data = request.POST
@@ -290,6 +301,7 @@ def upload_product(request, rfp_no=None):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if request.method == "POST":
                 try:
@@ -332,6 +344,7 @@ def lineitem_edit(request, rfp_no=None, lineitem_id=None):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
     
         if request.method == "GET":        
                 context['rfp_no'] = rfp_no
@@ -391,6 +404,7 @@ def lineitem_delete(request, rfp_no=None, lineitem_id=None):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if request.method == "POST":
                 lineitem = RFPLineitem.objects.get(lineitem_id=lineitem_id)
@@ -410,6 +424,7 @@ def rfp_generate(request, rfp_no=None):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if request.method == "POST":
                 rfp = RFP.objects.get(rfp_no=rfp_no)
@@ -503,6 +518,7 @@ def rfp_approval_list(request):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if type == 'Sales':
                 if request.method == "GET":
@@ -517,6 +533,7 @@ def rfp_approval_lineitems(request, rfp_no=None):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if type == 'Sales':
                 if request.method == "GET":
@@ -552,6 +569,7 @@ def rfp_reject(request, rfp_no=None):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if type == 'Sales':
                 if request.method == "POST":
@@ -633,6 +651,7 @@ def rfp_approve(request, rfp_no=None):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if type == 'Sales':
                 if request.method == "POST":
@@ -728,6 +747,7 @@ def rfp_rejected_list(request):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if type == 'CRM':
                 if request.method == "GET":

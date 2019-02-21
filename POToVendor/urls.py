@@ -15,6 +15,5 @@ urlpatterns = [
     path('pending_cpo/<cpo_id>/new_vendor_selection/',VPONewVendorSelection.as_view()),
     path('pending_cpo/<cpo_id>/vendor/<id>/contact_person_selection/',VPONewVendorContactPersonSelection.as_view()),
     path('pending_cpo/<cpo_id>/vendor/<vendor_id>/contact_person/<contact_person_id>/create_vpo/',VPONewVenndorPOSegmentCreation.as_view()),
-
     #
 ]

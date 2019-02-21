@@ -93,6 +93,7 @@ def new_expence_apply(request):
     context['expence'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if request.method == 'GET':        
         claim_types = ThirdClaimTypes.objects.all()
@@ -142,6 +143,7 @@ def expence_apply_list(request):
     context['expence'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
 
     if request.method == 'GET':
         expence_list = ClaimDetails.objects.filter(employee=request.user).order_by('-date')

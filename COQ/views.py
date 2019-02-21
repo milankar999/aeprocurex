@@ -16,6 +16,7 @@ def coq_pending_list(request):
     context['COQ'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == "GET":
@@ -37,6 +38,7 @@ def coq_pending_details(request,rfp_no=None):
     context['COQ'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == "GET":
@@ -153,6 +155,7 @@ def coq_price_select(request,rfp_no=None,sourcing_id=None):
     context['COQ'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method=="POST":
@@ -170,6 +173,7 @@ def auto_coq(request,rfp_no=None):
     context['COQ'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method=="POST":
@@ -187,6 +191,7 @@ def reset_coq(request,rfp_no=None):
     context['COQ'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method=="POST":
@@ -203,6 +208,7 @@ def resourcing(request,rfp_no=None,quotation_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == 'POST':

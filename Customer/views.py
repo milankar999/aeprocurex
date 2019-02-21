@@ -22,6 +22,7 @@ def customers(request):
         context['CustomerList'] = customer
         state = StateList.objects.all()
         context['StateList'] = state
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         
         if type == 'CRM':
                 return render(request,"CRM/Customer/customer.html",context)
@@ -56,6 +57,7 @@ def customers(request):
         if cust:
                 u = User.objects.get(username=request.user)
                 type = u.profile.type
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
                 customer = CustomerProfile.objects.all()
                 context['CustomerList'] = customer
                 state = StateList.objects.all()
@@ -68,6 +70,7 @@ def customers(request):
         else:
                 u = User.objects.get(username=request.user)
                 type = u.profile.type
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
                 customer = CustomerProfile.objects.all()
                 context['CustomerList'] = customer
                 state = StateList.objects.all()
@@ -85,6 +88,7 @@ def customer_details(request, id=None):
     if request.method == "GET":
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         customer = CustomerProfile.objects.get(id=id)
         context['Customer'] = customer
         
@@ -100,6 +104,7 @@ def customer_edit(request, id=None):
     if request.method == "GET":
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         customer = CustomerProfile.objects.get(id=id)
         context['Customer'] = customer
         state = StateList.objects.all()
@@ -137,6 +142,7 @@ def customer_edit(request, id=None):
         
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         customer = CustomerProfile.objects.get(id=id)
         context['Customer'] = customer
         state = StateList.objects.all()
@@ -153,6 +159,7 @@ def contact_person(request,id=None):
     if request.method == "GET":
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         ContactPerson = CustomerContactPerson.objects.filter(customer_name__pk=id)
         context['ContactPerson'] = ContactPerson
         customer = CustomerProfile.objects.get(id=id)
@@ -177,6 +184,7 @@ def contact_person(request,id=None):
 
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         ContactPerson = CustomerContactPerson.objects.filter(customer_name__pk=id)
         context['ContactPerson'] = ContactPerson
         customer = CustomerProfile.objects.get(id=id)
@@ -193,6 +201,7 @@ def contact_person_edit(request,cust_id=None,person_id=None):
 
     if request.method == "GET":
         u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         type = u.profile.type
         ContactPerson = CustomerContactPerson.objects.get(id=person_id)
         context['ContactPerson'] = ContactPerson
@@ -230,6 +239,7 @@ def enduser(request,id=None):
 
     if request.method == "GET":
         u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         type = u.profile.type
         enduser = EndUser.objects.filter(customer_name__pk=id)
         context['EndUser'] = enduser
@@ -254,6 +264,7 @@ def enduser(request,id=None):
                 context['message_type'] = 'danger'
 
         u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         type = u.profile.type
         user = EndUser.objects.filter(customer_name__pk=id)
         context['EndUser'] = user
@@ -272,6 +283,7 @@ def enduser_edit(request,cust_id=None,enduser_id=None):
     if request.method == "GET":
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         enduser = EndUser.objects.get(id=enduser_id)
         context['EndUser'] = enduser
 
@@ -295,6 +307,7 @@ def enduser_edit(request,cust_id=None,enduser_id=None):
 
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         enduser = EndUser.objects.get(id=enduser_id)
         context['EndUser'] = enduser 
 

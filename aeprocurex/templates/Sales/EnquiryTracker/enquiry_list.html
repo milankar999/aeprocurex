@@ -9,6 +9,7 @@
                       <thead>
                         <tr>
                           <th></th>
+                          <th>SL #</th>
                           <th>Enquiry Status</th>
                           <th>RFP No</th>
                           <th>Date</th>
@@ -25,9 +26,37 @@
                           {% for enquiry in enquiry_list %}
                             <tr>
                                 <td>
-                                   <a href="#" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                   <a href="/enquiry_tracker/rfp/{{enquiry.rfp_no}}/lineitems/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
                                 </td>
-                                <td>{{enquiry.enquiry_status}}</td>
+                                <td>{{forloop.counter}}</td>
+
+
+                                {% if enquiry.enquiry_status == 'Approved' %}
+                                <td>Sourcing Pending</td>
+
+                                {% elif enquiry.enquiry_status == '' %}
+                                <td>Creation In Progress</td>
+                                
+                                {% elif enquiry.enquiry_status == 'Created' %}
+                                <td>Waiting For Approval</td>
+                                
+                                {% elif enquiry.enquiry_status == 'Rejected' %}
+                                <td>Rejected</td>
+
+                                {% elif enquiry.enquiry_status == 'Sourcing_Completed' %}
+                                <td>Quotation Pending</td>
+
+                                {% elif enquiry.enquiry_status == 'COQ Done' %}
+                                <td>Quotatio Pending</td>
+            
+                                {% elif enquiry.enquiry_status == 'Quoted' %}
+                                <td>Quoted</td>
+
+                                {% else %}
+                                <td>Closed</td>
+                                {% endif %}
+                                
+                                
                                 <td>{{enquiry.rfp_no}}</td>
                                 <td>{{enquiry.rfp_creation_details__creation_date}}</td>
                                 <td>{{enquiry.customer__name}}</td>

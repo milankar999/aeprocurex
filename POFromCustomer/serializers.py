@@ -169,6 +169,27 @@ class CPOSelectedProductListSerializer(serializers.ModelSerializer):
             'unit_price'
         ]
 
+#Add new CPO LIneitem
+class CPONewProductListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CPOLineitem
+        fields = [
+            'product_title',
+            'description',
+            'model',
+            'brand',
+            'product_code',
+            'part_no',
+            'pack_size',
+            'hsn_code',
+            'gst',
+            'quantity',
+            'uom',
+            'unit_price'
+        ]
+
+
 class CPOSelectedProductEditSerializer(serializers.ModelSerializer):
 
     class Meta:

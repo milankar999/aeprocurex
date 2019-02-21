@@ -241,6 +241,7 @@ class CPOQuotationProductSelectedView(APIView):
                 try :
                         cpo = CustomerPO.objects.get(id=cpo_id)
                         for item in request.data['quotation_lineitems']:
+                                print(item)
                                 
                                 quotation_lineitem_obj = QuotationLineitem.objects.get(id = item)
                                 CPOLineitem.objects.create(
@@ -278,6 +279,28 @@ class CPOSelectedProductListView(generics.GenericAPIView,
 
         def get(self, request, cpo_id = None):
                 return self.list(request)
+
+#Add New Lineitem
+class CPOAddNewItemView(generics.GenericAPIView,
+                                mixins.ListModelMixin,
+                                mixins.CreateModelMixin,
+                                ):
+        serializer_class = CPONewProductListSerializer
+        lookup_field = 'id'
+
+        queryset = CPOLineitem.objects.all()
+
+        #Check Authentications
+        authentication_classes=[TokenAuthentication, SessionAuthentication]
+        permission_classes = [IsAuthenticated,]
+
+        def post(self,request,cpo_id=None,id=None):
+                return self.create(request)
+
+        def perform_create(self,serializer):
+                cpo = CustomerPO.objects.get(id=self.kwargs['cpo_id'])
+                serializer.save(cpo=cpo)
+
 
 
 #Edit Selected Lineitem

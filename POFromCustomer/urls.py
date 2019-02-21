@@ -15,6 +15,7 @@ urlpatterns = [
     path('customer/<cpo_id>/quotation_product_list/',CPOQuotationProductListView.as_view()),
     path('customer/<cpo_id>/quotation_product_selected/',CPOQuotationProductSelectedView.as_view()),
     path('customer/<cpo_id>/selected_product_list/',CPOSelectedProductListView.as_view()),
+    path('customer/<cpo_id>/add_new_item/',CPOAddNewItemView.as_view()),
     path('customer/<cpo_id>/selected_product/<id>/edit/',CPOSelectedProductEditView.as_view()),
     path('customer/<cpo_id>/launch/',CPOlaunch.as_view()),
 

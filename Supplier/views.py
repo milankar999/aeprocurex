@@ -15,6 +15,7 @@ def suppliers(request):
     if request.method == "GET":
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         supplier = SupplierProfile.objects.all()
         context['SupplierList'] = supplier
         state = StateList.objects.all()
@@ -45,6 +46,7 @@ def suppliers(request):
         if ven:
                 u = User.objects.get(username=request.user)
                 type = u.profile.type
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
                 supplier = SupplierProfile.objects.all()
                 context['SupplierList'] = supplier
                 state = StateList.objects.all()
@@ -57,6 +59,7 @@ def suppliers(request):
         else:
                 u = User.objects.get(username=request.user)
                 type = u.profile.type
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
                 supplier = SupplierProfile.objects.all()
                 context['SupplierList'] = supplier
                 state = StateList.objects.all()
@@ -74,6 +77,7 @@ def supplier_details(request, id=None):
     if request.method == "GET":
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         supplier = SupplierProfile.objects.get(id=id)
         context['Supplier'] = supplier
         
@@ -89,6 +93,7 @@ def supplier_edit(request, id=None):
     if request.method == "GET":
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         supplier = SupplierProfile.objects.get(id=id)
         context['Supplier'] = supplier
         state = StateList.objects.all()
@@ -133,6 +138,7 @@ def supplier_edit(request, id=None):
         
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         supplier = SupplierProfile.objects.get(id=id)
         context['Supplier'] = supplier
         state = StateList.objects.all()
@@ -149,6 +155,7 @@ def supplier_contact_person(request,id=None):
     if request.method == "GET":
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         ContactPerson = SupplierContactPerson.objects.filter(supplier_name__pk=id)
         context['ContactPerson'] = ContactPerson
         supplier = SupplierProfile.objects.get(id=id)
@@ -173,6 +180,7 @@ def supplier_contact_person(request,id=None):
 
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         ContactPerson = SupplierContactPerson.objects.filter(supplier_name__pk=id)
         context['ContactPerson'] = ContactPerson
         supplier = SupplierProfile.objects.get(id=id)
@@ -191,6 +199,7 @@ def supplier_contact_person_edit(request,supp_id=None,person_id=None):
     if request.method == "GET":
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         ContactPerson = SupplierContactPerson.objects.get(id=person_id)
         context['ContactPerson'] = ContactPerson
 
@@ -213,6 +222,7 @@ def supplier_contact_person_edit(request,supp_id=None,person_id=None):
 
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         ContactPerson = SupplierContactPerson.objects.get(id=person_id)
         context['ContactPerson'] = ContactPerson
 

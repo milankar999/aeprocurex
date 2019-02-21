@@ -18,6 +18,7 @@ def enquiry_list(request):
     user = User.objects.get(username=request.user)
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
 
     if type == 'Sourcing':
             if request.method == "GET":
@@ -41,6 +42,7 @@ def enquiry_lineitems(request,rfp_no=None):
     user = User.objects.get(username=request.user)
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
 
     if type == 'Sourcing':
             if request.method == "GET":
@@ -162,6 +164,7 @@ def enquiry_lineitems_edit(request, rfp_no=None, lineitem_id=None):
     user = User.objects.get(username=request.user)
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     
     if request.method == "GET":        
         context['rfp_no'] = rfp_no

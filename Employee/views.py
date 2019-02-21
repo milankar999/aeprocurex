@@ -10,14 +10,16 @@ def user_login(request):
         try:
                 u = User.objects.get(username=request.user)
                 type = u.profile.type
+                context = {}
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
                 if type == 'Sales':
-                        return render(request,"Sales/sales_home.html")
+                        return render(request,"Sales/sales_home.html",context)
 
                 if type == 'Sourcing':
-                        return render(request,"Sourcing/Sourcing_home.html")
+                        return render(request,"Sourcing/Sourcing_home.html",context)
 
                 if type == 'CRM':
-                        return render(request,"CRM/crm_home.html")
+                        return render(request,"CRM/crm_home.html",context)
         except:
                 context={}
                 if request.method=="POST":
@@ -42,38 +44,49 @@ def user_logout(request):
 
 @login_required(login_url="/employee/login/")
 def success(request):
+    context={}
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     
     if type == 'Sales':
-        return render(request,"Sales/sales_home.html")
+        return render(request,"Sales/sales_home.html",context)
 
     if type == 'Sourcing':
-        return render(request,"Sourcing/Sourcing_home.html")
+        return render(request,"Sourcing/Sourcing_home.html",context)
 
     if type == 'CRM':
-        return render(request,"CRM/crm_home.html")
+        return render(request,"CRM/crm_home.html",context)
 
 @login_required(login_url="/employee/login/")
 def crm_home_load(request):
     u = User.objects.get(username=request.user)
     type = u.profile.type
-    if type == 'CRM':
-        return render(request,"CRM/crm_home.html")
+    context={}
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+    if type == 'CRM':   
+        return render(request,"CRM/crm_home.html",context)
 
 @login_required(login_url="/employee/login/")
 def sourcing_home_load(request):
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context={}
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
+
     if type == 'Sourcing':
-        return render(request,"Employee/sourcing_home.html")
+        return render(request,"Employee/sourcing_home.html",context)
 
 @login_required(login_url="/employee/login/")
 def sales_home_load(request):
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context={}
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
+
     if type == 'Sales':
-        return render(request,"Employee/sales_home.html")
+        return render(request,"Employee/sales_home.html",context)
 
 
 #API Views

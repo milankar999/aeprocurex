@@ -22,6 +22,7 @@ def rfp_pending_list(request):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if type == 'Sourcing':
                 if request.method == "GET":
@@ -36,6 +37,7 @@ def rfp_pending_lineitems(request,rfp_no=None):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if type == 'Sourcing':
                 if request.method == "GET":
@@ -51,6 +53,7 @@ def lineitem_edit_tax(request,rfp_no=None,lineitem_id=None):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if type == 'Sourcing':
                 if request.method == "GET":
@@ -74,6 +77,7 @@ def vendor_selection(request,rfp_no=None):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if type == 'Sourcing':
                 if request.method == "GET":
@@ -95,6 +99,7 @@ def new_vendor(request,rfp_no=None):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if type == 'Sourcing':
                 if request.method == "POST":
@@ -130,6 +135,7 @@ def vendor_contact_person_selection(request,rfp_no=None,vendor_id=None):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         context['rfp_no'] = rfp_no
 
         if type == 'Sourcing':
@@ -160,6 +166,7 @@ def offer_reference(request,rfp_no=None,vendor_id=None,contact_person_id=None):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         context['rfp_no'] = rfp_no
         context['supplier_id'] = vendor_id
         context['contact_person_id'] = contact_person_id
@@ -180,6 +187,7 @@ def single_price_request(request,rfp_no=None):
         context['sourcing'] = 'active'
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         type = u.profile.type
 
         if type == 'Sourcing':
@@ -304,6 +312,7 @@ def single_vendor_approval_list(request):
     context['sourcing'] = 'active'
     user = User.objects.get(username=request.user)
     u = User.objects.get(username=request.user)
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     type = u.profile.type
 
     if type == 'Sales':
@@ -328,6 +337,7 @@ def single_vendor_approval_details(request,rfp_no=None):
     context['sourcing'] = 'active'
     user = User.objects.get(username=request.user)
     u = User.objects.get(username=request.user)
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     type = u.profile.type
 
     if type == 'Sales':
@@ -345,6 +355,7 @@ def single_vendor_approve(request,rfp_no=None):
         context['sourcing'] = 'active'
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         type = u.profile.type
 
         if type == 'Sales':
@@ -454,6 +465,7 @@ def single_vendor_reject(request,rfp_no=None):
         context['sourcing'] = 'active'
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         type = u.profile.type
 
         if type == 'Sales':
@@ -564,6 +576,7 @@ def single_vendor_history(request):
         context['sourcing'] = 'active'
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         type = u.profile.type
 
         if type == 'Sales':
@@ -590,6 +603,7 @@ def vendor_quotation_edit(request,rfp_no=None,sourcing_id=None):
         context['sourcing'] = 'active'
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         type = u.profile.type
 
         if type == 'Sourcing':
@@ -610,6 +624,7 @@ def vendor_quotation_price_upload(request,rfp_no=None,sourcing_id=None):
         context['sourcing'] = 'active'
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         type = u.profile.type
 
         if type == 'Sourcing':
@@ -677,6 +692,7 @@ def vendor_quotation_view(request,rfp_no=None,sourcing_id=None):
         context['sourcing'] = 'active'
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         type = u.profile.type
 
         if type == 'Sourcing':
@@ -692,6 +708,7 @@ def vendor_quotation_delete(request,rfp_no=None,sourcing_id=None):
         context['sourcing'] = 'active'
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         type = u.profile.type
 
         if type == 'Sourcing':
@@ -711,6 +728,7 @@ def vendor_quotation_price_add(request,rfp_no=None,sourcing_id=None,lineitem_id=
         context['sourcing'] = 'active'
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         type = u.profile.type
 
         if type == 'Sourcing':
@@ -763,6 +781,7 @@ def vendor_quotation_price_edit(request,rfp_no=None,sourcing_id=None,price_id=No
         context['sourcing'] = 'active'
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         type = u.profile.type
 
         if type == 'Sourcing':
@@ -815,6 +834,7 @@ def vendor_quotation_price_delete(request,rfp_no=None,sourcing_id=None,price_id=
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if type == 'Sourcing':
                 if request.method == "GET":
@@ -835,6 +855,7 @@ def round2(request,rfp_no=None,sourcing_id=None,price_id=None):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if type == 'Sourcing':
                 if request.method == "GET":
@@ -857,6 +878,7 @@ def sourcing_completed(request,rfp_no=None):
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
         type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if type == 'Sourcing':
                 if request.method == "POST":
@@ -868,6 +890,17 @@ def sourcing_completed(request,rfp_no=None):
 
                         #Temporary line
                         sva = 'Yes'
+                        #Temporary Line Completed
+
+                        #Checking GST & HSN
+                        
+                        rfp_lineitem = RFPLineitem.objects.filter(rfp_no=RFP.objects.get(rfp_no=rfp_no))
+                        for item in rfp_lineitem:
+
+                                if item.gst < 1  or item.hsn_code == '':
+                                        context['error'] = "HSN or GST % Missing"
+                                        return render(request,"Sourcing/Sourcing/error.html",context)
+                        #end of Checking GST / HSN
 
                         supplier_quotation_count = Sourcing.objects.filter(rfp__rfp_no=rfp_no).count()
                         if supplier_quotation_count < 2: 

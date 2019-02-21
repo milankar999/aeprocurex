@@ -23,6 +23,7 @@ def enquiry_list(request):
     context['enquiry_tracker'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if request.method == "GET":
         enquiry = RFP.objects.all().values(
@@ -41,3 +42,64 @@ def enquiry_list(request):
 
         if type == 'Sales':
             return render(request,"Sales/EnquiryTracker/enquiry_list.html",context)
+
+@login_required(login_url="/employee/login/")
+def lineitem_list(request):
+    context={}
+    context['enquiry_tracker'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+    if request.method == "GET":
+        lineitem_list = RFPLineitem.objects.all().values(
+            'rfp_no__rfp_no',
+            'rfp_no__rfp_creation_details__creation_date',
+            'rfp_no__rfp_type',
+            'rfp_no__enquiry_status',
+            'lineitem_id',
+            'product_title',
+            'description',
+            'model',
+            'brand',
+            'product_code',
+            'part_no',
+            'quantity',
+            'uom',
+            'rfp_no__customer__name',
+            'rfp_no__customer__location',
+            'rfp_no__rfp_keyaccounts_details__key_accounts_manager__username').order_by('-rfp_no__rfp_creation_details__creation_date')
+        
+
+        context['lineitem_list'] = lineitem_list
+
+        if type == 'Sales':
+            return render(request,"Sales/EnquiryTracker/lineitem_list.html",context)
+
+#RFP Details
+@login_required(login_url="/employee/login/")
+def rfp_lineitem(request,rfp_no=None):
+    context={}
+    context['enquiry_tracker'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+    if request.method == "GET":
+        rfp_lineitems = RFPLineitem.objects.filter(rfp_no=RFP.objects.get(rfp_no=rfp_no)).values(
+            'product_title',
+            'description',
+            'model',
+            'brand',
+            'product_code',
+            'part_no',
+            'category',
+            'hsn_code',
+            'gst',
+            'uom',
+            'quantity')
+        context['rfp_lineitems'] = rfp_lineitems
+
+        if type == 'Sales':
+            return render(request,"Sales/EnquiryTracker/rfp_lineitems.html",context)
+

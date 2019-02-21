@@ -30,6 +30,7 @@ def generate_quotation_list(request):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == "GET":
@@ -51,6 +52,7 @@ def generate_quotation_lineitem(request,rfp_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == "GET":
@@ -104,6 +106,7 @@ def generate_quotation_resourcing(request,rfp_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == 'POST':
@@ -118,6 +121,7 @@ def generate_quotation_recoq(request,rfp_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == 'POST':
@@ -133,6 +137,7 @@ def generate_quotation_lineitem_edit(request,rfp_no=None,item_id=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == "GET":
@@ -167,6 +172,7 @@ def generate_quotation_lineitem_delete(request,rfp_no=None,item_id=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     context['rfp_no'] = rfp_no
         
     if type == 'Sales':
@@ -186,6 +192,7 @@ def generate_quotation_price_fixing(request,rfp_no=None,item_id=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     context['rfp_no'] = rfp_no
         
     if type == 'Sales':
@@ -210,6 +217,7 @@ def generate_quotation_lineitem_add(request,rfp_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     context['rfp_no'] = rfp_no
         
     if type == 'Sales':
@@ -244,6 +252,7 @@ def generate_quotation_fill_margin(request,rfp_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     context['rfp_no'] = rfp_no
         
     if type == 'Sales':
@@ -262,6 +271,7 @@ def generate_quotation_fill_leadtime(request,rfp_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     context['rfp_no'] = rfp_no
         
     if type == 'Sales':
@@ -280,6 +290,7 @@ def generate_quotation_fill_brand(request,rfp_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     context['rfp_no'] = rfp_no
         
     if type == 'Sales':
@@ -298,6 +309,7 @@ def generate_quotation_fill_moq(request,rfp_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     context['rfp_no'] = rfp_no
         
     if type == 'Sales':
@@ -316,6 +328,7 @@ def generate_quotation_process(request,rfp_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     context['rfp_no'] = rfp_no
         
     if type == 'Sales':
@@ -326,6 +339,13 @@ def generate_quotation_process(request,rfp_no=None):
             if item_number == 0:
                 context['error'] = 'No Item found'
                 return render(request,"Sales/Quotation/error.html",context)
+
+            #GST Checking
+            coq_item = COQLineitem.objects.filter(rfp_no=rfp_no)
+            for item in coq_item:
+                if item.gst < 1:
+                    context['error'] = 'Empty GST Found'
+                    return render(request,"Sales/Quotation/error.html",context)
             
             #Pack Size Check
             pack_size_count = COQLineitem.objects.filter(rfp_no=rfp_no,pack_size='').count()
@@ -490,6 +510,7 @@ def generate_revised_existing(request,rfp_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     context['rfp_no'] = rfp_no
         
     if type == 'Sales':
@@ -506,6 +527,7 @@ def generate_revised_new(request,rfp_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     context['rfp_no'] = rfp_no
         
     if type == 'Sales':
@@ -554,6 +576,7 @@ def generate_quotation_edit_customer(request,rfp_no=None,cust_id=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     context['rfp_no'] = rfp_no
         
     if type == 'Sales':
@@ -596,6 +619,7 @@ def generate_quotation_column_selection(request,rfp_no=None,quotation_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     context['rfp_no'] = rfp_no
         
     if type == 'Sales':
@@ -1289,6 +1313,7 @@ def download_quotation(request,rfp_no=None,quotation_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == "GET":
@@ -1301,6 +1326,7 @@ def quoted_list(request):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == "GET":
@@ -1323,6 +1349,7 @@ def quoted_quotation_list(request,rfp_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == "GET":
@@ -1345,6 +1372,7 @@ def quotation_lineitems(request,rfp_no=None,quotation_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == "GET":
@@ -1352,7 +1380,7 @@ def quotation_lineitems(request,rfp_no=None,quotation_no=None):
             quotation_lineitem = QuotationLineitem.objects.filter(quotation = quotation_obj)
             context['quotation_lineitem'] = quotation_lineitem
             context['quotation_no'] = quotation_no
-        return render(request,"Sales/Quotation/quoted_lineitems.html",context)
+            return render(request,"Sales/Quotation/quoted_lineitems.html",context)
 
 @login_required(login_url="/employee/login/")
 def copy_quotation(request,rfp_no=None,quotation_no=None):
@@ -1360,6 +1388,7 @@ def copy_quotation(request,rfp_no=None,quotation_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == 'GET':
@@ -1394,6 +1423,7 @@ def resourcing(request,rfp_no=None,quotation_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == 'POST':
@@ -1408,6 +1438,7 @@ def re_coq(request,rfp_no=None,quotation_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == 'POST':
@@ -1422,6 +1453,7 @@ def revised_quotation(request,rfp_no=None,quotation_no=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == 'POST':
@@ -1436,6 +1468,7 @@ def immediate_quotation_selection(request):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == 'GET':
@@ -1447,6 +1480,7 @@ def immediate_quotation_customer_selection(request,quotation_type=None):
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == 'GET':
@@ -1494,6 +1528,7 @@ def immediate_quotation_cperson_selection(request,quotation_type=None,cust_id=No
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if type == 'Sales':
         if request.method == 'GET':
@@ -1532,6 +1567,7 @@ def immediate_quotation_enduser_selection(request,quotation_type=None,cust_id=No
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     context['cust_id'] = cust_id
     context['contact_person_id'] = contact_person_id
     context['quotation_type'] = quotation_type
@@ -1569,6 +1605,7 @@ def immediate_quotation_process(request,quotation_type=None,cust_id=None,contact
     context['quotation'] = 'active'
     u = User.objects.get(username=request.user)
     type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
     context['cust_id'] = cust_id
     context['contact_person_id'] = contact_person_id
     context['quotation_type'] = quotation_type
@@ -1606,6 +1643,7 @@ def immediate_quotation_product_selection(request,rfp_no=None):
     if request.method == "GET":
         user = User.objects.get(username=request.user)
         u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
         type = u.profile.type
         context['rfp_no'] = rfp_no
 
