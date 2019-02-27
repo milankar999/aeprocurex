@@ -22,6 +22,7 @@ def coq_pending_list(request):
         if request.method == "GET":
             rfp = RFP.objects.filter(opportunity_status='Open',enquiry_status='Sourcing_Completed').values(
                             'rfp_no',
+                            'rfp_type',
                             'customer__name',
                             'customer__location',
                             'customer_contact_person__name',

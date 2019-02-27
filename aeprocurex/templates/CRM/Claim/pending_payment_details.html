@@ -1,0 +1,80 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="container">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+        <H1>Panding Payment Details for - {{user}}</H1>
+        <div class="row justify-content-center">
+            <!--data table-->
+            <div class="table-responsive">          
+                <table id="lineitems" class="table table-hover table-bordered table-sm" width="100%">
+                  <thead>
+                    <tr>
+                        <th></th>
+                        <th>Date</th>
+                        <th>Claim Type</th>
+                        <th>Description</th>
+                        <th>Basic Amount</th>
+                        <th>Applicable GST Amount</th>
+                        <th>Document</th>
+                    </tr>
+                  </thead>
+                  <tbody>   
+                      {% for item in expence_list %}
+                        <tr>                            
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{item.date}}</td>
+                            <td>{{item.claim_type}}</td>
+                            <td>{{item.description}}</td>
+                            <td>{{item.total_basic_amount}}</td>
+                            <td>{{item.applicable_gst_value}}</td>
+                            <td><a href="/api/media/{{item.document}}" target="-blank">Click Here</a></td>
+                        </tr>
+                      {% empty %}
+                        <p>No Item Found</p>
+                      {% endfor %}
+                  </tbody>
+                </table>
+        </div>
+        <hr>
+            <!--End of data table-->
+              <button class="btn btn-info pull-right"  data-toggle="modal" data-target="#MarkPayment">Mark as Payment Done</button>
+            
+        </div>
+         <!-- Modal content-->
+         <div class="modal fade" id="MarkPayment" role="dialog">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Warning  <span class="glyphicon glyphicon-fire"></span></h4>
+              </div>
+              <div class="modal-body">
+                <p>Do you really want to mark this as Payment Done ?</p>
+              </div>
+              <div class="modal-footer">
+                <form method="POST" action="/expences/pending_payment_list/{{username}}/payment_completion/">
+                  {% csrf_token %}
+                  <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                  <input type="submit" class="btn btn-success" value="Confirm">
+                </form>
+              </div>
+            </div>
+            
+          </div>
+         </div>  
+        <!--ENd Of Model-->
+</div>
+<script type="text/javascript">
+    $(document).ready( function () {
+        $('#lineitems').DataTable();
+    } );
+    </script>   
+{% endblock content %}

@@ -36,6 +36,7 @@ def generate_quotation_list(request):
         if request.method == "GET":
             rfp = RFP.objects.filter(opportunity_status='Open',enquiry_status='COQ Done').values(
                             'rfp_no',
+                            'rfp_type',
                             'customer__name',
                             'customer__location',
                             'customer_contact_person__name',
@@ -1333,6 +1334,7 @@ def quoted_list(request):
             quoted_list = QuotationTracker.objects.filter(rfp__opportunity_status='Open',status='Generated').values(
                             'quotation_no',
                             'rfp__rfp_no',
+                            'rfp__rfp_type',
                             'customer__name',
                             'customer__location',
                             'customer_contact_person__name',

@@ -23,11 +23,19 @@
     <ul class="nav navbar-nav">
       <li class="{{expence}}" role="presentation" class="dropdown">
             <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-                Expence <span class="caret"></span>
+                Expense <span class="caret"></span>
               </a>
               <ul class="dropdown-menu">
                 <li><a href="/expences/new_expence/apply/">New Expense</a></li>
                 <li><a href="/expences/apply_list/">Expense List</a></li>
+                <li>&nbsp;</li>
+                <li><a href="/expences/1st_stage/approved_list/">(L1) Approved Expense List</a></li>
+                <li><a href="/expences/1st_stage/rejected_list/">(L1) Rejected Expense List</a></li>
+                <li>&nbsp;</li>
+                <li><a href="/expences/2nd_stage/approved_list/">(L2) Approved Expense List</a></li>
+                <li><a href="/expences/2nd_stage/rejected_list/">(L2) Rejected Expense List</a></li>
+                <hr>
+                <li><a href="/expences/pending_payment_list/">Pending Payment List</a></li>
               </ul>
       </li>
       <li class="{{customer}}"><a href="/customer/">Customer</a></li>
@@ -40,7 +48,17 @@
                 <li><a href="/rfp/in_progress/list/">Creation in Progress</a></li>
                 <li><a href="/rfp/rejected/list/">Rectify RFP</a></li>
             </ul>
-        </li>
+      </li>
+      <li class="{{po}}" role="presentation" class="dropdown">
+          <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            PO <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+              <li><a href="/po_from_customer/create/customer_selection/">Received New</a></li>
+              <li><a href="/rfp/in_progress/list/">Creation in Progress</a></li>
+              <li><a href="/rfp/rejected/list/">Rectify RFP</a></li>
+          </ul>
+      </li>
       <li class="{{quotation}}"><a href="#">Quotation</a></li>
     </ul>
     <button type="button" class="btn btn-danger navbar-btn navbar-right" data-toggle="modal" data-target="#LogoutModal">{{login_user_name}}  <span class="glyphicon glyphicon-log-in"></span></button>

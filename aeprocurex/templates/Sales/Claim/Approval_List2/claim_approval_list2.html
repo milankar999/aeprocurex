@@ -1,0 +1,81 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="container">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+            <!--data table-->
+            <h1>Pending Approval List</h1>
+            <form method="POST" action="/expences/2nd_stage/approve_all/">
+              {% csrf_token %}
+              <input type="submit" class="btn btn-sm btn-success pull-right" value="Approve All"  />
+            </form>
+            <div class="table-responsive">  
+              {% for date in date_object %}
+                <label>{{date.date}}</label>
+                  {% for user in user_date_object %}
+                    {% if user.date == date.date %}
+                    <div class="card-header p-0">
+                        <div class="bg-info text-white text-center py-2">
+                            <h1>{{user.employee__first_name}}&nbsp;{{user.employee__last_name}}</h1>
+                        </div>
+                    </div>
+                    <!--Claim items-->
+                    <table id="lineitems" class="table table-hover table-bordered table-sm" width="100%">
+                        <thead>
+                          <tr>
+                            <th></th>
+                            <th>Claim Type</th>
+                            <th>Description</th>
+                            <th>Basic Amount</th>
+                            <th>Applicable GST Amount</th>
+                            <th>Document</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody>   
+                          {% for claim in expense_list %}
+                            {% if claim.date == user.date %}
+                              {% if claim.employee__username == user.employee__username %}
+                              <tr>
+                                <td>
+                                    <form method="POST" action="/expences/2nd_stage/{{claim.id}}/approve/">
+                                      {% csrf_token %}
+                                      <input type="submit" class="btn btn-xs btn-success" value="Approve"  />
+                                    </form>
+                                </td>
+                                <td>{{claim.claim_type}}</td>
+                                <td>{{claim.description}}</td>
+                                <td>{{claim.total_basic_amount}}</td>
+                                <td>{{claim.applicable_gst_value}}</td>
+                                <td><a href="/api/media/{{claim.document}}" target="-blank">Click Here</a></td>
+                                <td>
+                                    <form method="POST" action="/expences/2nd_stage/{{claim.id}}/reject/">
+                                      {% csrf_token %}
+                                      <input type="submit" class="btn btn-xs btn-danger pull-right" value="Reject"  />
+                                    </form>
+                                </td>
+                              </tr>
+                              {% endif %}
+                            {% endif %}
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    <!--Claim Items End-->
+                    {% endif %}
+                  {% endfor %}
+              <hr>
+              {% endfor %}
+            </div>
+            <!--End of data table-->
+        </div>
+</div>  
+{% endblock content %}

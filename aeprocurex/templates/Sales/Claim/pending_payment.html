@@ -1,0 +1,52 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="container">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+        <H1>Panding Payment List</H1>
+        <div class="row justify-content-center">
+            <!--data table-->
+            <div class="table-responsive">          
+                <table id="lineitems" class="table table-hover table-bordered table-sm" width="100%">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Employee</th>
+                      <th>Basic Value</th>
+                      <th>GST Value</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>   
+                      {% for payment in payment_list %}
+                        <tr>                            
+                            <td>
+                                <a href="{{payment.employee__username}}/details/" data-toggle="tooltip" data-placement="top" title="View Details"> <span class="glyphicon glyphicon-eye-open" style="color: blue"></span></a>
+                            </td>
+                            <td>{{payment.employee__first_name}}&nbsp;{{payment.employee__last_name}} </td>
+                            <td>{{payment.total_basic_amount__sum}}</td>
+                            <td>{{payment.applicable_gst_value__sum}}</td>
+                            <td>{{payment.total_basic_amount__sum|add:payment.applicable_gst_value__sum}}</td>
+                        </tr>
+                      {% empty %}
+                        <p>No Item Found</p>
+                      {% endfor %}
+                  </tbody>
+                </table>
+        </div>
+            <!--End of data table-->
+        </div>
+</div>
+<script type="text/javascript">
+    $(document).ready( function () {
+        $('#lineitems').DataTable();
+    } );
+    </script>   
+{% endblock content %}

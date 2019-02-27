@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>CRM Home</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+</head>
+<body>
+
+
+<div class="container">
+
+        <h2>Quotation Details for QUotation No - {{quotation_no}}</h2>    
+
+       <div class="table-responsive">          
+               <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                 <thead>
+                   <tr>
+                     <th>SL #</th>
+                     <th>Product</th>
+                     <th>Description</th>
+                     <th>Model</th>
+                     <th>Brand</th>
+                     <th>Part No</th>
+                     <th>Product Code</th>
+                     <th>Quantity</th>
+                     <th>UOM</th>
+                     <th>Unit Price</th>
+                     <th>HSN Code</th>
+                     <th>GST</th>
+                   </tr>
+                 </thead>
+                 <tbody>   
+                     {% for item in quotation_lineitem %}
+                       <tr>
+                          <td>
+                            {{forloop.counter}} 
+                           </td>
+                           <td>{{item.product_title}}</td>>
+                           <td>{{item.description}}</td>>
+                           <td>{{item.model}}</td>>
+                           <td>{{item.brand}}</td>>
+                           <td>{{item.part_number}}</td>>
+                           <td>{{item.product_code}}</td>>
+                           <td>{{item.quantity}}</td>>
+                           <td>{{item.uom}}</td>>
+                           <td>{{item.basic_value}}</td>>
+                           <td>{{item.hsn_code}}</td>>
+                           <td>{{item.gst}}</td>>
+                       </tr>
+                     {% empty %}
+                       <p>No Item Found</p>
+                     {% endfor %}
+                 </tbody>
+               </table>
+       </div>
+   </div>
+   <script type="text/javascript">
+       $(document).ready( function () {
+           $('#dcustomer').DataTable();
+       } );
+   </script> 
+   <style>
+    html *
+    {
+       font-size: 12px !important;
+    }
+   </style>
+  </body>
+</html>

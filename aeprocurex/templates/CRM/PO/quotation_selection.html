@@ -1,0 +1,82 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="container">
+
+        <h2>Please Select The Quotation for {{CustomerName}}    
+
+       <div class="table-responsive">          
+               <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                 <thead>
+                   <tr>
+                     <th></th>
+                     <th>Quotation Number</th>
+                     <th>Customer</th>
+                     <th>Location</th>
+                     <th>Quotation Date</th>
+                     <th>Quotation Details</th>
+                   </tr>
+                 </thead>
+                 <tbody>   
+                     {% for quotation in quotation_list %}
+                       <tr>
+                           <td>
+                              <input type="checkbox" 
+                              name="quotation"
+                              value="{{quotation.quotation_no}}"
+                              change="getCheckedCheckboxesFor('quotation')"
+                              />
+                           </td>
+                           <td>{{quotation.quotation_no}}</td>
+                           <td>{{quotation.customer__name}}</td>
+                           <td>{{quotation.customer__location}}</td>
+                           <td>{{quotation.quotation_date}}</td>
+                           <td>
+                              <a href="/po_from_customer/create/{{quotation.quotation_no}}/details/" data-toggle="tooltip" 
+                              onclick="window.open(
+                              '/po_from_customer/create/{{quotation.quotation_no}}/details/', 
+                              'newwindow', 
+                              'width=0,height=0'); 
+                              return false;" data-placement="top" title="Select this contact person">
+                              <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                           </td>
+                       </tr>
+                     {% empty %}
+                       <p>No End User Found</p>
+                     {% endfor %}
+                 </tbody>
+               </table>
+               <hr>
+               <button class="btn btn-info pull-right" type="button" onclick="getCheckedCheckboxesFor('quotation');" value="Get Values">Select</button>
+       </div>
+   </div>
+   <script type="text/javascript">
+       $(document).ready( function () {
+           $('#dcustomer').DataTable();
+       });
+       function getCheckedCheckboxesFor(checkboxName) {
+            var checkboxes = document.querySelectorAll('input[name="' + checkboxName + '"]:checked'), values = [];
+            Array.prototype.forEach.call(checkboxes, function(el) {
+            values.push(el.value);
+          });
+          if(values.length==0){
+            alert('Minimum one Quotation You Have To Select');
+          }
+          else{
+          //alert(values);
+          $.post(
+            '',
+            data = 
+                  {
+                    'ql' : {values},
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                  },
+                  data_type = 'data/json'
+                )
+          }
+        }
+    </script>      
+
+{% endblock content %}

@@ -31,7 +31,8 @@
                       {% for item in expence_list %}
                         <tr>
                             <td>
-                                <a href="{{item.lineitem_id}}/edit/" data-toggle="tooltip" data-placement="top" title="Edit Tax Details"> <span class="glyphicon glyphicon-edit" style="color: blue"></span></a>
+                                <a href="{{item.id}}/edit/" data-toggle="tooltip" data-placement="top" title="Edit Tax Details"> <span class="glyphicon glyphicon-edit" style="color: blue"></span></a>
+                                <a href="{{item.id}}/delete/" data-toggle="tooltip" data-placement="top" title="Edit Tax Details"> <span class="glyphicon glyphicon-trash" style="color: red"></span></a>
                             </td>
                             <td>{{item.date}}</td>
                             <td>{{item.claim_type}}</td>

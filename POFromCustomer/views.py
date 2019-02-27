@@ -557,3 +557,229 @@ class RejectedCPOResolve(APIView):
                 cpo.status = 'created'
                 cpo.save()
                 return Response({'Message': 'Success'})
+
+
+
+
+
+
+
+
+
+###Without API
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponseRedirect
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from django.urls import reverse
+from Employee.models import *
+from .models import *
+from State.models import *
+from Customer.models import *
+from django.core.mail import send_mail, EmailMessage
+from django.core import mail
+import random
+from django.conf import settings
+from django.db.models import F
+
+#Customer Selection
+@login_required(login_url="/employee/login/")
+def cpo_create_customer_selection(request):
+        context={}
+        context['po'] = 'active'
+
+        if request.method == "GET":
+                u = User.objects.get(username=request.user)
+                type = u.profile.type
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
+                customer = CustomerProfile.objects.all()
+                context['CustomerList'] = customer
+                state = StateList.objects.all()
+                context['StateList'] = state
+        
+                if type == 'CRM':
+                        return render(request,"CRM/PO/customer_selection.html",context)
+
+        if request.method == "POST":
+                user = User.objects.get(username=request.user)
+                data = request.POST
+                customer_id = 'C1' + str(format(CustomerProfile.objects.count() + 1, '04d'))
+                print(customer_id)
+                cust = CustomerProfile.objects.create(id=customer_id,name=data['name'],location=data['location'],code=data['code'],address=data['address'],city=data['city'],state=data['state'],pin=data['pin'],country=data['country'],office_email1=data['officeemail1'],office_email2=data['officeemail2'],office_phone1=data['officephone1'],office_phone2=data['officephone2'],gst_number=data['GSTNo'],vendor_code=data['VendorCode'],payment_term=data['PaymentTerm'],inco_term=data['IncoTerm'],created_by=user)
+                if cust:
+                        u = User.objects.get(username=request.user)
+                        type = u.profile.type
+                        context['login_user_name'] = u.first_name + ' ' + u.last_name
+                        customer = CustomerProfile.objects.all()
+                        context['CustomerList'] = customer
+                        state = StateList.objects.all()
+                        context['StateList'] = state
+                        context['message'] = 'Successfully registered ' + data['name']
+                        context['message_type'] = 'success'
+                        
+                        if type == 'CRM':
+                                return render(request,"CRM/PO/customer_selection.html",context)
+        
+                else:
+                        u = User.objects.get(username=request.user)
+                        type = u.profile.type
+                        context['login_user_name'] = u.first_name + ' ' + u.last_name
+                        customer = CustomerProfile.objects.all()
+                        context['CustomerList'] = customer
+                        state = StateList.objects.all()
+                        context['StateList'] = state
+                        context['message'] = 'Something went wrong'
+                        context['message_type'] = 'danger'
+                        
+                        if type == 'CRM':
+                                return render(request,"CRM/PO/customer_selection.html",context)
+
+#Customer Contact Person / Requester Selection
+@login_required(login_url="/employee/login/")
+def cpo_create_contact_person_selection(request, cust_id=None):
+        context={}
+        context['po'] = 'active'
+
+        if request.method == "GET":
+                user = User.objects.get(username=request.user)
+                u = User.objects.get(username=request.user)
+                type = u.profile.type
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
+                ContactPerson = CustomerContactPerson.objects.filter(customer_name__pk=cust_id)
+                context['ContactPerson'] = ContactPerson
+                customer = CustomerProfile.objects.get(id=cust_id)
+                context['CustomerName'] = customer.name
+                context['CustomerID'] = cust_id
+
+                if type == 'CRM':
+                        return render(request,"CRM/PO/contact_person_selection.html",context)
+
+        if request.method == "POST":
+                user = User.objects.get(username=request.user)
+                data = request.POST
+                customer = CustomerProfile.objects.get(id=cust_id)
+                contactperson_id =  cust_id +'P' + str(CustomerContactPerson.objects.count() + 1)
+                cp = CustomerContactPerson.objects.create(id=contactperson_id,name=data['name'],mobileNo1=data['phone1'],mobileNo2=data['phone2'],email1=data['email1'],email2=data['email2'],customer_name=customer,created_by=user)
+                if cp:
+                        context['message'] = 'Successfully registered ' + data['name']
+                        context['message_type'] = 'success'
+                else:
+                        context['message'] = 'Something went wrong'
+                        context['message_type'] = 'danger'
+      
+                u = User.objects.get(username=request.user)
+                type = u.profile.type
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
+                ContactPerson = CustomerContactPerson.objects.filter(customer_name__pk=cust_id)
+                context['ContactPerson'] = ContactPerson
+                customer = CustomerProfile.objects.get(id=cust_id)
+                context['CustomerName'] = customer.name
+                context['CustomerID'] = cust_id
+        
+                if type == 'CRM':
+                        return render(request,"CRM/PO/contact_person_selection.html",context)
+
+#Receiver Selection
+@login_required(login_url="/employee/login/")
+def cpo_create_receiver_selection(request, cust_id=None,contact_person_id=None):
+        context={}
+        context['po'] = 'active'
+
+        if request.method == "GET":
+                user = User.objects.get(username=request.user)
+                u = User.objects.get(username=request.user)
+                type = u.profile.type
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
+                receiver = DeliveryContactPerson.objects.filter(customer_name__pk=cust_id)
+                context['receiver'] = receiver
+                customer = CustomerProfile.objects.get(id=cust_id)
+                context['CustomerName'] = customer.name
+                context['CustomerID'] = cust_id
+                context['ContactPersonID'] = contact_person_id
+
+                if type == 'CRM':
+                        return render(request,"CRM/PO/receiver_selection.html",context)
+
+        if request.method == "POST":
+                user = User.objects.get(username=request.user)
+                data = request.POST
+                customer = CustomerProfile.objects.get(id=cust_id)
+                enduser_id =  cust_id +'D' + str(EndUser.objects.count() + 1)
+                cp = DeliveryContactPerson.objects.create(id=enduser_id,person_name=data['name'],department_name = data['dept'],mobileNo1=data['phone1'],mobileNo2=data['phone2'],email1=data['email1'],email2=data['email2'],customer_name=customer,created_by=user)
+                if cp:
+                        context['message'] = 'Successfully registered ' + data['name']
+                        context['message_type'] = 'success'
+                else:
+                        context['message'] = 'Something went wrong'
+                        context['message_type'] = 'danger'
+
+                u = User.objects.get(username=request.user)
+                type = u.profile.type
+                context['login_user_name'] = u.first_name + ' ' + u.last_name
+                receiver = DeliveryContactPerson.objects.filter(customer_name__pk=cust_id)
+                context['receiver'] = receiver
+                customer = CustomerProfile.objects.get(id=cust_id)
+                context['CustomerName'] = customer.name
+                context['CustomerID'] = cust_id
+                context['ContactPersonID'] = contact_person_id
+        
+                if type == 'CRM':
+                        return render(request,"CRM/PO/receiver_selection.html",context)
+
+#Quotation Selection
+@login_required(login_url="/employee/login/")
+def cpo_create_quotation_selection(request, cust_id=None,contact_person_id=None, receiver_id=None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                quotation_list = QuotationTracker.objects.all().values(
+                        'quotation_no',
+                        'customer__name',
+                        'customer__location',
+                        'quotation_date')
+                context['quotation_list'] = quotation_list
+                context['CustomerID'] = cust_id
+                context['ContactPersonID'] = contact_person_id
+                context['receiver_id'] = receiver_id
+                customer = CustomerProfile.objects.get(id=cust_id)
+                context['CustomerName'] = customer.name
+
+                if type == 'CRM':
+                        return render(request,"CRM/PO/quotation_selection.html",context)
+
+        if request.method == 'POST':
+                print(request.POST)
+                #quotation_list = request.POST['quotation_list[0][]']
+                print(request.POST['values[]']) 
+                
+
+                
+
+#Quotation Selection
+@login_required(login_url="/employee/login/")
+def cpo_quotation_details(request, quotation_no=None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                quotation_lineitem = QuotationLineitem.objects.filter(
+                        quotation=QuotationTracker.objects.get(quotation_no=quotation_no)
+                        ).annotate(
+                                basic_value = F('unit_price') + (F('unit_price') * F('margin') / 100)
+                        )
+                print(quotation_lineitem)
+                context['quotation_lineitem'] = quotation_lineitem
+                context['quotation_no'] = quotation_no
+
+                if type == 'CRM':
+                        return render(request,"CRM/PO/quotation_details.html",context)
+

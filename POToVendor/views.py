@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import *
 from .serializers import *
 import io
+import random
 
 from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
@@ -141,16 +142,16 @@ class PendingCPOVendorProductSegmentation(generics.GenericAPIView,
                 return self.list(request)
 
 #Segmented Product API
-class PendingCPOSegmentatedProduct(generics.GenericAPIView,
-                                mixins.ListModelMixin):
-        serializer_class = PendingVPOLineitemsSerializer
-        lookup_field = 'id'
+#class PendingCPOSegmentatedProduct(generics.GenericAPIView,
+#                                mixins.ListModelMixin):
+#        serializer_class = PendingVPOLineitemsSerializer
+#        lookup_field = 'id'#
+#
+#        def get_queryset(self):
+#                return VPOLineitems.objects.filter(vpo=VPO.objects.get(id=self.kwargs['vpo_id']))
 
-        def get_queryset(self):
-                return VPOLineitems.objects.filter(vpo=VPO.objects.get(id=self.kwargs['vpo_id']))
-
-        def get(self,request,id,vpo_id):
-                return self.list(request)
+#        def get(self,request,id,vpo_id):
+#                return self.list(request)
 
 
 #Unassigned PO Lineitems
@@ -263,7 +264,7 @@ class VPONewVenndorPOSegmentCreation(generics.GenericAPIView,
                                 mixins.UpdateModelMixin,
                                 mixins.RetrieveModelMixin,
                                 mixins.DestroyModelMixin):
-        serializer_class = VPOVendorCOntactPersonSelectionSerializer
+        serializer_class = VPONewVenndorPOSegmentCreationSerializer
         lookup_field = 'id'
 
         queryset = SupplierContactPerson.objects.all()
@@ -271,7 +272,7 @@ class VPONewVenndorPOSegmentCreation(generics.GenericAPIView,
         authentication_classes = [TokenAuthentication, SessionAuthentication]
         permission_classes = [IsAuthenticated,]
 
-        def post(self,request,cpo_id=None,Vendor_id=None,contact_person_id=None):
+        def post(self,request,cpo_id=None,vendor_id=None,contact_person_id=None):
                 return self.create(request)
 
         def perform_create(self,serializer):
@@ -281,7 +282,7 @@ class VPONewVenndorPOSegmentCreation(generics.GenericAPIView,
                         vendor_contact_person = SupplierContactPerson.objects.get(id=self.kwargs['contact_person_id']),
                         billing_address = 'Shankarappa Complex #4, Hosapalya Main Road, Opposite to Om Shakti Temple, Hosapalya, HSR Layout Extension, Bangalore - 560068',
                         shipping_address = 'Shankarappa Complex #4, Hosapalya Main Road, Opposite to Om Shakti Temple, Hosapalya, HSR Layout Extension, Bangalore - 560068',
-                        requester = self.request.user,
+                        requester = VPORequester.objects.create(requester=self.request.user),
                         payment_term = SupplierProfile.objects.get(id=self.kwargs['vendor_id']).payment_term,
                         advance_percentage = SupplierProfile.objects.get(id=self.kwargs['vendor_id']).advance_persentage,
                         di1 = 'Original Invoice & Delivery Challans Four (4) copies each must be submitted at the time of delivery of goods.',
@@ -292,3 +293,119 @@ class VPONewVenndorPOSegmentCreation(generics.GenericAPIView,
                         di6 = 'Mail all correspondance to corporate office address only.',
                         di7 = 'Must Submit Warranty Certificate, PO copy, TC copy (if any) and all other documents as per standard documentation'
                 )
+
+#Assign all Unassign Items
+class VPOAssignProducts(APIView):
+        parser_classes = (JSONParser,)
+
+        #Check Authentications
+        authentication_classes = [TokenAuthentication, SessionAuthentication]
+        permission_classes = [IsAuthenticated,]
+
+        def post(self, request, format=None, cpo_id = None, vpo_id=None):
+                
+                try :
+                        vpo = VPO.objects.get(id=vpo_id)
+                        for item_id in request.data['vpo_lineitems']:
+                                print(item_id)
+                                item = CPOLineitem.objects.get(id=item_id)
+                                
+                                VPOLineitems.objects.create(
+                                        vpo=vpo,
+                                        cpo_lineitem = item,
+                                        product_title = item.product_title,
+                                        description = item.description,
+                                        model = item.model,
+                                        brand = item.brand,
+                                        product_code = item.product_code,
+                                        hsn_code = item.hsn_code,
+                                        pack_size = item.pack_size,
+                                        gst = item.gst,
+                                        uom = item.uom,
+                                        quantity = item.quantity,
+                                        unit_price = item.unit_price
+                                        )
+                                item.segment_status = True
+                                item.save()
+                        return Response({'Message': 'Success'})
+                except:
+                        return Response({'Message': 'Error Occured'})
+
+#VPO Basic Info Checking
+class VPOBasicInfoChecking(generics.GenericAPIView,
+                                mixins.UpdateModelMixin,
+                                mixins.RetrieveModelMixin):
+
+        serializer_class = VPOBasicInfoCheckingSerializer
+        lookup_field = 'id'
+
+        queryset = VPO.objects.all()
+
+        #Check Authentications
+        authentication_classes = [TokenAuthentication, SessionAuthentication]
+        permission_classes = [IsAuthenticated,]
+
+        def get(self,request,cpo_id=None,id=None):
+                return self.retrieve(request,id)
+        
+        def put(self,request,cpo_id=None,id=None):
+                return self.partial_update(request)
+
+#VPO Supplier Contact Info Checking
+class VPOSupplierCPInfoChecking(generics.GenericAPIView,
+                                mixins.UpdateModelMixin,
+                                mixins.RetrieveModelMixin):
+        
+        serializer_class = VPOSupplierCPInfoCheckingSerializer
+        lookup_field = 'id'
+
+        queryset = VPO.objects.all()
+
+        #Check Authentications
+        authentication_classes = [TokenAuthentication, SessionAuthentication]
+        permission_classes = [IsAuthenticated,]
+
+        def get(self,request,cpo_id=None,id=None):
+                return self.retrieve(request,id)
+        
+class VPOSCPCURD(generics.GenericAPIView,
+                                mixins.ListModelMixin,
+                                mixins.CreateModelMixin,
+                                mixins.UpdateModelMixin,
+                                mixins.RetrieveModelMixin):
+        serializer_class = VPOSCPCURDSerializer
+        lookup_field = 'id'
+
+        def get_queryset(self):
+                return SupplierContactPerson.objects.filter(supplier_name = VPO.objects.get(id = self.kwargs['vpo_id']).vendor)
+
+        def get(self, request, cpo_id = None, vpo_id = None):
+                return self.list(request)
+
+        def post(self, request, cpo_id = None, vpo_id = None):
+                return self.create(request)
+
+        def perform_create(self, serializer):
+                supplier = VPO.objects.get(id = self.kwargs['vpo_id']).vendor
+                serializer.save(
+                        id= self.kwargs['vpo_id'] + str(random.randint(1,101)),
+                        created_by=self.request.user,
+                        supplier_name=supplier)
+
+class VPOSCPEdit(generics.GenericAPIView,
+                                mixins.ListModelMixin,
+                                mixins.CreateModelMixin,
+                                mixins.UpdateModelMixin,
+                                mixins.RetrieveModelMixin):
+        serializer_class = VPOSCPCURDSerializer
+        lookup_field = 'id'
+
+        queryset = SupplierContactPerson.objects.all()
+
+        def get(self, request, cpo_id = None, vpo_id = None, id=None):
+                return self.retrieve(request,id)
+
+        def put(self, request, cpo_id = None, vpo_id = None,id = None):
+                return self.partial_update(request)
+
+

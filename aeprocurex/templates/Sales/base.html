@@ -18,7 +18,7 @@
 <nav class="navbar navbar-inverse">
   <div class="container-fluid">
     <div class="navbar-header">
-      <a class="navbar-brand" href="#">Aeprocurex</a>
+      <a class="navbar-brand" href="/">Aeprocurex</a>
     </div>
     <ul class="nav navbar-nav">
       <li class="{{enquiry_tracker}}" role="presentation" class="dropdown">
@@ -32,11 +32,22 @@
       </li>
       <li class="{{expence}}" role="presentation" class="dropdown">
             <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-                Expence <span class="caret"></span>
+                Expense <span class="caret"></span>
               </a>
               <ul class="dropdown-menu">
                 <li><a href="/expences/new_expence/apply/">New Expense</a></li>
-                <li><a href="/expences/apply_list/">Expense List</a></li>
+                <li><a href="/expences/apply_list/">Applied Expense List</a></li>
+                <li>&nbsp;</li>
+                <li><a href="/expences/1st_stage/approved_list/">(L1) Approved Expense List</a></li>
+                <li><a href="/expences/1st_stage/rejected_list/">(L1) Rejected Expense List</a></li>
+                <li>&nbsp;</li>
+                <li><a href="/expences/2nd_stage/approved_list/">(L2) Approved Expense List</a></li>
+                <li><a href="/expences/2nd_stage/rejected_list/">(L2) Rejected Expense List</a></li>
+                <hr> 
+                <li><a href="/expences/1st_stage/pending_approval_list/">L1 - Expense Approval List</a></li>
+                <li><a href="/expences/2nd_stage/pending_approval_list/">L2 - Expense Approval List</a></li>
+                <hr>
+                <li><a href="/expences/pending_payment_list/">Pending Payment List</a></li>
               </ul>
       </li>
       <li class="{{customer}}"><a href="#">Customer</a></li>

@@ -37,19 +37,6 @@ class PendingCPOLineitemsSerializer(serializers.ModelSerializer):
             'quantity',
         ]
 
-#Vendor Product Segmentation API View
-class PendingVPOVendorProductSegmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = VPO
-        fields = [
-            'id',
-            'vendor',
-            'vendor_contact_person',
-            'offer_reference',
-            'offer_date',
-        ]
-        depth = 1
-
 #Segmented Product Lineitems
 class PendingVPOLineitemsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -66,7 +53,27 @@ class PendingVPOLineitemsSerializer(serializers.ModelSerializer):
             'gst',
             'uom',
             'quantity',
+            'unit_price',
         ]
+
+#Vendor Product Segmentation API View
+class PendingVPOVendorProductSegmentSerializer(serializers.ModelSerializer):
+    vpo_lineitems = PendingVPOLineitemsSerializer(
+        many=True,
+        read_only=True)
+    class Meta:
+        model = VPO
+        fields = [
+            'id',
+            'vendor',
+            'vendor_contact_person',
+            'offer_reference',
+            'offer_date',
+            'vpo_lineitems'
+        ]
+        depth = 1
+
+
 
 #Unassigned Product Lineitems
 class PendingCPOUnassignedLineitemsSerializer(serializers.ModelSerializer):
@@ -188,4 +195,56 @@ class VPONewVenndorPOSegmentCreationSerializer(serializers.ModelSerializer):
             'di3',
             'di4',
             'di5'
+        )
+
+
+#VPO Basic Info Checking Serializer
+class VPOBasicInfoCheckingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VPO
+        fields = [
+            'id',
+            'billing_address',
+            'shipping_address',
+            'delivery_date',
+            'offer_reference',
+            'offer_date',
+            'payment_term',
+            'advance_percentage',
+            'freight_charges',
+            'custom_duties',
+            'pf',
+            'insurance'
+        ]
+        read_only_fields = (
+            'id',
+        )
+
+#VPO Supplier Contact Person Checking Serializer
+class VPOSupplierCPInfoCheckingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VPO
+        fields = [
+            'id',
+            'vendor_contact_person'
+        ]
+        read_only_fields = (
+            'id',
+        )
+        depth = 1
+
+#VPO Supplier Contact Person CURD Operation
+class VPOSCPCURDSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupplierContactPerson
+        fields = [
+            'id',
+            'name',
+            'mobileNo1',
+            'mobileNo2',
+            'email1',
+            'email2'
+        ]
+        read_only_fields = (
+            'id',
         )

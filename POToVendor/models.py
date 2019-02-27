@@ -30,7 +30,7 @@ class VPO(models.Model):
         shipping_address = models.TextField(null=True,blank=True)
         delivery_date = models.DateField(null=True, blank=True)
 
-        po_number = models.CharField(max_length=100,unique=True,null=True,blank=True)
+        po_number = models.CharField(max_length=100,null=True,blank=True)
         po_date = models.DateField(null=True,blank=True)
 
         requester = models.ForeignKey(VPORequester,on_delete=models.CASCADE,null=True,blank=True)
@@ -42,9 +42,9 @@ class VPO(models.Model):
         freight_charges = models.FloatField(default = 0.0)
         custom_duties = models.FloatField(default = 0.0)
         pf = models.FloatField(default = 0.0)
+        insurance = models.FloatField(default = 0.0)
         
         mode_of_transport = models.CharField(max_length=200,null=True,blank=True)
-        insurance = models.CharField(max_length=200,null=True,blank=True)
         inco_terms = models.CharField(max_length=200,null=True,blank=True)
         installation = models.CharField(max_length=200,null=True,blank=True)
 
@@ -68,7 +68,7 @@ class VPO(models.Model):
 
 class VPOLineitems(models.Model):
         id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-        vpo = models.ForeignKey(VPO,on_delete=models.CASCADE)
+        vpo = models.ForeignKey(VPO,related_name='vpo_lineitems',on_delete=models.CASCADE)
         cpo_lineitem = models.ForeignKey(CPOLineitem,on_delete=models.CASCADE)
         
         product_title = models.CharField(max_length=200,null = False, blank = False)
