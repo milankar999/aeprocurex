@@ -401,6 +401,10 @@ class VPOSCPEdit(generics.GenericAPIView,
         lookup_field = 'id'
 
         queryset = SupplierContactPerson.objects.all()
+        
+        #Check Authentications
+        authentication_classes = [TokenAuthentication, SessionAuthentication]
+        permission_classes = [IsAuthenticated,]
 
         def get(self, request, cpo_id = None, vpo_id = None, id=None):
                 return self.retrieve(request,id)
@@ -408,4 +412,175 @@ class VPOSCPEdit(generics.GenericAPIView,
         def put(self, request, cpo_id = None, vpo_id = None,id = None):
                 return self.partial_update(request)
 
+
+#VPO Supplier Info Checking
+class VPOSupplierInfoChecking(generics.GenericAPIView,
+                                mixins.UpdateModelMixin,
+                                mixins.RetrieveModelMixin):
+        
+        serializer_class = VPOSupplierInfoCheckingSerializer
+        lookup_field = 'id'
+
+        queryset = VPO.objects.all()
+
+        #Check Authentications
+        authentication_classes = [TokenAuthentication, SessionAuthentication]
+        permission_classes = [IsAuthenticated,]
+
+        def get(self,request,cpo_id=None,id=None):
+                return self.retrieve(request,id)
+        
+#VPO Supplier Info Update
+class VPOSupplierInfoUpdate(generics.GenericAPIView,
+                                mixins.UpdateModelMixin,
+                                mixins.RetrieveModelMixin):
+        
+        serializer_class = VPOUpdateVendorInfoSerializer
+        lookup_field = 'id'
+
+        queryset = SupplierProfile.objects.all()
+
+        #Check Authentications
+        authentication_classes = [TokenAuthentication, SessionAuthentication]
+        permission_classes = [IsAuthenticated,]
+
+        def get(self,request,cpo_id=None,vpo_id=None,id=None):
+                return self.retrieve(request,id)
+
+        def put(self,request,cpo_id=None,vpo_id=None,id=None):
+                return self.update(request,id)
+
+#VPO Receiver Info Checking
+class VPOReceiverInfoChecking(generics.GenericAPIView,
+                                mixins.UpdateModelMixin,
+                                mixins.RetrieveModelMixin):
+        
+        #Check Authentications
+        authentication_classes = [TokenAuthentication, SessionAuthentication]
+        permission_classes = [IsAuthenticated,]
+
+        serializer_class = VPOReceiverSerilizer
+        lookup_field = 'id'
+
+        queryset = VPO.objects.all()
+
+        def get(self,request,cpo_id=None,id=None):
+                return self.retrieve(request,id)
+
+        def put(self,request,cpo_id=None,id=None):
+                return self.partial_update(request)
+
+#VPO Terms and Conditions
+class VPOTermsConditions(generics.GenericAPIView,
+                                mixins.UpdateModelMixin,
+                                mixins.RetrieveModelMixin):
+        
+        #Check Authentications
+        authentication_classes = [TokenAuthentication, SessionAuthentication]
+        permission_classes = [IsAuthenticated,]
+
+        serializer_class = VPOTermsConditionsSerializer
+        lookup_field = 'id'
+
+        queryset = VPO.objects.all()
+
+        def get(self,request,cpo_id=None,id=None):
+                return self.retrieve(request,id)
+
+        def put(self,request,cpo_id=None,id=None):
+                return self.partial_update(request)
+
+ 
+#VPO Delivery Instructions
+class VPODeliveryInstructions(generics.GenericAPIView,
+                                mixins.UpdateModelMixin,
+                                mixins.RetrieveModelMixin):
+        
+        #Check Authentications
+        authentication_classes = [TokenAuthentication, SessionAuthentication]
+        permission_classes = [IsAuthenticated,]
+
+        serializer_class = VPODISerializer
+        lookup_field = 'id'
+
+        queryset = VPO.objects.all()
+
+        def get(self,request,cpo_id=None,id=None):
+                return self.retrieve(request,id)
+
+        def put(self,request,cpo_id=None,id=None):
+                return self.partial_update(request)
+
+#VPO Launch
+class VPOLaunch(APIView):
+        parser_classes = (JSONParser,)
+
+        #Check Authentications
+        authentication_classes = [TokenAuthentication, SessionAuthentication]
+        permission_classes = [IsAuthenticated,]
+
+        def post(self, request, format=None, cpo_id = None, vpo_id=None):
+                try :
+                        vpo = VPO.objects.get(id=vpo_id)
+                        vpo_lineitem = VPOLineitems.objects.filter(vpo=vpo)
+
+                        
+
+                        if vpo.offer_reference == '':
+                                return Response({'Message': 'Offer Reference Not Found'})
+
+                        if vpo.offer_date == '':
+                                return Response({'Message': 'Undefined Offer Date Found'})
+
+                        if vpo.delivery_date == '':
+                                return Response({'Message': 'Delivery Date Not Found'})
+
+                        if vpo.billing_address == '':
+                                return Response({'Message': 'Billing Addresss Not Found'})
+
+                        if vpo.payment_term == 0 and vpo.advance_percentage == 0:
+                                return Response({'Message': 'Payment Terms and Advance Percentage are not Clear'})
+
+                        if vpo.inco_terms == 0:
+                                return Response({'Message': 'Inco Terms Not Found'})
+
+
+
+                        for item in vpo_lineitem:
+                                if item.product_title == '':
+                                        return Response({'Message': 'Undefined Product Title Found'})
+                                
+                                if item.description == '':
+                                        return Response({'Message': 'Undefined Product Description Found'})
+
+                                if item.gst == '':
+                                        return Response({'Message': 'Undefined GST Found'})
+
+                                if item.uom == '':
+                                        return Response({'Message': 'Undefined UOM Found'})
+
+                                if item.quantity == '':
+                                        return Response({'Message': 'Undefined Quantity Found'})
+
+                                if item.unit_price == '':
+                                        return Response({'Message': 'Undefined Unit Price Found'})
+                                
+                        vpo.status = 'Requested'
+                        vpo.save()
+                        return Response({'Message': 'Success'})
+                except:
+                        return Response({'Message': 'Error Occured'})
+
+#VPO Preview
+class VPOPreview(generics.GenericAPIView,
+                        mixins.UpdateModelMixin,
+                        mixins.RetrieveModelMixin):
+        
+        serializer_class = VPOPreviewSerializer
+        lookup_field = 'id'
+
+        queryset = VPO.objects.all() 
+
+        def get(self,request,cpo_id=None, id=None):
+                return self.retrieve(request,id)
 

@@ -24,6 +24,27 @@ urlpatterns = [
     path('pending_cpo/<cpo_id>/vpo/<id>/supplier_contact_person_info_checking/',VPOSupplierCPInfoChecking.as_view()),
     
     #CURD Vendor Contact Person
-    path('pending_cpo/<cpo_id>/vpo/<vpo_id>/supplier_contact_person/',VPOSCPCURD.as_view()),
+    #path('pending_cpo/<cpo_id>/vpo/<vpo_id>/supplier_contact_person/',VPOSCPCURD.as_view()),
     path('pending_cpo/<cpo_id>/vpo/<vpo_id>/supplier_contact_person/<id>/edit/',VPOSCPEdit.as_view()),
+
+    #Vendor Info Checking
+    path('pending_cpo/<cpo_id>/vpo/<id>/supplier_info_checking/',VPOSupplierInfoChecking.as_view()),
+    path('pending_cpo/<cpo_id>/vpo/<vpo_id>/supplier/<id>/update/',VPOSupplierInfoUpdate.as_view()),
+
+    #Receiver Info
+    path('pending_cpo/<cpo_id>/vpo/<id>/receiver_info/',VPOReceiverInfoChecking.as_view()),
+
+    #Terms & Conditions
+    path('pending_cpo/<cpo_id>/vpo/<id>/terms_conditions/',VPOTermsConditions.as_view()),
+
+    #Delivery Instruction
+    path('pending_cpo/<cpo_id>/vpo/<id>/delivery_instructions/',VPODeliveryInstructions.as_view()),
+
+    #ASK for Approval
+    path('pending_cpo/<cpo_id>/vpo/<vpo_id>/launch/',VPOLaunch.as_view()),
+
+    #See The Demo Page
+    path('pending_cpo/<cpo_id>/vpo/<id>/preview/',VPOPreview.as_view()),
+
+    
 ]

@@ -602,3 +602,27 @@ def pending_payment_completion(request, username=None):
             item.save()
         
         return HttpResponseRedirect(reverse('pending-payment-list'))
+
+#Individual Payment Status
+@login_required(login_url="/employee/login/")
+def individual_payment_status(request):
+    context={}
+    context['expence'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type   
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+    if request.method == 'GET':
+        context['expense_details'] = ClaimDetails.objects.filter(employee=request.user).values(
+            'status').annotate(
+                Sum('total_basic_amount'),
+                Sum('applicable_gst_value'))
+        
+        if type == 'Sales':
+            return render(request,"Sales/Claim/individual_payment_status.html",context)
+        
+        if type == 'Sourcing':
+            return render(request,"Sourcing/Claim/individual_payment_status.html",context)
+        
+        if type == 'CRM':
+            return render(request,"CRM/Claim/individual_payment_status.html",context)

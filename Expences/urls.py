@@ -32,6 +32,9 @@ urlpatterns = [
     path('pending_payment_list/',pending_payment_list,name='pending-payment-list'),
     path('pending_payment_list/<username>/details/',pending_payment_details,name='pending-payment-details'),
 
+    #Individual Pending Payment Status
+    path('pending_payment_list/individual_payment_status/',individual_payment_status,name='individual-payment-status'),
+
     #Payment Completion
     path('pending_payment_list/<username>/payment_completion/',pending_payment_completion,name='pending-payment-completion'),
 ]   

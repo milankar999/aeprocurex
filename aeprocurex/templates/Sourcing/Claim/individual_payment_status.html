@@ -1,0 +1,51 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="container">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+            <!--data table-->
+            <div class="table-responsive">          
+                <table id="lineitems" class="table table-hover table-bordered table-sm" width="100%">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Claim Type</th>
+                      <th>Total Basic Value</th>
+                      <th>GST Amount</th>
+                      <th>Total Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>   
+                      {% for expense in expense_details %}
+                        <tr>                            
+                            <td></td>
+                            
+                            <td>{{expense.status}}</td>
+                            <td>{{expense.total_basic_amount__sum}}</td>
+                            <td>{{expense.applicable_gst_value__sum}}</td>
+                            <td>{{expense.total_basic_amount__sum|add:expense.applicable_gst_value__sum}}</td>
+                        </tr>
+                      {% empty %}
+                        <p>No Item Found</p>
+                      {% endfor %}
+                  </tbody>
+                </table>
+        </div>
+            <!--End of data table-->
+        </div>
+</div>
+<script type="text/javascript">
+    $(document).ready( function () {
+        $('#lineitems').DataTable();
+    } );
+    </script>   
+{% endblock content %}

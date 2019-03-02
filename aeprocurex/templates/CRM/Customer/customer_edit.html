@@ -27,11 +27,11 @@
                                 <div class="card-body p-3">
     
                                         <label class="form-input" for="name">Customer Name <a style="color: red">*</a></label>
-                                        <input type="text" class="form-control" id="name" name="name" placeholder="Organization Name" required value={{Customer.name}}>
+                                        <input type="text" class="form-control" id="name" name="name" placeholder="Organization Name" required value="{{Customer.name}}">
                                         <label class="form-input" for="location">Location <a style="color: red">*</a></label>
-                                        <input type="text" class="form-control" id="location" name="location" placeholder="Branch" required value={{Customer.location}}> 
+                                        <input type="text" class="form-control" id="location" name="location" placeholder="Branch" required value="{{Customer.location}}"> 
                                         <label class="form-input" for="code">Code <a style="color: red">*</a></label>
-                                        <input type="text" class="form-control" id="code" name="code" placeholder="provide a unique identification code" required value={{Customer.code}}>
+                                        <input type="text" class="form-control" id="code" name="code" placeholder="provide a unique identification code" required value="{{Customer.code}}">
                                         <label class="form-input" for="address">Address <a style="color: red"></a></label>
                                         <textarea type="text" class="form-control" id="address" name="address">{{Customer.address}}</textarea>
 
@@ -43,7 +43,7 @@
                                         <textarea type="text" class="form-control" id="shipping_address" name="shipping_address">{{Customer.shipping_address}}</textarea>
 
                                         <label class="form-input" for="code">City <a style="color: red">*</a></label>
-                                        <input type="text" class="form-control" id="city" name="city" required value={{Customer.city}}>
+                                        <input type="text" class="form-control" id="city" name="city" required value="{{Customer.city}}">
                                         <label class="form-input" for="state">State <a style="color: red">*</a></label>
                                         <select class="form-control" id="state" name="state" required>
                                           <option>{{Customer.state}}</option>
@@ -52,10 +52,10 @@
                                           {% endfor %}
                                         </select>
                                         <label class="form-input" for="pin">Pin </label>
-                                        <input type="number" class="form-control" id="pin" name="pin" value={{Customer.pin}}>
+                                        <input type="number" class="form-control" id="pin" name="pin" value="{{Customer.pin}}">
                 
                                         <label class="form-input" for="country">Country </label>
-                                        <input type="text" class="form-control" id="country" name="country" value={{Customer.country}}>
+                                        <input type="text" class="form-control" id="country" name="country" value="{{Customer.country}}">
                 
                                         <label class="form-input" for="officeemail1">Office Email ID 1 </label>
                                         <input type="email" class="form-control" id="offieemail1" name="officeemail1" value={{Customer.office_email1}}>
@@ -64,25 +64,25 @@
                                         <input type="email" class="form-control" id="offieemail2" name="officeemail2" value={{Customer.office_email2}}>
                 
                                         <label class="form-input" for="officephone1">Office Phone No 1 </label>
-                                        <input type="number" class="form-control" id="offiephone1" name="officephone1" value={{Customer.office_phone1}}>
+                                        <input type="number" class="form-control" id="offiephone1" name="officephone1" value="{{Customer.office_phone1}}">
                 
                                         <label class="form-input" for="officephone2">Office Phone No 2 </label>
-                                        <input type="number" class="form-control" id="offiephone2" name="officephone2" value={{Customer.office_phone2}}>
+                                        <input type="number" class="form-control" id="offiephone2" name="officephone2" value="{{Customer.office_phone2}}">
                 
                                         <label class="form-input" for="GSTNo">GST No </label>
                                         <input type="text" class="form-control" id="GSTNo" name="GSTNo" value={{Customer.gst_number}}>
                 
                                         <label class="form-input" for="VendorCode">Vendor Code </label>
-                                        <input type="text" class="form-control" id="VendorCode" name="VendorCode" value={{Customer.vendor_code}}>
+                                        <input type="text" class="form-control" id="VendorCode" name="VendorCode" value="{{Customer.vendor_code}}">
                 
                                         <label class="form-input" for="PaymentTerm">Payment Term (in Days) <a style="color: red">*</a></label>
                                         <input type="number" class="form-control" id="PaymentTerm" name="PaymentTerm" required value={{Customer.payment_term}}>
                 
                                         <label class="form-input" for="IncoTerm">Inco Term </label>
-                                        <input type="text" class="form-control" id="IncoTerm" name="IncoTerm" value={{Customer.inco_term}}><br>
+                                        <input type="text" class="form-control" id="IncoTerm" name="IncoTerm" value="{{Customer.inco_term}}"><br>
 
                                         <label class="form-input" for="tax_type">Tax Type </label>
-                                        <input type="text" class="form-control" id="tax_type" name="tax_type" value={{Customer.tax_type}}><br>
+                                        <input type="text" class="form-control" id="tax_type" name="tax_type" value="{{Customer.tax_type}}"><br>
                                     
     
                                     <div class="text-center">

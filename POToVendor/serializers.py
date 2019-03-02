@@ -214,7 +214,8 @@ class VPOBasicInfoCheckingSerializer(serializers.ModelSerializer):
             'freight_charges',
             'custom_duties',
             'pf',
-            'insurance'
+            'insurance',
+            'discount'
         ]
         read_only_fields = (
             'id',
@@ -248,3 +249,139 @@ class VPOSCPCURDSerializer(serializers.ModelSerializer):
         read_only_fields = (
             'id',
         )
+
+#VPO Supplier Info Checking Serializer
+class VPOSupplierInfoCheckingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VPO
+        fields = [
+            'id',
+            'vendor'
+        ]
+        read_only_fields = (
+            'id',
+        )
+        depth = 1
+
+#VPO Update Info Vendor Serializer
+class VPOUpdateVendorInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupplierProfile
+        fields = [
+            'id',
+            'name',
+            'location',
+            'address',
+            'city',
+            'state',
+            'pin',
+            'country',
+            'office_email1',
+            'office_email2',
+            'office_phone1',
+            'office_phone2',
+            'gst_number',
+            'payment_term',
+            'advance_persentage',
+            'inco_term'
+        ]
+        read_only_fields = (
+            'id',
+        )
+
+#VPO receiver Serializer
+class VPOReceiverSerilizer(serializers.ModelSerializer):
+    class Meta:
+        model = VPO
+        fields = [
+            'id',
+            'receiver_name',
+            'receiver_phone1',
+            'receiver_phone2',
+            'receiver_dept'
+        ]
+        read_only_fields = (
+            'id',
+        )
+
+#VPO Terms and COnditions Serializer
+class VPOTermsConditionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VPO
+        fields = [
+            'id',
+            'mode_of_transport',
+            'inco_terms',
+            'installation',
+            'comments'
+        ]
+        read_only_fields = (
+            'id',
+        )
+
+#VPO Delivery Instructions
+class VPODISerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VPO
+        fields = [
+            'id',
+            'di1',
+            'di2',
+            'di3',
+            'di4',
+            'di5',
+            'di6',
+            'di7',
+            'di8',
+            'di9',
+            'di10'
+        ]
+        read_only_fields = (
+            'id',
+        )
+        
+#Vendor PO Preview
+class VPOPreviewSerializer(serializers.ModelSerializer):
+    vpo_lineitems = PendingVPOLineitemsSerializer(
+        many=True,
+        read_only=True)
+    class Meta:
+        model = VPO
+        fields = [
+            'id',
+            'vendor',
+            'vendor_contact_person',
+            'offer_reference',
+            'offer_date',
+            'billing_address',
+            'shipping_address',
+            'delivery_date',
+            'requester',
+            'receiver_name',
+            'receiver_phone1',
+            'receiver_phone2',
+            'receiver_dept',
+            'payment_term',
+            'advance_percentage',
+            'freight_charges',
+            'custom_duties',
+            'pf',
+            'insurance',        
+            'mode_of_transport',
+            'inco_terms',
+            'installation',
+            'comments',
+            'di1',
+            'di2',
+            'di3',
+            'di4',
+            'di5',
+            'di6',
+            'di7',
+            'di8',
+            'di9',
+            'di10',
+            'discount',
+            'vpo_lineitems',
+        ]
+        depth = 1
