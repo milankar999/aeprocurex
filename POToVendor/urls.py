@@ -24,7 +24,7 @@ urlpatterns = [
     path('pending_cpo/<cpo_id>/vpo/<id>/supplier_contact_person_info_checking/',VPOSupplierCPInfoChecking.as_view()),
     
     #CURD Vendor Contact Person
-    #path('pending_cpo/<cpo_id>/vpo/<vpo_id>/supplier_contact_person/',VPOSCPCURD.as_view()),
+    ##path('pending_cpo/<cpo_id>/vpo/<vpo_id>/supplier_contact_person/',VPOSCPCURD.as_view()),
     path('pending_cpo/<cpo_id>/vpo/<vpo_id>/supplier_contact_person/<id>/edit/',VPOSCPEdit.as_view()),
 
     #Vendor Info Checking
@@ -44,7 +44,22 @@ urlpatterns = [
     path('pending_cpo/<cpo_id>/vpo/<vpo_id>/launch/',VPOLaunch.as_view()),
 
     #See The Demo Page
-    path('pending_cpo/<cpo_id>/vpo/<id>/preview/',VPOPreview.as_view()),
+    path('pending_cpo/<cpo_id>/vpo/<vpo_id>/preview/',VPOPreview.as_view()),
+    path('pending_cpo/<cpo_id>/vpo/<id>/preview_lineitems/',VPOPreviewLineitems.as_view()),
 
-    
+    #VPO Approval List
+    path('vpo/approval_list/',VPOApprovalList.as_view()),
+    path('vpo/<id>/<po_number>/lineitems/',VPOApprovalLineitems.as_view()),
+    path('vpo/<id>/<po_number>/info/',VPOApprovalInfo.as_view()),
+
+    path('vpo/<vpo_id>/<po_number>/preview/',VPOApprovalPreview.as_view()),    
+    path('vpo/<vpo_id>/<po_number>/lineitems/approve/',VPOApprove.as_view()),
+    path('vpo/<vpo_id>/<po_number>/lineitems/reject/',VPOReject.as_view()),
+
+    #Generating VPO
+    path('vpo/ready_list/',VPOReadyList.as_view()),
+    path('vpo/ready_list/<po_number>/details/',VPOReadyPreview.as_view()),
+    path('vpo/ready_list/<po_number>/change_info/',VPOReadyChangeInfo.as_view()),
+
+    path('vpo/ready_list/<po_number>/generate/po/',VPOGeneratePO.as_view()),
 ]

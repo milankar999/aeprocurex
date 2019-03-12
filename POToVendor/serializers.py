@@ -6,7 +6,7 @@ from Supplier.models import *
 from django.contrib.auth.models import User
 
 #Pending CPO Selection
-class PendingVPOListSerializer(serializers.ModelSerializer):
+class PendingCPOListSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomerPO
         fields = [
@@ -17,7 +17,7 @@ class PendingVPOListSerializer(serializers.ModelSerializer):
             'delivery_date',
         ]
         depth = 1
-        
+
 #Pending CPO Lineitems
 class PendingCPOLineitemsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,6 +37,7 @@ class PendingCPOLineitemsSerializer(serializers.ModelSerializer):
             'quantity',
         ]
 
+##Segmentation Serializer
 #Segmented Product Lineitems
 class PendingVPOLineitemsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,6 +55,7 @@ class PendingVPOLineitemsSerializer(serializers.ModelSerializer):
             'uom',
             'quantity',
             'unit_price',
+            'discount',
         ]
 
 #Vendor Product Segmentation API View
@@ -73,8 +75,6 @@ class PendingVPOVendorProductSegmentSerializer(serializers.ModelSerializer):
         ]
         depth = 1
 
-
-
 #Unassigned Product Lineitems
 class PendingCPOUnassignedLineitemsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -93,7 +93,7 @@ class PendingCPOUnassignedLineitemsSerializer(serializers.ModelSerializer):
             'quantity',
         ]
 
-#VPO Product Edit
+#VPO Lineitem Edit
 class PendingVPOLineitemEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = VPOLineitems
@@ -110,8 +110,8 @@ class PendingVPOLineitemEditSerializer(serializers.ModelSerializer):
             'uom',
             'quantity',
             'unit_price',
+            'discount',
         ]
-
         read_only_fields = (
             'id',
         )
@@ -197,7 +197,6 @@ class VPONewVenndorPOSegmentCreationSerializer(serializers.ModelSerializer):
             'di5'
         )
 
-
 #VPO Basic Info Checking Serializer
 class VPOBasicInfoCheckingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -215,7 +214,6 @@ class VPOBasicInfoCheckingSerializer(serializers.ModelSerializer):
             'custom_duties',
             'pf',
             'insurance',
-            'discount'
         ]
         read_only_fields = (
             'id',
@@ -234,8 +232,8 @@ class VPOSupplierCPInfoCheckingSerializer(serializers.ModelSerializer):
         )
         depth = 1
 
-#VPO Supplier Contact Person CURD Operation
-class VPOSCPCURDSerializer(serializers.ModelSerializer):
+#VPO Supplier Contact Person Edit Operation
+class VPOSCPEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = SupplierContactPerson
         fields = [
@@ -339,7 +337,7 @@ class VPODISerializer(serializers.ModelSerializer):
         read_only_fields = (
             'id',
         )
-        
+
 #Vendor PO Preview
 class VPOPreviewSerializer(serializers.ModelSerializer):
     vpo_lineitems = PendingVPOLineitemsSerializer(
@@ -381,7 +379,120 @@ class VPOPreviewSerializer(serializers.ModelSerializer):
             'di8',
             'di9',
             'di10',
-            'discount',
-            'vpo_lineitems',
+            'vpo_lineitems'
+        ]
+
+
+#VPO Preview Lineitems Serializer
+class VPOPreviewLineitemsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VPOLineitems
+        fields = [
+            'id',
+            'product_title',
+            'description',
+            'model',
+            'brand',
+            'product_code',
+            'hsn_code',
+            'pack_size',
+            'gst',
+            'uom',
+            'quantity',
+            'unit_price',
+            'discount'
+        ]      
+
+#VPO Approval List
+class VPOApprovalListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VPOTracker
+        fields = [
+            'po_number',
+            'po_date',
+            'vpo'
         ]
         depth = 1
+        
+
+#VPO Approval Lineitems Serializer
+class VPOApprovalLineitemsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VPOLineitems
+        fields = [
+            'id',
+            'product_title',
+            'description',
+            'model',
+            'brand',
+            'product_code',
+            'hsn_code',
+            'pack_size',
+            'gst',
+            'uom',
+            'quantity',
+            'unit_price',
+            'discount'
+        ]
+
+#VPO Approval Info Serializer
+class VPOApprovalInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VPO
+        fields = [
+            'vendor',
+            'vendor_contact_person',
+            'offer_reference',
+            'offer_date',
+            'billing_address',
+            'shipping_address',
+            'delivery_date',
+            'requester',
+            'receiver_name',
+            'receiver_phone1',
+            'receiver_phone2',
+            'receiver_dept',
+            'payment_term',
+            'advance_percentage',
+            'freight_charges',
+            'custom_duties',
+            'pf',
+            'insurance',        
+            'mode_of_transport',
+            'inco_terms',
+            'installation',
+            'comments',
+            'di1',
+            'di2',
+            'di3',
+            'di4',
+            'di5',
+            'di6',
+            'di7',
+            'di8',
+            'di9',
+            'di10',
+        ]
+        depth = 1
+
+#VPO Ready List
+class VPOReadyListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VPOTracker
+        fields = [
+            'po_number',
+            'po_date',
+            'vpo'
+        ]
+        depth = 1
+
+#Vendor PO  Ready Preview
+class VPOReadyPreviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VPOTracker
+        fields = [
+            'po_number',
+            'po_date',
+            'vpo'
+        ]
+        depth = 2

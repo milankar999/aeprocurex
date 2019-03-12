@@ -105,6 +105,7 @@ CORS_ALLOW_HEADERS = (
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'X-CSRFToken',
 )
 CORS_ALLOW_METHODS = (
     'DELETE',
