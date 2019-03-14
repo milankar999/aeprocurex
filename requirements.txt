@@ -1,5 +1,8 @@
+amqp==2.4.1
+billiard==3.5.0.5
 cairocffi==0.9.0
 CairoSVG==2.2.1
+celery==4.2.1
 certifi==2018.11.29
 cffi==1.11.5
 chardet==3.0.4
@@ -12,16 +15,22 @@ django-cors-headers==2.4.0
 -e git+https://github.com/django-import-export/django-import-export.git@596a4f5b54b7d0beadc588b5f59068ea30ed072a#egg=django_import_export
 django-mathfilters==0.4.0
 djangorestframework==3.9.0
+docopt==0.6.2
 et-xmlfile==1.0.1
+filelock==3.0.10
 fpdf==1.7.2
 html5lib==1.0.1
 httpie==1.0.2
 idna==2.8
 jdcal==1.4
+kombu==4.3.0
+num2words==0.5.9
 odfpy==1.4.0
 openpyxl==2.5.12
 pdfkit==0.6.1
 Pillow==5.3.0
+pluggy==0.9.0
+py==1.8.0
 pycparser==2.19
 Pygments==2.3.1
 Pyphen==0.9.5
@@ -32,8 +41,12 @@ requests==2.21.0
 six==1.12.0
 tablib==0.12.1
 tinycss2==0.6.1
+toml==0.10.0
+tox==3.7.0
 unicodecsv==0.14.1
 urllib3==1.24.1
+vine==1.2.0
+virtualenv==16.4.3
 WeasyPrint==43
 webencodings==0.5.1
 wkhtmltopdf==0.2

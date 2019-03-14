@@ -12,7 +12,27 @@
                 {% endif %}
             
                 <a href="/sourcing/pending_list" class="btn btn-danger"><span class="glyphicon glyphicon-backward"></span></a> 
-                <button class="btn btn-info">Suggestion From History &nbsp;<span class="glyphicon glyphicon-cloud"></span></button>
+                <button class="btn btn-info">Suggestion From History &nbsp;<span class="glyphicon glyphicon-cloud"></span></button><br>
+                
+                      {% ifnotequal rfp.document1 "" %}
+                        <label>Supporting Document <a href="/api/media/{{rfp.document1}}" target="-blank">Click Here</a></label><br>
+                      {% endifnotequal %}
+
+                      {% ifnotequal rfp.document2 "" %}
+                        <label>Supporting Document <a href="/api/media/{{rfp.document2}}" target="-blank">Click Here</a></label><br>
+                      {% endifnotequal %}
+
+                      {% ifnotequal rfp.document3 "" %}
+                        <label>Supporting Document <a href="/api/media/{{rfp.document3}}" target="-blank">Click Here</a></label><br>
+                      {% endifnotequal %}
+
+                      {% ifnotequal rfp.document4 "" %}
+                        <label>Supporting Document <a href="/api/media/{{rfp.document4}}" target="-blank">Click Here</a></label><br>
+                      {% endifnotequal %}
+
+                      {% ifnotequal rfp.document5 "" %}
+                        <label>Supporting Document <a href="/api/media/{{rfp.document5}}" target="-blank">Click Here</a></label><br>
+                      {% endifnotequal %}
                             
         </div>
             <div class="table-responsive">          

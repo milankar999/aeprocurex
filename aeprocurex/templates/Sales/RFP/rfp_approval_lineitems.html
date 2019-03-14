@@ -16,6 +16,30 @@
                       <h4 class="modal-title">RFP Details</span></h4>
                     </div class="container">
                     {% for info in rfp_details %}
+                    
+                      {% ifnotequal info.document1 "" %}
+                        <label>Supporting Document <a href="/api/media/{{info.document1}}" target="-blank">Click Here</a></label><br>
+                      {% endifnotequal %}
+
+                      {% ifnotequal info.document2 "" %}
+                        <label>Supporting Document <a href="/api/media/{{info.document2}}" target="-blank">Click Here</a></label><br>
+                      {% endifnotequal %}
+
+                      {% ifnotequal info.document3 "" %}
+                        <label>Supporting Document <a href="/api/media/{{info.document3}}" target="-blank">Click Here</a></label><br>
+                      {% endifnotequal %}
+
+                      {% ifnotequal info.document4 "" %}
+                        <label>Supporting Document <a href="/api/media/{{info.document4}}" target="-blank">Click Here</a></label><br>
+                      {% endifnotequal %}
+
+                      {% ifnotequal info.document5 "" %}
+                        <label>Supporting Document <a href="/api/media/{{info.document5}}" target="-blank">Click Here</a></label><br>
+                      {% endifnotequal %}
+
+                  
+                    <hr>
+
                     <h6>&nbsp;&nbsp;RFP Type</h6>
                     <h4>&nbsp;&nbsp;{{info.rfp_type}}</h4>
                     <hr> 

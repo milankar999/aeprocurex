@@ -188,7 +188,7 @@
               <h4 class="modal-title">Fill the product Details</span></h4>
             </div>
             <div class="modal-body">
-              <form type="submit" id="customer-form" method="POST" action="/rfp/{{rfp_no}}/generate/">
+              <form type="submit" id="customer-form"  enctype="multipart/form-data" method="POST" action="/rfp/{{rfp_no}}/generate/">
                 {% csrf_token %}
                 <div class="form-group">
 
@@ -207,7 +207,22 @@
                         <select class="form-control" id="priority" name="priority" required>
                             <option>0</option>
                             <option>1</option>
-                          </select>
+                        </select>
+
+                        <label class="form-input" for="supporting_document1">Supporting Document 1 </label>
+                        <input type="file" id="supporting_document1" name="supporting_document1">
+
+                        <label class="form-input" for="supporting_document2">Supporting Document 2 </label>
+                        <input type="file" id="supporting_document2" name="supporting_document2">
+
+                        <label class="form-input" for="supporting_document3">Supporting Document 3 </label>
+                        <input type="file" id="supporting_document3" name="supporting_document3">
+
+                        <label class="form-input" for="supporting_document4">Supporting Document 4 </label>
+                        <input type="file" id="supporting_document4" name="supporting_document4">
+
+                        <label class="form-input" for="supporting_document5">Supporting Document 5 </label>
+                        <input type="file" id="supporting_document5" name="supporting_document5">
 
                 </div>
             </div>

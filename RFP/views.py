@@ -434,6 +434,33 @@ def rfp_generate(request, rfp_no=None):
                 rfp.rfp_type = data['rfp_type']
                 rfp.opportunity_status = 'Open'
                 rfp.enquiry_status = 'Created'
+
+                try:
+                        rfp.document1 = request.FILES['supporting_document1']
+                except:
+                        pass
+
+                try:
+                        rfp.document2 = request.FILES['supporting_document2']
+                except:
+                        pass                
+                
+                try:
+                        rfp.document3 = request.FILES['supporting_document3']
+                except:
+                        pass                
+                
+                try:
+                        rfp.document4 = request.FILES['supporting_document4']
+                except:
+                        pass                
+                        
+                try:
+                        rfp.document5 = request.FILES['supporting_document5']
+                except:
+                        pass
+
+
                 rfp.save()
 
                 email_list = []
@@ -552,7 +579,12 @@ def rfp_approval_lineitems(request, rfp_no=None):
                                 'priority',
                                 'reference',
                                 'rfp_type',
-                                'rfp_creation_details__created_by__username')                  
+                                'rfp_creation_details__created_by__username',
+                                'document1',
+                                'document2',
+                                'document3',
+                                'document4',
+                                'document5')                  
                         context['rfp_no'] = rfp_no
                         context['lineitems'] = rfp_lineitems
                         context['rfp_details'] = rfp

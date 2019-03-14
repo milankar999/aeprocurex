@@ -81,6 +81,13 @@ class RFP(models.Model):
     single_vendor_approval = models.CharField(max_length=10,default='No')
     single_vendor_reason = models.TextField(null=True,blank=True)
 
+    #attachment
+    document1 = models.FileField(upload_to='rfp/',null=True,blank=True)
+    document2 = models.FileField(upload_to='rfp/',null=True,blank=True)
+    document3 = models.FileField(upload_to='rfp/',null=True,blank=True)
+    document4 = models.FileField(upload_to='rfp/',null=True,blank=True)
+    document5 = models.FileField(upload_to='rfp/',null=True,blank=True)
+
     def __str__(self):
         return self.rfp_no + '     ' + self.customer.name
 

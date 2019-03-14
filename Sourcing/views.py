@@ -42,9 +42,15 @@ def rfp_pending_lineitems(request,rfp_no=None):
         if type == 'Sourcing':
                 if request.method == "GET":
                         rfp_lineitems = RFPLineitem.objects.filter(rfp_no=rfp_no)
+
+                        rfp = RFP.objects.get(rfp_no=rfp_no)
+                        context['rfp'] = rfp
+
+                        
                         context['rfp_no'] = rfp_no
                         context['lineitems'] = rfp_lineitems
                         return render(request,"Sourcing/Sourcing/pending_lineitems.html",context)
+
 
 @login_required(login_url="/employee/login/")
 def lineitem_edit_tax(request,rfp_no=None,lineitem_id=None):
