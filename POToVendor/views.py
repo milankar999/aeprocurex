@@ -1327,7 +1327,7 @@ def add_comments(pdf,y,po_number,comments):
         return(y)
 
 #Terms and Conditions
-def add_terms_conditions(pdf,y,po_number,mode_of_transport,installation,inco_terms):
+def add_terms_conditions(pdf,y,po_number,mode_of_transport,installation,inco_terms,terms_of_payment):
         pdf.setFillColor(HexColor('#E4E4E4'))
         y = y -15
         pdf.rect(10,y,570,15, stroke=0, fill=1)
@@ -1352,7 +1352,7 @@ def add_terms_conditions(pdf,y,po_number,mode_of_transport,installation,inco_ter
                 #Page Break
                 if y < 50:
                         y = add_new_page(pdf,po_number)
-
+                pdf.setFont('Helvetica', 8)
                 pdf.drawString(12,y,'Mode of Transport : ' + mode_of_transport)
                 y = y - 10
         except:
@@ -1362,7 +1362,18 @@ def add_terms_conditions(pdf,y,po_number,mode_of_transport,installation,inco_ter
                 #Page Break
                 if y < 50:
                         y = add_new_page(pdf,po_number)
+                pdf.setFont('Helvetica', 8)
                 pdf.drawString(12,y,'Installation : ' + installation)
+                y = y - 10
+        except:
+                pass
+
+        try:
+                #Page Break
+                if y < 50:
+                        y = add_new_page(pdf,po_number)
+                pdf.setFont('Helvetica', 8)
+                pdf.drawString(12,y,'Terms of Payment : ' + terms_of_payment)
                 y = y - 10
         except:
                 pass
@@ -1652,7 +1663,8 @@ def PO_Generator(po_number):
                 po_number,
                 vpo_object.mode_of_transport,
                 vpo_object.installation,
-                vpo_object.inco_terms
+                vpo_object.inco_terms,
+                vpo_object.terms_of_payment
         )
         y = add_delivery_instruction(
                 pdf,

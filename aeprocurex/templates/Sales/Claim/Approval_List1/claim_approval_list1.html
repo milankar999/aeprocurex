@@ -56,7 +56,16 @@
                                 <td>{{claim.description}}</td>
                                 <td>{{claim.total_basic_amount}}</td>
                                 <td>{{claim.applicable_gst_value}}</td>
-                                <td><a href="/api/media/{{claim.document}}" target="-blank">Click Here</a></td>
+
+                                <td>
+                                  {% ifnotequal claim.document "" %}
+                                    {% ifnotequal claim.document "claim/none.jpg" %}
+                                      <a href="/api/media/{{claim.document}}" target="-blank">Click Here</a>
+                                    {% endifnotequal %}
+                                  {% endifnotequal %}
+                                </td>
+
+                                
                                 <td>
                                     <form method="POST" action="/expences/1st_stage/{{claim.id}}/reject/">
                                       {% csrf_token %}

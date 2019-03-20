@@ -502,7 +502,7 @@ def rfp_generate(request, rfp_no=None):
                 ' At : ' + str(rfp.rfp_creation_details.creation_date) + ' '\
                 '</strong></span><span style="color: #0000ff;">'\
                 '<p><span style="color: #0000ff;"><strong>RFP No : '+ rfp_no +'</strong></span></p>'\
-                '<p><span style="color: #0000ff;"><strong>RFP Type : '+ data['rfp_type'] +'</strong></span></p>'\
+                '<p><span style="color: #0000ff;"><strong>Enquiry Type : '+ data['rfp_type'] +'</strong></span></p>'\
                 '<p><span style="color: #0000ff;"><strong>Customer : '+ rfp.customer.name +'</strong></span></p>'\
                 '<p><span style="color: #0000ff;"><strong>Requester : '+ rfp.customer_contact_person.name +'</strong></span></p>'\
                 '<table id="t01">'\
@@ -699,6 +699,7 @@ def rfp_approve(request, rfp_no=None):
                         rfp = RFP.objects.get(rfp_no=rfp_no)
                         rfpapprovaldetail = RFPApprovalDetail.objects.create(id=rfp_no+str(random.randint(1000,99999)),approved_by=user)
                         rfp.enquiry_status = 'Approved'
+                        rfp.rfp_approval_details = rfpapprovaldetail
                         rfp.rfp_keyaccounts_details = keyaccounts
                         rfp.rfp_assign1 = assign1
                         if data['assign2'] != '' :
@@ -765,7 +766,7 @@ def rfp_approve(request, rfp_no=None):
                                 i = i + 1
                         email_body = email_body + '</table>'\
                         '</body>'
-                        msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['sales.p@a/eprocurex.com','milan.kar@aeprocurex.com'])
+                        msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['crm.p@aeprocurex.com','sales.p@aeprocurex.com','milan.kar@aeprocurex.com'])
                         msg.content_subtype = "html"  # Main content is now text/html
                         msg.send()
                         context['message'] = 'RFP No ' + rfp_no + ' has been approved successfully'

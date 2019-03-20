@@ -19,6 +19,7 @@
                       <thead>
                         <tr>
                           <th></th>
+                          <th></th>
                           <th>Vendor Name</th>
                           <th>Location</th>
                           <th>Contact Person</th>
@@ -33,6 +34,9 @@
                                   <a href="/sourcing/{{rfp_no}}/lineitems/vendor_quotation/{{supplier.id}}/edit/" data-toggle="tooltip" data-placement="top" title="Edit"> <span class="glyphicon glyphicon-pencil" style="color: orange"></span></a> &nbsp;
                                   <a href="/sourcing/{{rfp_no}}/lineitems/vendor_quotation/{{supplier.id}}/view/" data-toggle="tooltip" data-placement="top" title="View"> <span class="glyphicon glyphicon-play-circle" style="color: blue"></span></a> &nbsp;
                                   <a href="/sourcing/{{rfp_no}}/lineitems/vendor_quotation/{{supplier.id}}/delete/" data-toggle="tooltip" data-placement="top" title="Delete"> <span class="glyphicon glyphicon-trash" style="color: red"></span></a>
+                                </td>
+                                <td>
+                                  <a href="/sourcing/{{rfp_no}}/lineitems/vendor_quotation/{{supplier.id}}/rfq/product_selection/" data-toggle="tooltip" data-placement="top" title="Get RFQ"> <span class="glyphicon glyphicon-copy" style="color: green"></span></a>
                                 </td>
                                 <td>{{supplier.supplier__name}}</td>
                                 <td>{{supplier.supplier__location}}</td>

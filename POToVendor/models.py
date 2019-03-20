@@ -34,6 +34,7 @@ class VPO(models.Model):
         mode_of_transport = models.CharField(max_length=200,null=True,blank=True)
         inco_terms = models.CharField(max_length=200,null=True,blank=True)
         installation = models.CharField(max_length=200,null=True,blank=True)
+        terms_of_payment = models.CharField(max_length=200,null=True,blank=True)
 
         currency = models.CharField(max_length=20,default='INR')
 

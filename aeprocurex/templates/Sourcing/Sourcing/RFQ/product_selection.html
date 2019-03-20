@@ -1,0 +1,105 @@
+{% extends 'Sourcing/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="">
+        <label style="text-align:center">Please Select Products For This Vendor</label>
+        <div class="container">
+                {% if message %}
+                <div class="alert alert-{{message_type}}">
+                    <strong>{{message}}</strong>
+                </div>
+                {% endif %}
+        </div>
+            <div class="table-responsive">          
+                    <table id="lineitems" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Product Title</th>
+                          <th>Description</th>
+                          <th>Model</th>
+                          <th>Brand</th>
+                          <th>Product Code</th>
+                          <th>Part no</th>
+                          <th>Category</th>
+                          <th>HSN Code</th>
+                          <th>GST</th>
+                          <th>UOM</th>
+                          <th>Quantity</th>
+                          <th>Target Price</th>
+                          <th>Remarks</th>
+                          <th>Customer Lead Time</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for item in rfp_lineitems %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" 
+                                    name="lineitem"
+                                    value="{{item.lineitem_id}}"
+                                    change="getCheckedCheckboxesFor('lineitem')"
+                                    />
+                                </td>
+                                <td>{{item.product_title}}</td>
+                                <td>{{item.description}}</td>
+                                <td>{{item.model}}</td>
+                                <td>{{item.brand}}</td>
+                                <td>{{item.product_code}}</td>
+                                <td>{{item.part_no}}</td>
+                                <td>{{item.category}}</td>
+                                <td>{{item.hsn_code}}</td>
+                                <td>{{item.gst}}</td>
+                                <td>{{item.uom}}</td>
+                                <td>{{item.quantity}}</td>
+                                <td>{{item.target_price}}</td>
+                                <td>{{item.remarks}}</td>
+                                <td>{{item.customer_lead_time}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Pending RFP Approval Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+<div class="container">
+    
+        <button type="submit" class="btn btn-success pull-right" id="preceed" onclick="getCheckedCheckboxesFor('lineitem');">Proceed To Generate PFQ &nbsp;<span class="glyphicon glyphicon-forward"></span></button>
+    
+</div>
+       <br>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#lineitems').DataTable();
+            });
+
+            function redirect(){
+                window.location.href = "/sourcing/{{rfp_no}}/lineitems/vendor_quotation/{{sourcing_id}}/rfq/generate_rfq/";
+            }
+
+            function getCheckedCheckboxesFor(checkboxName) {
+                var checkboxes = document.querySelectorAll('input[name="' + checkboxName + '"]:checked'), values = [];
+                Array.prototype.forEach.call(checkboxes, function(el) {
+                    values = values + ',' + el.value;
+                });
+                if(values.length==0){
+                    alert('Minimum one Product You Have To Select');
+                }
+                else{
+                    console.log(values);
+                    //alert(values);
+                    data = $.post(
+                    '',
+                    data = {
+                    'lineitem' : values,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    data_type = 'data/json')
+                    document.getElementById("preceed").disabled = true;
+                    setTimeout(redirect, 1000);
+                }
+            }
+        </script>     
+{% endblock content %}

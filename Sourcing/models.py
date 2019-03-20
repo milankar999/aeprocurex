@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from Supplier.models import *
 from RFP.models import *
+import uuid
 
 class Sourcing(models.Model):
     id = models.CharField(max_length=200, null = False, blank = False, primary_key=True)
@@ -42,3 +43,20 @@ class SourcingLineitem(models.Model):
 
     def __str__(self):
         return self.product_title + ' ' + str(self.price1)
+
+class RFQ(models.Model):
+    id = models.CharField(max_length=200,primary_key=True)
+    sourcing = models.ForeignKey(Sourcing, on_delete = models.CASCADE)
+
+    date = models.DateTimeField(auto_now_add=True,null=True,blank=True)
+
+    def __str__(self):
+        return self.id
+
+class RFQLineitem(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    rfq = models.ForeignKey(RFQ, on_delete= models.CASCADE)
+    rfp_lineitem = models.ForeignKey(RFPLineitem, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.id

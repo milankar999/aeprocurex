@@ -32,7 +32,7 @@ class ClaimDetails(models.Model):
     total_basic_amount = models.FloatField(null=False,blank=False)
     applicable_gst_value = models.FloatField(null=False,blank=False, default = 0)
     date = models.DateField()
-    document = models.FileField(upload_to='claim/',default='claim/none.jpg')
+    document = models.FileField(upload_to='claim/',null=True,blank=True)
 
     status = models.CharField(max_length=200,default='Requested')
     created_at = models.DateTimeField(auto_now_add=True)

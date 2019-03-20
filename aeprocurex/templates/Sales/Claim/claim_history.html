@@ -40,7 +40,13 @@
                             <td>{{item.total_basic_amount}}</td>
                             <td>{{item.applicable_gst_value}}</td>
                             <td>{{item.status}}</td>
-                            <td><a href="/api/media/{{item.document}}" target="-blank">Click Here</a></td>
+                            <td>
+                              {% ifnotequal item.document "" %}
+                                {% ifnotequal item.document "claim/none.jpg" %}
+                                  <a href="/api/media/{{item.document}}" target="-blank">Click Here</a>
+                                {% endifnotequal %}
+                              {% endifnotequal %}
+                            </td>
                         </tr>
                       {% empty %}
                         <p>No Pending RFP Approval Found</p>

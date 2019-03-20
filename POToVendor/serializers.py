@@ -311,7 +311,8 @@ class VPOTermsConditionsSerializer(serializers.ModelSerializer):
             'mode_of_transport',
             'inco_terms',
             'installation',
-            'comments'
+            'comments',
+            'terms_of_payment'
         ]
         read_only_fields = (
             'id',

@@ -15,6 +15,19 @@ import random
 from django.conf import settings
 import openpyxl
 
+from django.db.models import F
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.colors import HexColor
+from reportlab.platypus import Image, Paragraph, Table, TableStyle
+from reportlab.lib.units import mm, inch
+from reportlab.lib import colors
+import textwrap
+from django.views.static import serve
+from django.http import FileResponse
+#from datetime import datetime
+from num2words import num2words
+
 @login_required(login_url="/employee/login/")
 def rfp_pending_list(request):
         context={}
@@ -50,7 +63,6 @@ def rfp_pending_lineitems(request,rfp_no=None):
                         context['rfp_no'] = rfp_no
                         context['lineitems'] = rfp_lineitems
                         return render(request,"Sourcing/Sourcing/pending_lineitems.html",context)
-
 
 @login_required(login_url="/employee/login/")
 def lineitem_edit_tax(request,rfp_no=None,lineitem_id=None):
@@ -90,7 +102,13 @@ def vendor_selection(request,rfp_no=None):
                         supplier_list = SupplierProfile.objects.all()
                         context['rfp_no'] = rfp_no
 
-                        selected_supplier_list = Sourcing.objects.filter(rfp=rfp_no).values('id','supplier__name','supplier__location','supplier_contact_person__name','offer_reference','offer_date')
+                        selected_supplier_list = Sourcing.objects.filter(rfp=rfp_no).values(
+                                'id',
+                                'supplier__name',
+                                'supplier__location',
+                                'supplier_contact_person__name',
+                                'offer_reference',
+                                'offer_date')
                         context['selected_supplier_list'] = selected_supplier_list
 
                         context['Supplier_list'] = supplier_list
@@ -186,6 +204,394 @@ def offer_reference(request,rfp_no=None,vendor_id=None,contact_person_id=None):
                         sourcing_id = rfp_no + vendor_id
                         Sourcing.objects.create(id=sourcing_id,rfp=RFP.objects.get(rfp_no=rfp_no),supplier=SupplierProfile.objects.get(id=vendor_id),supplier_contact_person=SupplierContactPerson.objects.get(id=contact_person_id),offer_reference=data['reference'],offer_date=data['oDate'],created_by=user)
                         return HttpResponseRedirect(reverse('vendor-selection', args=[rfp_no]))
+
+#Add Front Page Header
+def Add_Header(pdf):
+        pdf.drawInlineImage("static/image/aeprocurex.jpg",360,750,220,70)
+        pdf.setFont('Helvetica-Bold', 13)
+        pdf.drawString(10,763,"AEPROCUREX SOURCING PRIVATE LIMITED")
+
+        pdf.setFont('Helvetica',9)
+        #pdf.setFillColor(HexColor('#000000'))
+        pdf.drawString(10,752,"Regd. Office: Shankarappa Complex, No.4")
+        pdf.drawString(10,741,"Hosapalya Main Road, Opp. To Om Shakti Temple")
+        pdf.drawString(10,730,"HSR Layout Extension,Bangalore - 560068")
+
+        pdf.drawString(10,719,"Telephone: 080-43743314, +91 9964892600")
+        pdf.drawString(10,708,"E-mail: sales.p@aeprocurex.com")
+        pdf.drawString(10,697,"GST No. 29AAQCA2809L1Z6")
+        pdf.drawString(10,686,"PAN No. - AAQCA2809L")
+        pdf.drawString(10,675,"CIN No.-U74999KA2017PTC108349")
+
+        pdf.setFont('Helvetica-Bold', 20)
+        pdf.drawString(300,700,"REQUEST FOR QUOTATION")
+        #pdf.setFillColor(yellow)
+        pdf.rect(300,696,275,1, stroke=1, fill=1)
+
+#Add Footer 
+def Add_Footer(pdf):
+        pdf.setFont('Helvetica', 10)
+        pdf.drawString(250,15,'aeprocurex.com')
+        pdf.drawString(520,15,'Page-No : ' + str(pdf.getPageNumber()))
+
+#Add Request Information
+def request_information(pdf,request_no, request_date,vendor_code):
+        pdf.setFont('Helvetica', 9)
+        pdf.drawString(300,680,"Request No :")
+        pdf.drawString(300,667,"Request Date :")
+        pdf.drawString(300,645,"Vendor Code :")
+
+        pdf.setFont('Helvetica-Bold', 9)
+        try:
+                pdf.drawString(390,680,request_no)
+        except:
+                pdf.drawString(390,680,"")
+        try:
+                pdf.drawString(390,667,str(request_date.strftime('%d, %b %Y')))
+        except:
+                pdf.drawString(390,667,"")
+        try:
+                pdf.drawString(390,645,vendor_code)
+        except:
+                pdf.drawString(390,645,"")
+
+#Add Request To
+def Add_To(pdf,supplier_name,address,gst):
+        pdf.setFont('Helvetica-Bold', 13)
+        pdf.drawString(10,622,'REQUEST TO')
+        pdf.rect(10,618,85,0.5, stroke=1, fill=1)
+        #pdf.setFont('Helvetica-Bold', 13)
+
+        pdf.setFont('Helvetica-Bold', 10)
+        pdf.drawString(10,605,supplier_name)
+        pdf.setFont('Helvetica', 9)
+    
+        wrapper = textwrap.TextWrapper(width=115) 
+        word_list = wrapper.wrap(text=address)
+        y = 590 
+        for element in word_list:
+                pdf.drawString(10,y,element)
+                y = y - 13
+        y = y -3
+        try:
+                pdf.drawString(10,y,'GST # :' + gst)
+                y = y - 13
+        except:
+                pass
+        y = y - 3
+        return(y)
+
+#ADD greeting
+def Add_grt(pdf,y):
+        pdf.setFont('Helvetica-Bold', 8)
+        pdf.drawString(10,y,"Dear Sir / Madam,")
+        y = y - 9
+        pdf.drawString(30,y,"Please Provide the Price/s for following listed items as soon as possible")
+        y = y - 9
+        return(y)
+
+#Add Table Header
+def Add_Table_Header(pdf,y):
+        pdf.rect(10,y,570,1, stroke=1, fill=1)
+        pdf.setFillColor(HexColor('#E4E4E4'))
+        pdf.rect(10,y-31,570,30, stroke=0, fill=1)
+        #Colum headers
+        pdf.setFillColor(HexColor('#000000'))
+        pdf.setFont('Helvetica-Bold', 8)
+        pdf.drawString(12,y-17,'SL #')
+        pdf.drawString(60,y-17,'Material / Description / Specification')
+        pdf.drawString(400,y-17,'Quantity')
+        pdf.drawString(520,y-17,'UOM')
+        y = y - 31
+        pdf.rect(10,y,570,0.1, stroke=1, fill=1)
+        y = y - 10
+        return(y)
+
+#Add Lineitem
+def add_lineitem(pdf,y,i,request_number,product_title,description,model,brand,product_code,quantity,uom):
+        
+        pdf.setFont('Helvetica', 9)
+        pdf.drawString(12,y,str(i))
+        pdf.drawString(400,y,str(quantity))
+        pdf.drawString(520,y,uom.upper())
+
+        #Product title
+        material_wrapper = textwrap.TextWrapper(width=45)
+        title_word_list = material_wrapper.wrap(text=product_title)
+    
+        #Page Break
+        if y < 50:
+                y = add_new_page(pdf,request_number)
+                y = Add_Table_Header(pdf,y)
+                pdf.setFont('Helvetica', 9)
+
+        for element in title_word_list:
+                pdf.drawString(40,y,element)
+                y = y - 11
+        
+        
+                #Page Break
+                if y < 50:
+                        y = add_new_page(pdf,request_number)
+                        y = Add_Table_Header(pdf,y)
+                        pdf.setFont('Helvetica', 9)
+        
+        y = y + 10
+        
+        #Description
+        description_word_list = material_wrapper.wrap(description)
+        for element in description_word_list:
+                pdf.drawString(40,y-10,element)
+                y = y - 11
+    
+                #Page Break
+                if y < 50:
+                        y = add_new_page(pdf,request_number)
+                        y = Add_Table_Header(pdf,y)
+                        pdf.setFont('Helvetica', 9)
+        y=y-3
+        #Make
+        if brand != '':
+                try:
+                        brand_word_list = material_wrapper.wrap('Make :' + brand)
+                        for element in brand_word_list:
+                
+                                pdf.drawString(40,y-10,element)
+                                y = y - 11
+
+                                #Page Break
+                                if y < 50:
+                                        y = add_new_page(pdf,request_number)
+                                        y = Add_Table_Header(pdf,y)
+                                        pdf.setFont('Helvetica', 9)
+                                
+                        y=y-3
+                except:
+                        pass
+
+        #Model
+        if model != '':
+                try:
+                        model_word_list = material_wrapper.wrap('Model :' + model)
+                        for element in model_word_list:
+                
+                                pdf.drawString(40,y-10,element)
+                                y = y - 11
+
+                                #Page Break
+                                if y < 50:
+                                        y = add_new_page(pdf,request_number)
+                                        y = Add_Table_Header(pdf,y)
+                                        pdf.setFont('Helvetica', 9)
+                                
+                        y=y-3
+                except:
+                        pass
+
+        #Product Code
+        if product_code != '':
+                try:
+                        product_code_word_list = material_wrapper.wrap('Product Code :' + product_code)
+                        for element in product_code_word_list:
+                
+                                pdf.drawString(40,y-10,element)
+                                y = y - 11
+
+                                #Page Break
+                                if y < 50:
+                                        y = add_new_page(pdf,request_number)
+                                        y = Add_Table_Header(pdf,y)
+                                        pdf.setFont('Helvetica', 9)
+                                
+                        y=y-3
+                except:
+                        pass
+        
+        pdf.rect(10,y,568,0.1, stroke=1, fill=1)
+        y = y - 10
+        return(y)
+
+#Add New Page
+def add_new_page(pdf,request_number):
+        pdf.showPage()
+        pdf.drawInlineImage("static/image/aeprocurex.jpg",360,750,220,70)
+        Add_Footer(pdf)
+        pdf.setFont('Helvetica-Bold', 13)
+        pdf.drawString(10,763,'Request NO : ' + request_number)
+        pdf.line(10,748,580,748)
+        return(740)
+
+#add requester
+def add_requester(pdf,y,request_number,requester_name,email,phone):
+        #Page Break
+        if y < 100:
+                y = add_new_page(pdf,request_number)
+                pdf.setFont('Helvetica', 9)
+        pdf.setFont('Helvetica-Bold', 8)
+
+        pdf.drawString(20,y,"Note : Kindly Mention Pack Size, MOQ, Lead Time, MRP, HSN Code and GST(%) In Your Offer")
+        y = y - 10
+
+        try:
+                pdf.drawString(400,y,"Requester :")
+                pdf.drawString(450,y,requester_name)
+                y = y - 10
+        except:
+                y = y - 10
+        
+        try:
+                pdf.drawString(400,y,"Email :")
+                pdf.drawString(450,y,email)
+                y = y - 10
+        except:
+                y = y - 10
+        
+        try:
+                pdf.drawString(400,y,"Contact No:")
+                pdf.drawString(450,y,phone)
+                y = y - 10
+        except:
+                y = y - 20
+
+        try:
+                pdf.drawString(190,y,"[ THIS IS A SYSTEM GENERATED REQUEST ]")
+                y = y - 10
+        except:
+                y = y - 10
+        return(y)        
+
+def Generate_RFQ(rfq_no):
+        rfq = RFQ.objects.get(id = rfq_no)
+        pdf = canvas.Canvas("media/rfq/" + rfq_no + ".pdf", pagesize=A4)
+        pdf.setTitle(rfq_no + '.pdf')
+        Add_Header(pdf)
+        Add_Footer(pdf)
+        request_information(
+                pdf,
+                rfq_no,
+                rfq.date,
+                rfq.sourcing.supplier.id
+                )
+        y = Add_To(
+                pdf,
+                rfq.sourcing.supplier.name,
+                rfq.sourcing.supplier.address,
+                rfq.sourcing.supplier.gst_number
+                )
+        y = Add_grt(
+                pdf,
+                y)
+        y = Add_Table_Header(pdf,y)
+
+        rfq_lineitem = RFQLineitem.objects.filter(rfq=rfq)
+
+        i = 1
+        for item in rfq_lineitem:
+                product_title = item.rfp_lineitem.product_title
+                description = item.rfp_lineitem.description
+                model = item.rfp_lineitem.model
+                brand = item.rfp_lineitem.brand
+                product_code = item.rfp_lineitem.product_code
+
+                quantity = item.rfp_lineitem.quantity
+                uom = item.rfp_lineitem.uom
+
+                y = add_lineitem(
+                        pdf,
+                        y,
+                        i,
+                        rfq_no,
+                        product_title,
+                        description,
+                        model,
+                        brand,
+                        product_code,
+                        quantity,
+                        uom)
+                i = i + 1
+
+        add_requester(
+                pdf,
+                y,
+                rfq_no,
+                rfq.sourcing.rfp.rfp_assign1.assign_to1.first_name + ' ' + rfq.sourcing.rfp.rfp_assign1.assign_to1.last_name,
+                rfq.sourcing.rfp.rfp_assign1.assign_to1.email,
+                rfq.sourcing.rfp.rfp_assign1.assign_to1.profile.office_mobile
+                )
+
+        pdf.showPage()
+        pdf.save()
+
+@login_required(login_url="/employee/login/")
+def rfq_product_selection(request,rfp_no=None,sourcing_id=None):
+        context={}
+        context['sourcing'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        context['rfp_no'] = rfp_no
+        context['sourcing_id'] = sourcing_id
+
+        if type == 'Sourcing':
+                if request.method == "GET":
+                        rfp = RFP.objects.get(rfp_no=rfp_no)
+                        rfp_lineitems = RFPLineitem.objects.filter(rfp_no=rfp)
+                        context['rfp_lineitems'] = rfp_lineitems
+                        #print(rfp_lineitems)
+                        return render(request,"Sourcing/Sourcing/RFQ/product_selection.html",context)
+
+                if request.method == "POST":
+                        data = request.POST
+                        lineitem = data['lineitem']
+                        lineitem_list = lineitem.split(",")
+                        print(lineitem_list)   
+
+                        sourcing = Sourcing.objects.get(id = sourcing_id)
+                        #Delete existing RFQ
+                        rfq_list = RFQ.objects.filter(sourcing = sourcing)
+                        for rq in rfq_list:
+                                rq.delete()
+
+                        rfq_count = RFQ.objects.count()
+                        rfq_id = sourcing.supplier.id + 'RFQ' +str(rfq_count + 1) 
+
+                        print(rfq_id)
+                        rfq = RFQ.objects.create(
+                                id = rfq_id,
+                                sourcing = sourcing
+                        )
+
+                        #RFQ Lineitem Creation
+                        for item in lineitem_list:
+                                if item != '':
+                                        rfp_lineitem = RFPLineitem.objects.get(lineitem_id=item)
+                                        RFQLineitem.objects.create(
+                                                rfq = rfq,
+                                                rfp_lineitem = rfp_lineitem 
+                                        )
+                                                              
+@login_required(login_url="/employee/login/")
+def rfq_generate(request,rfp_no=None,sourcing_id=None):
+        context={}
+        context['sourcing'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        context['rfp_no'] = rfp_no
+        context['sourcing_id'] = sourcing_id
+
+        if type == 'Sourcing':
+                if request.method == 'GET':
+                        sourcing = Sourcing.objects.get(id = sourcing_id)
+                        print(sourcing)
+
+                        rfq = RFQ.objects.get(sourcing=sourcing)
+                        Generate_RFQ(rfq.id)
+                        context['rfq_id'] = rfq.id
+
+                        return render(request,"Sourcing/Sourcing/RFQ/download_rfq.html",context)
 
 @login_required(login_url="/employee/login/")
 def single_price_request(request,rfp_no=None):
@@ -311,7 +717,6 @@ def single_price_request(request,rfp_no=None):
                         msg.send()
                         return HttpResponseRedirect(reverse('vendor-selection', args=[rfp_no]))
 
-
 @login_required(login_url="/employee/login/")
 def single_vendor_approval_list(request):
     context={}
@@ -336,7 +741,6 @@ def single_vendor_approval_list(request):
             print(rfp_list)
             return render(request,"Sales/Sourcing/single_vendor_approval_list.html",context)
 
-
 @login_required(login_url="/employee/login/")
 def single_vendor_approval_details(request,rfp_no=None):
     context={}
@@ -353,7 +757,6 @@ def single_vendor_approval_details(request,rfp_no=None):
             lineitem = RFPLineitem.objects.filter(rfp_no=RFP.objects.get(rfp_no=rfp_no))
             context['rfp_lineitems'] = lineitem
             return render(request,"Sales/Sourcing/single_vendor_approval_details.html",context)
-
 
 @login_required(login_url="/employee/login/")
 def single_vendor_approve(request,rfp_no=None):
@@ -602,7 +1005,6 @@ def single_vendor_history(request):
                         print(rfp_list)
                         return render(request,"Sales/Sourcing/single_vendor_history.html",context)  
 
-
 @login_required(login_url="/employee/login/")
 def vendor_quotation_edit(request,rfp_no=None,sourcing_id=None):
         context={}
@@ -691,7 +1093,6 @@ def vendor_quotation_price_upload(request,rfp_no=None,sourcing_id=None):
                                 i = i + 1
                         return HttpResponseRedirect(reverse('vendor-quotation-edit', args=[rfp_no,sourcing_id]))
 
-
 @login_required(login_url="/employee/login/")
 def vendor_quotation_view(request,rfp_no=None,sourcing_id=None):
         context={}
@@ -726,7 +1127,6 @@ def vendor_quotation_delete(request,rfp_no=None,sourcing_id=None):
                         sourcing_obj = Sourcing.objects.get(id=sourcing_id)
                         sourcing_obj.delete()
                         return HttpResponseRedirect(reverse('vendor-selection', args=[rfp_no]))
-
 
 @login_required(login_url="/employee/login/")
 def vendor_quotation_price_add(request,rfp_no=None,sourcing_id=None,lineitem_id=None):
@@ -763,6 +1163,11 @@ def vendor_quotation_price_add(request,rfp_no=None,sourcing_id=None,lineitem_id=
                         else:
                                 price1 = price_detail['price1']
 
+                        if price_detail['price2'] == '':
+                                price2 = 0
+                        else:
+                                price2 = price_detail['price2']
+
                         SourcingLineitem.objects.create(
                                 id=sourcing_lineitem_id,
                                 sourcing=Sourcing.objects.get(id=sourcing_id),
@@ -778,7 +1183,8 @@ def vendor_quotation_price_add(request,rfp_no=None,sourcing_id=None,lineitem_id=
                                 price_validity = price_detail['price_validity'],
                                 expected_freight = freight,
                                 mrp = mrp,
-                                price1 = price1 )
+                                price1 = price1,
+                                price2 = price2 )
                         return HttpResponseRedirect(reverse('vendor-quotation-edit', args=[rfp_no,sourcing_id]))
 
 @login_required(login_url="/employee/login/")
@@ -817,6 +1223,11 @@ def vendor_quotation_price_edit(request,rfp_no=None,sourcing_id=None,price_id=No
                         else:
                                 price1 = price_detail['price1']
 
+                        if price_detail['price2'] == '':
+                                price2 = 0
+                        else:
+                                price2 = price_detail['price2']
+
                         price_object.product_title=price_detail['product_title']
                         price_object.description=price_detail['description']
                         price_object.model=price_detail['model']
@@ -829,6 +1240,7 @@ def vendor_quotation_price_edit(request,rfp_no=None,sourcing_id=None,price_id=No
                         price_object.expected_freight = freight
                         price_object.mrp = mrp
                         price_object.price1 = price1
+                        price_object.price2 = price2
             
                         price_object.save()
                         return HttpResponseRedirect(reverse('vendor-quotation-edit', args=[rfp_no,sourcing_id]))
@@ -853,7 +1265,6 @@ def vendor_quotation_price_delete(request,rfp_no=None,sourcing_id=None,price_id=
                         price_object.delete()
                         return HttpResponseRedirect(reverse('vendor-quotation-edit', args=[rfp_no,sourcing_id]))
 
-
 @login_required(login_url="/employee/login/")
 def round2(request,rfp_no=None,sourcing_id=None,price_id=None):
         context={}
@@ -875,7 +1286,6 @@ def round2(request,rfp_no=None,sourcing_id=None,price_id=None):
                         sourcing_obj.price2 = data['round2']
                         sourcing_obj.save()
                         return HttpResponseRedirect(reverse('vendor-quotation-edit', args=[rfp_no,sourcing_id]))
-
 
 @login_required(login_url="/employee/login/")
 def sourcing_completed(request,rfp_no=None):

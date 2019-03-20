@@ -111,88 +111,53 @@
             </div>
 
         <div class="container">
-            <!--utton class="btn btn-danger" data-toggle="modal" data-target="#reject">Reject &nbsp;<span class="glyphicon glyphicon-remove"></span></button-->
+            <button class="btn btn-danger" data-toggle="modal" data-target="#reject">Mark As Duplicate &nbsp;<span class="glyphicon glyphicon-remove"></span></button>
             <div class="modal fade" id="reject" role="dialog">
                 <div class="modal-dialog">
                 
                   <!-- Modal content-->
-                  <form method="POST" action="/rfp/{{rfp_no}}/reject/">   
+                  <form method="POST" action="/enquiry_tracker/rfp/{{rfp_no}}/mark_duplicate/">   
                     {% csrf_token %}
                         <div class="modal-content">
                                 <div class="modal-header">
-                                  <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                  <h4 class="modal-title">Mention the reason of Rejection</span></h4>
-                                <div class="modal-body">
-                                    
-                                        <div class="form-group">
-                                            <textarea type="text" class="form-control" id="rejection" name="rejection" required></textarea>
-                                        </div>
+                                  <label>Are You Sure Want to mark as duplicate ?</label>
                                 </div>
                                 <div class="modal-footer">
+                                    {% for info in rfp_details %}
+                                    <label>Current Status {{info.enquiry_status}}</label><br>
+                                    {% endfor %}
                                     <input type="submit" class="btn btn-success" value="Submit">
+                                    <input type="button" class="btn btn-info" data-dismiss="modal" value="Cancel">
                                 </div>
-                              </div>                    
+                                                 
                         </div>
                   </form>
               </div>
             </div>
 
-            <!--button class="btn btn-success" data-toggle="modal" data-target="#approve">Approve &nbsp;<span class="glyphicon glyphicon-ok"></span></button-->
+            <button class="btn btn-success" data-toggle="modal" data-target="#approve">Mark As Closed &nbsp;<span class="glyphicon glyphicon-ok"></span></button>
             <div class="modal fade" id="approve" role="dialog">
                     <div class="modal-dialog">
                     
                       <!-- Modal content-->
-                      <form method="POST" action="/rfp/{{rfp_no}}/approve/">   
+                      <form method="POST" action="/enquiry_tracker/rfp/{{rfp_no}}/mark_closed/">   
                         {% csrf_token %}
-                            <div class="modal-content"> 
+                            <div class="modal-content">
                                     <div class="modal-header">
-                                      <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                      <h4 class="modal-title">Please Mention these details</span></h4>
-                                    <div class="modal-body">
-                                        
-                                            <div class="form-group">
-                                                <label class="form-input" for="assign1">Assign to 1 <a style="color: red">*</a></label>
-                                                <select class="form-control" id="assign1" name="assign1" required>
-                                                    <option></option>
-                                                    {% for user in users %}
-                                                    <option>{{user.username}}</option>
-                                                    {% endfor %}
-                                                </select>
-
-                                                <label class="form-input" for="assign2">Assign to 2 (Optional) </label>
-                                                <select class="form-control" id="assign2" name="assign2">
-                                                    <option></option>
-                                                    {% for user in users %}
-                                                    <option>{{user.username}}</option>
-                                                    {% endfor %}
-                                                </select>
-
-                                                <label class="form-input" for="assign3">Assign to 3 (Optional) </label>
-                                                <select class="form-control" id="assign3" name="assign3">
-                                                    <option></option>.
-                                                    {% for user in users %}
-                                                    <option>{{user.username}}-{{user.first_name}}</option>
-                                                    {% endfor %}
-                                                </select>
-                                                <hr>
-                                                <label class="form-input" for="keyPerson">Key Accounts Person <a style="color: red">*</a></label>
-                                                <select class="form-control" id="keyPerson" name="keyPerson" required>
-                                                    <option></option>
-                                                    {% for user in keyaccounts %}
-                                                    <option>{{user.username}}</option>
-                                                    {% endfor %}
-                                                </select>
-                                                
-                                            </div>
+                                      <label>Are You Sure Want to mark as closed ?</label>
                                     </div>
                                     <div class="modal-footer">
+                                        {% for info in rfp_details %}
+                                        <label>Current Status {{info.enquiry_status}}</label><br>
+                                        {% endfor %}
                                         <input type="submit" class="btn btn-success" value="Submit">
+                                        <input type="button" class="btn btn-info" data-dismiss="modal" value="Cancel">
                                     </div>
-                                  </div>                    
+                                                     
                             </div>
                       </form>
                   </div>
-                </div>
+            </div>
         </div><br>
         </div>
         <script type="text/javascript">
