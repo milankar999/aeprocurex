@@ -11,7 +11,7 @@
         </div>
         {% endif %}
         <h2>Please Select The Receiver for {{CustomerName}} <button class="btn btn-success" data-toggle="modal" data-target="#ADDNew">ADD New &nbsp;<span class="glyphicon glyphicon-plus"></span></button></h2> 
-        <a role="button" href="/po_from_customer/create/{{CustomerID}}/{{ContactPersonID}}/none/quotation_selection/" class="btn btn-danger">Skip Receiver&nbsp; <span class="glyphicon glyphicon-forward"></span></a><br><br>
+        <a role="button" href="/po_from_customer/create/{{CustomerID}}/{{ContactPersonID}}/none/process/" class="btn btn-danger">Skip Receiver&nbsp; <span class="glyphicon glyphicon-forward"></span></a><br><br>
     
         <!-- Modal -->
     <div class="modal fade" id="ADDNew" role="dialog">
@@ -75,7 +75,7 @@
                      {% for user in receiver %}
                        <tr>
                           <td>
-                              <a href="/po_from_customer/create/{{CustomerID}}/{{ContactPersonID}}/{{user.id}}/quotation_selection/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                              <a href="/po_from_customer/create/{{CustomerID}}/{{ContactPersonID}}/{{user.id}}/process/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
                            </td>
                            <td>{{user.id}}</td>
                            <td>{{user.person_name}}</td>

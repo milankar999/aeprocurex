@@ -121,6 +121,7 @@ def coq_pending_details(request,rfp_no=None):
                         unit_price = lineitem.price1,
                         lead_time = lineitem.lead_time,
                         margin = 2.0,
+                        creation_time = lineitem.creation_time
                         )
 
             else:
@@ -143,7 +144,8 @@ def coq_pending_details(request,rfp_no=None):
                         uom = lineitem.rfp_lineitem.uom,
                         expected_freight = lineitem.expected_freight,
                         unit_price = lineitem.price2,
-                        lead_time = lineitem.lead_time
+                        lead_time = lineitem.lead_time,
+                        creation_time = lineitem.creation_time
                         )
             rfp_obj = RFP.objects.get(rfp_no=rfp_no)
             rfp_obj.enquiry_status = 'COQ Done'

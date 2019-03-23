@@ -41,6 +41,8 @@ class SourcingLineitem(models.Model):
     price2 = models.FloatField(null = True, blank = True)
     mark = models.CharField(max_length = 10, default='False')
 
+    creation_time = models.DateTimeField(null=True,blank=True)
+
     def __str__(self):
         return self.product_title + ' ' + str(self.price1)
 

@@ -16,36 +16,36 @@ def user_login(request):
                 context['login_user_name'] = u.first_name + ' ' + u.last_name
                 if type == 'Sales':
                         rfp_approval_pending_count = RFP.objects.filter(enquiry_status = 'Created').count()
-                        rfp_approval_pending = RFP.objects.filter(enquiry_status = 'Created')
+                        #rfp_approval_pending = RFP.objects.filter(enquiry_status = 'Created')
 
                         rfp_sourcing_pending_count = RFP.objects.filter(enquiry_status = 'Approved').count()
-                        rfp_sourcing_pending = RFP.objects.filter(enquiry_status = 'Approved')
+                        #rfp_sourcing_pending = RFP.objects.filter(enquiry_status = 'Approved')
 
                         rfp_coq_pending_count = RFP.objects.filter(enquiry_status = 'Sourcing_Completed').count()
-                        rfp_coq_pending = RFP.objects.filter(enquiry_status = 'Sourcing_Completed')
+                        #rfp_coq_pending = RFP.objects.filter(enquiry_status = 'Sourcing_Completed')
 
                         rfp_quotation_pending_count = RFP.objects.filter(enquiry_status = 'COQ Done').count()
-                        rfp_quotation_pending = RFP.objects.filter(enquiry_status = 'COQ Done')
+                        #rfp_quotation_pending = RFP.objects.filter(enquiry_status = 'COQ Done')
         
                         context['rfp_approval_pending_count'] = rfp_approval_pending_count
-                        context['rfp_approval_pending'] = rfp_approval_pending
+                        #context['rfp_approval_pending'] = rfp_approval_pending
 
                         context['rfp_sourcing_pending_count'] = rfp_sourcing_pending_count
-                        context['rfp_sourcing_pending'] = rfp_sourcing_pending
+                        #context['rfp_sourcing_pending'] = rfp_sourcing_pending
 
                         context['rfp_coq_pending_count'] = rfp_coq_pending_count
-                        context['rfp_coq_pending'] = rfp_coq_pending
+                        #context['rfp_coq_pending'] = rfp_coq_pending
 
                         context['rfp_quotation_pending_count'] = rfp_quotation_pending_count
-                        context['rfp_quotation_pending'] = rfp_quotation_pending
+                        #context['rfp_quotation_pending'] = rfp_quotation_pending
                         return render(request,"Sales/sales_home.html",context)
 
                 if type == 'Sourcing':
                         rfp_sourcing_pending_count = RFP.objects.filter(enquiry_status = 'Approved', rfp_assign1__assign_to1 = u).count()
-                        rfp_sourcing_pending = RFP.objects.filter(enquiry_status = 'Approved', rfp_assign1__assign_to1 = u)
+                        #rfp_sourcing_pending = RFP.objects.filter(enquiry_status = 'Approved', rfp_assign1__assign_to1 = u)
 
                         context['rfp_sourcing_pending_count'] = rfp_sourcing_pending_count
-                        context['rfp_sourcing_pending'] = rfp_sourcing_pending
+                        #context['rfp_sourcing_pending'] = rfp_sourcing_pending
                         return render(request,"Sourcing/Sourcing_home.html",context)
 
                 if type == 'CRM':
@@ -81,35 +81,35 @@ def success(request):
     
         if type == 'Sales':
                 rfp_approval_pending_count = RFP.objects.filter(enquiry_status = 'Created').count()
-                rfp_approval_pending = RFP.objects.filter(enquiry_status = 'Created')
+                #rfp_approval_pending = RFP.objects.filter(enquiry_status = 'Created')
 
                 rfp_sourcing_pending_count = RFP.objects.filter(enquiry_status = 'Approved').count()
-                rfp_sourcing_pending = RFP.objects.filter(enquiry_status = 'Approved')
+                #rfp_sourcing_pending = RFP.objects.filter(enquiry_status = 'Approved')
 
                 rfp_coq_pending_count = RFP.objects.filter(enquiry_status = 'Sourcing_Completed').count()
-                rfp_coq_pending = RFP.objects.filter(enquiry_status = 'Sourcing_Completed')
+                #rfp_coq_pending = RFP.objects.filter(enquiry_status = 'Sourcing_Completed')
 
                 rfp_quotation_pending_count = RFP.objects.filter(enquiry_status = 'COQ Done').count()
-                rfp_quotation_pending = RFP.objects.filter(enquiry_status = 'COQ Done')
+                #rfp_quotation_pending = RFP.objects.filter(enquiry_status = 'COQ Done')
         
                 context['rfp_approval_pending_count'] = rfp_approval_pending_count
-                context['rfp_approval_pending'] = rfp_approval_pending
+                #context['rfp_approval_pending'] = rfp_approval_pending
 
                 context['rfp_sourcing_pending_count'] = rfp_sourcing_pending_count
-                context['rfp_sourcing_pending'] = rfp_sourcing_pending
+                #context['rfp_sourcing_pending'] = rfp_sourcing_pending
 
                 context['rfp_coq_pending_count'] = rfp_coq_pending_count
-                context['rfp_coq_pending'] = rfp_coq_pending
+                #context['rfp_coq_pending'] = rfp_coq_pending
 
                 context['rfp_quotation_pending_count'] = rfp_quotation_pending_count
-                context['rfp_quotation_pending'] = rfp_quotation_pending
+                #context['rfp_quotation_pending'] = rfp_quotation_pending
                 return render(request,"Sales/sales_home.html",context)
 
         if type == 'Sourcing':
                 rfp_sourcing_pending_count = RFP.objects.filter(enquiry_status = 'Approved', rfp_assign1__assign_to1 = u).count()
-                rfp_sourcing_pending = RFP.objects.filter(enquiry_status = 'Approved', rfp_assign1__assign_to1 = u)
+                #rfp_sourcing_pending = RFP.objects.filter(enquiry_status = 'Approved', rfp_assign1__assign_to1 = u)
                 context['rfp_sourcing_pending_count'] = rfp_sourcing_pending_count
-                context['rfp_sourcing_pending'] = rfp_sourcing_pending
+                #context['rfp_sourcing_pending'] = rfp_sourcing_pending
                 return render(request,"Sourcing/Sourcing_home.html",context)
 
         if type == 'CRM':
@@ -134,10 +134,10 @@ def sourcing_home_load(request):
 
         if type == 'Sourcing':
                 rfp_sourcing_pending_count = RFP.objects.filter(enquiry_status = 'Approved', rfp_assign1__assign_to1 = u).count()
-                rfp_sourcing_pending = RFP.objects.filter(enquiry_status = 'Approved', rfp_assign1__assign_to1 = u)
+                #rfp_sourcing_pending = RFP.objects.filter(enquiry_status = 'Approved', rfp_assign1__assign_to1 = u)
 
                 context['rfp_sourcing_pending_count'] = rfp_sourcing_pending_count
-                context['rfp_sourcing_pending'] = rfp_sourcing_pending
+                #context['rfp_sourcing_pending'] = rfp_sourcing_pending
 
                 return render(request,"Employee/sourcing_home.html",context)
 
@@ -150,32 +150,32 @@ def sales_home_load(request):
 
         if type == 'Sales':
                 rfp_approval_pending_count = RFP.objects.filter(enquiry_status = 'Created').count()
-                rfp_approval_pending = RFP.objects.filter(enquiry_status = 'Created')
+                #rfp_approval_pending = RFP.objects.filter(enquiry_status = 'Created')
 
                 rfp_sourcing_pending_count = RFP.objects.filter(enquiry_status = 'Approved').count()
-                rfp_sourcing_pending = RFP.objects.filter(enquiry_status = 'Approved')
+                #rfp_sourcing_pending = RFP.objects.filter(enquiry_status = 'Approved')
 
                 rfp_coq_pending_count = RFP.objects.filter(enquiry_status = 'Sourcing_Completed').count()
-                rfp_coq_pending = RFP.objects.filter(enquiry_status = 'Sourcing_Completed')
+                #rfp_coq_pending = RFP.objects.filter(enquiry_status = 'Sourcing_Completed')
 
                 rfp_quotation_pending_count = RFP.objects.filter(enquiry_status = 'COQ Done').count()
-                rfp_quotation_pending = RFP.objects.filter(enquiry_status = 'COQ Done')
+                #rfp_quotation_pending = RFP.objects.filter(enquiry_status = 'COQ Done')
         
                 context['rfp_approval_pending_count'] = rfp_approval_pending_count
-                context['rfp_approval_pending'] = rfp_approval_pending
+                #context['rfp_approval_pending'] = rfp_approval_pending
 
                 context['rfp_sourcing_pending_count'] = rfp_sourcing_pending_count
-                context['rfp_sourcing_pending'] = rfp_sourcing_pending
+                #context['rfp_sourcing_pending'] = rfp_sourcing_pending
 
                 context['rfp_coq_pending_count'] = rfp_coq_pending_count
-                context['rfp_coq_pending'] = rfp_coq_pending
+                #context['rfp_coq_pending'] = rfp_coq_pending
 
                 context['rfp_quotation_pending_count'] = rfp_quotation_pending_count
-                context['rfp_quotation_pending'] = rfp_quotation_pending
+                #context['rfp_quotation_pending'] = rfp_quotation_pending
 
-                print(rfp_approval_pending)
-                print(rfp_coq_pending)
-                print(rfp_quotation_pending)
+                #print(rfp_approval_pending)
+                #print(rfp_coq_pending)
+                #print(rfp_quotation_pending)
 
 
                 return render(request,"Sales/sales_home.html",context)

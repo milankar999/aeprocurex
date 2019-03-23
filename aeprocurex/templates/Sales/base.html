@@ -81,7 +81,7 @@
           <ul class="dropdown-menu">
               <li><a href="/COQ/pending_list/">Pending</a></li>
           </ul>
-      </li>
+        </li>
       <li class="{{quotation}}" role="presentation" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
           Quotation <span class="caret"></span>
@@ -91,7 +91,19 @@
             <li><a href="/quotation/quoted/list/">Quoted</a></li>
             <li><a href="/quotation/immediate_quotation/selection/">Immediate Quotation</a></li>
         </ul>
-    </li>
+      </li>
+
+      <li class="{{po}}" role="presentation" class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+          Customer PO <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            <li><a href="/po_from_customer/cpo_approval/list/"> Approval List</a></li>
+            <li><a href="/quotation/quoted/list/">Quoted</a></li>
+            <li><a href="/quotation/immediate_quotation/selection/">Immediate Quotation</a></li>
+        </ul>
+      </li>
+
     </ul>
     <button type="button" class="btn btn-danger navbar-btn navbar-right" data-toggle="modal" data-target="#LogoutModal">{{login_user_name}}  <span class="glyphicon glyphicon-log-in"></span></button>
   </div>

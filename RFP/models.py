@@ -110,5 +110,7 @@ class RFPLineitem(models.Model):
     customer_lead_time = models.FloatField(null=True, blank=True)
     image = models.ImageField(upload_to = 'pic_folder/', blank = True, default = 'pic_folder/None/no-img.jpg')
 
+    creation_time = models.DateTimeField(auto_now_add=True,null=True,blank=True)
+    
     def __str__(self):
         return self.lineitem_id+ '     ' +  self.product_title

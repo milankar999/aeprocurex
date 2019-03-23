@@ -1,0 +1,45 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <h2>Customer PO Approval List</h2>
+            <div class="table-responsive">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Customer</th>
+                          <th>Location</th>
+                          <th>Customer PO No</th>
+                          <th>Customer PO Date</th>
+                          <th>Requester</th>
+                          <th>Creation Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for cpo in cpo_list %}
+                            <tr>
+                               <td>
+                                   <a href="/po_from_customer/rejected_cpo/{{cpo.id}}/lineitems/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td>{{cpo.customer.name}}</td>
+                                <td>{{cpo.customer.location}}</td>
+                                <td>{{cpo.customer_po_no}}</td>
+                                <td>{{cpo.customer_po_date}}</td>
+                                <td>{{cpo.customer_contact_person.name}}</td>
+                                <td>{{cpo.cpo_creation_detail.creation_date}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No CPO Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable();
+            } );
+            </script>     
+{% endblock content %}

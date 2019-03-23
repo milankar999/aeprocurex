@@ -60,5 +60,7 @@ class QuotationLineitem(models.Model):
 
     lead_time = models.CharField(max_length=200,null = True, blank = True)
 
+    creation_time = models.DateTimeField(auto_now_add=True,null=True,blank=True)
+
     def __str__(self):
         return self.product_title

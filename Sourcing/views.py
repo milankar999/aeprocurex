@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
+from django.http import Http404, HttpResponse, JsonResponse
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
@@ -14,6 +15,8 @@ from django.core import mail
 import random
 from django.conf import settings
 import openpyxl
+
+from rest_framework.response import Response
 
 from django.db.models import F
 from reportlab.pdfgen import canvas
@@ -54,7 +57,7 @@ def rfp_pending_lineitems(request,rfp_no=None):
 
         if type == 'Sourcing':
                 if request.method == "GET":
-                        rfp_lineitems = RFPLineitem.objects.filter(rfp_no=rfp_no)
+                        rfp_lineitems = RFPLineitem.objects.filter(rfp_no=rfp_no).order_by('creation_time')
 
                         rfp = RFP.objects.get(rfp_no=rfp_no)
                         context['rfp'] = rfp
@@ -570,6 +573,7 @@ def rfq_product_selection(request,rfp_no=None,sourcing_id=None):
                                                 rfq = rfq,
                                                 rfp_lineitem = rfp_lineitem 
                                         )
+                        return JsonResponse(data)
                                                               
 @login_required(login_url="/employee/login/")
 def rfq_generate(request,rfp_no=None,sourcing_id=None):
@@ -1043,7 +1047,7 @@ def vendor_quotation_price_upload(request,rfp_no=None,sourcing_id=None):
                                 wb = openpyxl.load_workbook(filename = 'media/xl_template/SourcingTemplate.xlsx')
                                 worksheet = wb['ProductDetails']
                                 worksheet['B1'] = sourcing_id
-                                rfp_lineitems = RFPLineitem.objects.filter(rfp_no=RFP.objects.get(rfp_no=rfp_no))
+                                rfp_lineitems = RFPLineitem.objects.filter(rfp_no=RFP.objects.get(rfp_no=rfp_no)).order_by('creation_time')
                                 i = 1
                                 for item in rfp_lineitems:
                                         worksheet.append([
@@ -1070,11 +1074,11 @@ def vendor_quotation_price_upload(request,rfp_no=None,sourcing_id=None):
                                         if row[1].value != '' and row[12].value != '' and row[13].value != '' and row[7].value != '':
                                                 sourcing_lineitem_id = sourcing_id + str(random.randint(100000,9999999))
                                                 try :
-                                                
+                                                        rfp_lineitem_obj = RFPLineitem.objects.get(lineitem_id=row[1].value)
                                                         SourcingLineitem.objects.create(
                                                                 id=sourcing_lineitem_id,
                                                                 sourcing=Sourcing.objects.get(id=sourcing_id),
-                                                                rfp_lineitem=RFPLineitem.objects.get(lineitem_id=row[1].value),
+                                                                rfp_lineitem=rfp_lineitem_obj,
                                                                 product_title=row[2].value,
                                                                 description=row[3].value,
                                                                 model=row[4].value,
@@ -1087,7 +1091,9 @@ def vendor_quotation_price_upload(request,rfp_no=None,sourcing_id=None):
                                                                 expected_freight = row[14].value,
                                                                 mrp = row[11].value,
                                                                 price1 = row[12].value,
-                                                                price2 = row[13].value )
+                                                                price2 = row[13].value,
+                                                                creation_time = rfp_lineitem_obj.creation_time )
+                                                        print(rfp_lineitem_obj.creation_time)
                                                 except:
                                                         pass
                                 i = i + 1
@@ -1145,6 +1151,7 @@ def vendor_quotation_price_add(request,rfp_no=None,sourcing_id=None,lineitem_id=
                         return render(request,"Sourcing/Sourcing/supplier_price_add.html",context)
 
                 if request.method == "POST":
+                        rfp_lineitem_obj = RFPLineitem.objects.get(lineitem_id=lineitem_id)
                         price_detail = request.POST
                         sourcing_lineitem_id = sourcing_id + str(random.randint(100000,9999999))
             
@@ -1184,7 +1191,9 @@ def vendor_quotation_price_add(request,rfp_no=None,sourcing_id=None,lineitem_id=
                                 expected_freight = freight,
                                 mrp = mrp,
                                 price1 = price1,
-                                price2 = price2 )
+                                price2 = price2,
+                                creation_time = rfp_lineitem_obj.creation_time )
+                        #print(rfp_lineitem_obj.creation_time)
                         return HttpResponseRedirect(reverse('vendor-quotation-edit', args=[rfp_no,sourcing_id]))
 
 @login_required(login_url="/employee/login/")

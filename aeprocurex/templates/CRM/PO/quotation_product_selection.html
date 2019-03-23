@@ -1,0 +1,115 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block content %}
+<div class="">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+        <h2>Please Select Lineitem From This table 
+        </h2> 
+           
+        
+       <div class="table-responsive">          
+               <table id="product" class="table table-hover table-bordered table-sm" width="100%">
+                 <thead>
+                   <tr>
+                     <th></th>
+                     <th>Sl No</th>
+                     <th>Product Title</th>
+                     <th>Description</th>
+                     <th>Model</th>
+                     <th>Brand</th>
+                     <th>Product Code</th>
+                     <th>Part no</th>
+                     <th>Pack Size</th>
+                     <th>Quantity</th>
+                     <th>UOM</th>
+                     <th>Unit Price</th>
+                     <th>GST (%)</th>
+                     <th>HSN Code</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                        
+                     {% for item in quotation_lineitems %}
+                       <tr>
+                          <td>
+                              <input type="checkbox" 
+                              name="quotation"
+                              value="{{item.id}}"
+                              change="getCheckedCheckboxesFor('quotation')"
+                              />       
+                          </td>
+                          <td>{{forloop.counter}}</td>
+                          <td>{{item.product_title}}</td>
+                          <td>{{item.description}}</td>
+                          <td>{{item.model}}</td>
+                          <td>{{item.brand}}</td>
+                          <td>{{item.product_code}}</td>
+                          <td>{{item.part_no}}</td>
+                          <td>{{item.pack_size}}</td>
+                          <td>{{item.quantity}}</td>
+                          <td>{{item.uom}}</td>
+                          <td>{{item.price}}</td>
+                          <td>{{item.gst}}</td>
+                          <td>{{item.hsn_code}}</td>
+                       </tr>
+                     {% empty %}
+                       <p>No Lineitem Found</p>
+                     {% endfor %}
+                 </tbody>
+               </table>
+       </div><br>
+
+       <div class="row">
+        <div class="text-center">
+          <button type="button" class="btn btn-info pull-right" id="btnGenerate" onclick="getCheckedCheckboxesFor('quotation')">Next</button>
+      </div>
+       </div>
+       <div class="modal fade" id="generate" role="dialog">
+        <div class="modal-dialog">          
+        </div>
+      </div>
+     
+
+   </div>
+   <script type="text/javascript">
+       function redirect(){
+           window.location.href = "/po_from_customer/create/{{cpo_id}}/selected_lineitems/";
+        }
+
+       function getCheckedCheckboxesFor(checkboxName) {
+            var checkboxes = document.querySelectorAll('input[name="' + checkboxName + '"]:checked'), values = [];
+            Array.prototype.forEach.call(checkboxes, function(el) {
+              values = values + ',' + el.value;
+          });
+          if(values.length==0){
+            alert('Minimum one item You Have To Select');
+          }
+          else{
+            document.getElementById("btnGenerate").disabled = true;
+            data = {
+                'quotation_product_list' : values,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+                }
+                $.ajax({
+                  type: "POST",
+                  url: "",
+                  data: data,
+                  success: function() {
+                    redirect();
+                  },
+                  failure: function(){
+                    window.alert('Some Error Occurred, Please Try Again');
+                    document.getElementById("btnGenerate").disabled = false;
+                  }
+              }
+            );
+          }
+        }
+    </script>     
+
+{% endblock content %}

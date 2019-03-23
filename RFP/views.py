@@ -248,7 +248,7 @@ def product_selection(request, rfp_no=None):
                 context['login_user_name'] = u.first_name + ' ' + u.last_name
                 context['rfp_no'] = rfp_no
 
-                lineitems = RFPLineitem.objects.filter(rfp_no__pk=rfp_no)
+                lineitems = RFPLineitem.objects.filter(rfp_no__pk=rfp_no).order_by('creation_time')
                 context['lineitems'] = lineitems
 
                 if type == 'CRM':
@@ -564,7 +564,7 @@ def rfp_approval_lineitems(request, rfp_no=None):
 
         if type == 'Sales':
                 if request.method == "GET":
-                        rfp_lineitems = RFPLineitem.objects.filter(rfp_no=rfp_no)
+                        rfp_lineitems = RFPLineitem.objects.filter(rfp_no=rfp_no).order_by('creation_time')
                         rfp = RFP.objects.filter(rfp_no=rfp_no).values(
                                 'customer__name',
                                 'customer__location',

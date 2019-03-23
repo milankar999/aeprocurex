@@ -6,7 +6,12 @@
 <div class="container">
 
         <h2>Please Select The Quotation for {{CustomerName}}    
-
+        <div class="container">
+          <form method="POST" action="/po_from_customer/create/{{cpo_id}}/quotation_selection_skip/">
+            {% csrf_token %}
+            <input type="submit" class="btn btn-danger" value="Skip"/>
+          </form>
+        </div>
        <div class="table-responsive">          
                <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
                  <thead>
@@ -49,32 +54,50 @@
                  </tbody>
                </table>
                <hr>
-               <button class="btn btn-info pull-right" type="button" onclick="getCheckedCheckboxesFor('quotation');" value="Get Values">Select</button>
+               <button class="btn btn-success pull-right" id='preceed' type="button" onclick="getCheckedCheckboxesFor('quotation');" value="Get Values">Select</button>
+               <button class="btn btn-info pull-left" id='preceed' type="button" onclick="window.open(
+                '/po_from_customer/quotation_no_search/', 
+                'newwindow', 
+                'width=0,height=0'); 
+                return false;" value="Get Values">Search Quotation Number</button>
        </div>
    </div>
    <script type="text/javascript">
        $(document).ready( function () {
            $('#dcustomer').DataTable();
        });
+
+       function redirect(){
+           window.location.href = "/po_from_customer/create/{{cpo_id}}/quotation_lineitem_selection/";
+        }
+
        function getCheckedCheckboxesFor(checkboxName) {
             var checkboxes = document.querySelectorAll('input[name="' + checkboxName + '"]:checked'), values = [];
             Array.prototype.forEach.call(checkboxes, function(el) {
-            values.push(el.value);
+              values = values + ',' + el.value;
           });
           if(values.length==0){
             alert('Minimum one Quotation You Have To Select');
           }
           else{
-          //alert(values);
-          $.post(
-            '',
-            data = 
-                  {
-                    'ql' : {values},
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+              document.getElementById("preceed").disabled = true;
+              data = {
+                'quotation_list' : values,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+                }
+                $.ajax({
+                  type: "POST",
+                  url: "",
+                  data: data,
+                  success: function() {
+                    redirect();
                   },
-                  data_type = 'data/json'
-                )
+                  failure: function(){
+                    window.alert('Some Error Occurred, Please Try Again');
+                    document.getElementById("preceed").disabled = false;
+                  }
+              }
+            );
           }
         }
     </script>      

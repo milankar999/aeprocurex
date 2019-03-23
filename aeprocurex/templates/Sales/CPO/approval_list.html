@@ -1,37 +1,37 @@
-{% extends 'CRM/base.html' %}
+{% extends '../base.html' %}
 {% load static %}
 
 {% block content %}
     <div class="container">
-        <h2>Rejected RFP List</h2>
+        <h2>Customer PO Approval List</h2>
             <div class="table-responsive">          
                     <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
                       <thead>
                         <tr>
                           <th></th>
-                          <th>RFP No</th>
                           <th>Customer</th>
                           <th>Location</th>
-                          <th>Contact Person</th>
+                          <th>Customer PO No</th>
+                          <th>Customer PO Date</th>
+                          <th>Requester</th>
                           <th>Creation Date</th>
-                          <th>Priority</th>
                         </tr>
                       </thead>
                       <tbody>   
-                          {% for rfp in rfp_list %}
+                          {% for cpo in cpo_list %}
                             <tr>
                                <td>
-                                   <a href="" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                   <a href="/po_from_customer/cpo_approval/{{cpo.id}}/lineitem/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
                                 </td>
-                                <td>{{rfp.rfp_no}}</td>
-                                <td>{{rfp.customer__name}}</td>
-                                <td>{{rfp.customer__location}}</td>
-                                <td>{{rfp.customer_contact_person__name}}</td>
-                                <td>{{rfp.rfp_creation_details__creation_date}}</td>
-                                <td>{{rfp.priority}}</td>
+                                <td>{{cpo.customer.name}}</td>
+                                <td>{{cpo.customer.location}}</td>
+                                <td>{{cpo.customer_po_no}}</td>
+                                <td>{{cpo.customer_po_date}}</td>
+                                <td>{{cpo.customer_contact_person.name}}</td>
+                                <td>{{cpo.cpo_creation_detail.creation_date}}</td>
                             </tr>
                           {% empty %}
-                            <p>No Rejected RFP Found</p>
+                            <p>No CPO Found</p>
                           {% endfor %}
                       </tbody>
                     </table>

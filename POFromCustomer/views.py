@@ -726,9 +726,9 @@ def cpo_create_receiver_selection(request, cust_id=None,contact_person_id=None):
                 if type == 'CRM':
                         return render(request,"CRM/PO/receiver_selection.html",context)
 
-#Quotation Selection
+#Customer PO Process
 @login_required(login_url="/employee/login/")
-def cpo_create_quotation_selection(request, cust_id=None,contact_person_id=None, receiver_id=None):
+def cpo_process(request, cust_id=None,contact_person_id=None, receiver_id=None):
         context={}
         context['po'] = 'active'
         user = User.objects.get(username=request.user)
@@ -737,28 +737,72 @@ def cpo_create_quotation_selection(request, cust_id=None,contact_person_id=None,
         context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if request.method == 'GET':
+                customer = CustomerProfile.objects.get(id=cust_id)
+                customer_contact_person = CustomerContactPerson.objects.get(id=contact_person_id)
+
+                cpo_creation_details = CPOCreationDetail.objects.create(created_by=user)
+                
+                if receiver_id == 'none':
+                        cpo = CustomerPO.objects.create(
+                                customer = customer,
+                                customer_contact_person = customer_contact_person,
+                                cpo_creation_detail = cpo_creation_details
+                        )
+                else:
+                        receiver = DeliveryContactPerson.objects.get(id=receiver_id)
+                        cpo = CustomerPO.objects.create(
+                                customer = customer,
+                                customer_contact_person = customer_contact_person,
+                                delivery_contact_person = receiver,
+                                cpo_creation_detail = cpo_creation_details
+                        )
+                print(cpo.id)
+                context['cpo_id'] = cpo.id
+                return render(request,"CRM/PO/process.html",context)
+
+
+#Quotation Selection
+@login_required(login_url="/employee/login/")
+def cpo_create_quotation_selection(request, cpo_id=None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        context['cpo_id'] = cpo_id
+
+        if request.method == 'GET':
                 quotation_list = QuotationTracker.objects.all().values(
                         'quotation_no',
                         'customer__name',
                         'customer__location',
                         'quotation_date')
                 context['quotation_list'] = quotation_list
-                context['CustomerID'] = cust_id
-                context['ContactPersonID'] = contact_person_id
-                context['receiver_id'] = receiver_id
-                customer = CustomerProfile.objects.get(id=cust_id)
+                cpo = CustomerPO.objects.get(id=cpo_id)
+                customer = cpo.customer
                 context['CustomerName'] = customer.name
 
                 if type == 'CRM':
                         return render(request,"CRM/PO/quotation_selection.html",context)
 
         if request.method == 'POST':
-                print(request.POST)
-                #quotation_list = request.POST['quotation_list[0][]']
-                print(request.POST['values[]']) 
+                data = request.POST
+                quotations = data['quotation_list'] 
+                quotation_list = quotations.split(",")
+                
+                cpo = CustomerPO.objects.get(id = cpo_id)
+                for item in quotation_list:
+                        if item != "":
+                                quotation = QuotationTracker.objects.get(quotation_no = item)
+                                CPOSelectedQuotation.objects.create(
+                                        quotation = quotation,
+                                        customer_po = cpo
+                                )
+                #return HttpResponse([{"dd":"ddd"}], content_type='application/json')
+                return JsonResponse(data)
                 
 
-                
 
 #Quotation Selection
 @login_required(login_url="/employee/login/")
@@ -782,4 +826,433 @@ def cpo_quotation_details(request, quotation_no=None):
 
                 if type == 'CRM':
                         return render(request,"CRM/PO/quotation_details.html",context)
+
+
+#Cpo create lineitem selection
+@login_required(login_url="/employee/login/")
+def cpo_create_quotation_lineitem_selection(request, cpo_id=None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                context['cpo_id'] = cpo_id
+                cpo = CustomerPO.objects.get(id=cpo_id)
+                selected_quotation_list = CPOSelectedQuotation.objects.filter(customer_po=cpo)
+                i = 1
+                for quotation in selected_quotation_list:
+                        if i == 1:
+                                quotation_lineitems = QuotationLineitem.objects.filter(quotation=quotation.quotation).annotate(
+                                        price = F('unit_price') + (F('unit_price') * F('margin') / 100)
+                                        ).values(
+                                        'id',
+                                        'product_title',
+                                        'description',
+                                        'model',
+                                        'brand',
+                                        'product_code',
+                                        'part_number',
+                                        'pack_size',
+                                        'hsn_code',
+                                        'gst',
+                                        'quantity',
+                                        'uom',
+                                        'price'
+                                )
+                                i = i + 1 
+                        else:
+                                quotation_lineitems = quotation_lineitems.union(QuotationLineitem.objects.filter(quotation=quotation.quotation).annotate(
+                                        price = F('unit_price') + (F('unit_price') * F('margin') / 100)
+                                        ).values(
+                                        'id',
+                                        'product_title',
+                                        'description',
+                                        'model',
+                                        'brand',
+                                        'product_code',
+                                        'part_number',
+                                        'pack_size',
+                                        'hsn_code',
+                                        'gst',
+                                        'quantity',
+                                        'uom',
+                                        'price'
+                                ))
+                
+                context['quotation_lineitems'] = quotation_lineitems
+                if type == 'CRM':
+                        return render(request,"CRM/PO/quotation_product_selection.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+                products = data['quotation_product_list'] 
+                product_list = products.split(",")
+                
+                cpo = CustomerPO.objects.get(id = cpo_id)
+                for item in product_list:
+                        if item != "":
+                                quotation_lineitem = QuotationLineitem.objects.get(id = item)
+                                CPOLineitem.objects.create(
+                                        cpo = cpo,
+                                        quotation_lineitem = quotation_lineitem,
+                                        product_title = quotation_lineitem.product_title,
+                                        description =  quotation_lineitem.description,
+                                        model = quotation_lineitem.model,
+                                        brand = quotation_lineitem.brand,
+                                        product_code = quotation_lineitem.product_code,
+                                        part_no = quotation_lineitem.part_number,
+                                        hsn_code = quotation_lineitem.hsn_code,
+                                        pack_size = quotation_lineitem.pack_size,
+                                        gst = quotation_lineitem.gst,
+                                        uom = quotation_lineitem.uom,
+                                        quantity = quotation_lineitem.quantity,
+                                        unit_price = quotation_lineitem.unit_price + ( quotation_lineitem.unit_price * quotation_lineitem.margin / 100),
+                                        total_price = (quotation_lineitem.unit_price + ( quotation_lineitem.unit_price * quotation_lineitem.margin / 100)) * quotation_lineitem.quantity
+                                )
+                #return HttpResponse([{"dd":"ddd"}], content_type='application/json')
+                return JsonResponse(data)
+
+#Cpo create lineitem selection
+@login_required(login_url="/employee/login/")
+def cpo_create_quotation_selection_skip(request, cpo_id=None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                return HttpResponseRedirect(reverse('cpo-create-selected-lineitem',args=[cpo_id]))
+
+#Cpo quotation no search
+@login_required(login_url="/employee/login/")
+def cpo_quotation_no_search(request):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+
+        if request.method == 'GET':
+                quotation_lineitem = QuotationLineitem.objects.all().annotate(
+                                basic_value = F('unit_price') + (F('unit_price') * F('margin') / 100)
+                        )
+                context['quotation_lineitem'] = quotation_lineitem
+                return render(request,"CRM/PO/quotation_no_search.html",context)
+
+
+#Cpo create lineitem selection
+@login_required(login_url="/employee/login/")
+def cpo_create_selected_lineitem(request, cpo_id=None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                cpo = CustomerPO.objects.get(id=cpo_id)
+                cpo_lineitem = CPOLineitem.objects.filter(cpo = cpo)
+                print(cpo_lineitem)
+                context['cpo_lineitem'] = cpo_lineitem
+
+                billing_address = cpo.customer.billing_address
+                shipping_address = cpo.customer.shipping_address
+                inco_term = cpo.customer.inco_term
+                payment_term = cpo.customer.payment_term
+
+                if billing_address == 'Same':
+                        context['billing_address'] = cpo.customer.address
+                else : 
+                        context['billing_address'] = billing_address
+
+                if shipping_address == 'Same':
+                        context['shipping_address'] = cpo.customer.address
+                else : 
+                        context['shipping_address'] = shipping_address
+
+                context['inco_term'] = inco_term
+                context['payment_term'] = payment_term
+
+                if type == 'CRM':
+                        return render(request,"CRM/PO/quotation_selected_lineitem.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+                cpo = CustomerPO.objects.get(id=cpo_id)
+                CPOLineitem.objects.create(
+                        cpo = cpo,
+                        product_title = data['product_title'],
+                        description = data['description'],
+                        model = data['model'],
+                        brand = data['brand'],
+                        product_code = data['product_code'],
+                        part_no = data['part_no'],
+                        pack_size = data['pack_size'],
+                        hsn_code = data['hsn_code'],
+                        gst = data['gst'],
+                        uom = data['uom'],
+                        quantity = data['quantity'],
+                        unit_price = data['unit_price'],
+                        total_price = float(data['quantity']) * float(data['unit_price'])
+                )
+                return HttpResponseRedirect(reverse('cpo-create-selected-lineitem',args=[cpo_id]))
+
+
+#Cpo create lineitem edit
+@login_required(login_url="/employee/login/")
+def cpo_create_lineitem_edit(request, cpo_id=None, lineitem_id = None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                cpo_lineitem = CPOLineitem.objects.get(id = lineitem_id)
+                context['cpo_lineitem'] = cpo_lineitem
+
+                if type == 'CRM':
+                        return render(request,"CRM/PO/cpo_lineitem_edit.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+                cpo_lineitem = CPOLineitem.objects.get(id=lineitem_id)
+                cpo_lineitem.product_title = data['product_title']
+                cpo_lineitem.description = data['description']
+                cpo_lineitem.model = data['model']
+                cpo_lineitem.brand = data['brand']
+                cpo_lineitem.product_code = data['product_code']
+                cpo_lineitem.part_no = data['part_no']
+                cpo_lineitem.pack_size = data['pack_size']
+                cpo_lineitem.hsn_code = data['hsn_code']
+                cpo_lineitem.gst = data['gst']
+                cpo_lineitem.uom = data['uom']
+                cpo_lineitem.quantity = data['quantity']
+                cpo_lineitem.unit_price = data['unit_price']
+                cpo_lineitem.total_price = float(data['quantity']) * float(data['unit_price'])
+                cpo_lineitem.save()
+
+                return HttpResponseRedirect(reverse('cpo-create-selected-lineitem',args=[cpo_id]))
+
+#Cpo create lineitem edit
+@login_required(login_url="/employee/login/")
+def cpo_create_lineitem_delete(request, cpo_id=None, lineitem_id = None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                cpo_lineitem = CPOLineitem.objects.get(id = lineitem_id)
+                context['cpo_lineitem'] = cpo_lineitem
+
+                if type == 'CRM':
+                        return render(request,"CRM/PO/cpo_lineitem_delete.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+                cpo_lineitem = CPOLineitem.objects.get(id=lineitem_id)
+                cpo_lineitem.delete()
+
+                return HttpResponseRedirect(reverse('cpo-create-selected-lineitem',args=[cpo_id]))
+
+#Cpo generate
+@login_required(login_url="/employee/login/")
+def cpo_generate(request, cpo_id=None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                data = request.POST
+
+                cpo = CustomerPO.objects.get(id = cpo_id)
+                cpo.customer_po_no = data['customer_po_no']
+                cpo.customer_po_date = data['customer_po_date']
+                cpo.billing_address = data['billing_address']
+                cpo.shipping_address = data['shipping_address']
+                cpo.delivery_date = data['delivery_date']
+                cpo.inco_terms = data['inco_terms']
+                cpo.payment_terms = data['payment_terms']
+                
+                try:
+                        cpo.document1 = request.FILES['supporting_document1']
+                except:
+                        pass
+
+                try:
+                        cpo.document2 = request.FILES['supporting_document2']
+                except:
+                        pass
+
+                cpo.status = 'Created'
+
+                cpo.save()
+
+                if type == 'CRM':
+                        return render(request,"CRM/PO/success.html",context)
+
+#Cpo inprogress list
+@login_required(login_url="/employee/login/")
+def cpo_creation_inprogress_list(request, cpo_id=None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                cpo_list = CustomerPO.objects.filter(status='creation_inprogress')
+                context['cpo_list'] = cpo_list
+
+                if type == 'CRM':
+                        return render(request,"CRM/PO/creation_in_progress.html",context)
+
+#Cpo Creation inprogress list
+@login_required(login_url="/employee/login/")
+def cpo_creation_inprogress_details(request, cpo_id=None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                cpo = CustomerPO.objects.get(id=cpo_id)
+                csq_c = CPOSelectedQuotation.objects.filter(customer_po=cpo).count()
+                cpol_c = CPOLineitem.objects.filter(cpo=cpo).count()
+                
+                if cpol_c > 0:
+                        return HttpResponseRedirect(reverse('cpo-create-selected-lineitem',args=[cpo_id]))
+
+                if csq_c > 0:
+                        return HttpResponseRedirect(reverse('cpo-create-quotation-lineitem-selection',args=[cpo_id]))
+
+                return HttpResponseRedirect(reverse('cpo-create-quotation-selection',args=[cpo_id]))
+
+
+#CPO Approval List
+@login_required(login_url="/employee/login/")
+def cpo_approval_list(request):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                cpo_list = CustomerPO.objects.filter(status='Created')
+                context['cpo_list'] = cpo_list
+
+                if type == 'Sales':
+                        return render(request,"Sales/CPO/approval_list.html",context)
+
+#CPO Approval Lineitem
+@login_required(login_url="/employee/login/")
+def cpo_approval_lineitem(request,cpo_id=None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                cpo = CustomerPO.objects.get(id=cpo_id)
+                cpo_lineitem = CPOLineitem.objects.filter(cpo=cpo)
+                context['cpo_lineitem'] = cpo_lineitem
+                context['cpo'] = cpo
+                users = User.objects.filter(profile__type='Sourcing')
+                context['users'] = users
+
+                if type == 'Sales':
+                        return render(request,"Sales/CPO/cpo_lineitem.html",context)
+
+#CPO Reject
+@login_required(login_url="/employee/login/")
+def cpo_reject(request,cpo_id=None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                data = request.POST
+                cpo = CustomerPO.objects.get(id=cpo_id)
+                cpo.status = 'rejected'
+                cpo.rejection_reason = data['rejection']
+                cpo.save()
+                return HttpResponseRedirect(reverse('cpo-approval-list'))
+
+#CPO Approve
+@login_required(login_url="/employee/login/")
+def cpo_approve(request,cpo_id=None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                data = request.POST
+                assign_user = User.objects.get(username=data['assign1'])
+
+                assign = CPOAssign.objects.create(assign_to=assign_user)
+
+                cpo = CustomerPO.objects.get(id=cpo_id)
+                cpo.status = 'approved'
+                cpo.cpo_assign_detail = assign
+                cpo.save()
+                
+                print(data)
+                return HttpResponseRedirect(reverse('cpo-approval-list'))
+
+
+#CPO Rejection List
+@login_required(login_url="/employee/login/")
+def cpo_rejected_list(request,cpo_id=None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                cpo = CustomerPO.objects.filter(status='rejected')
+                context['cpo_list'] = cpo
+
+                if type == 'CRM':
+                        return render(request,"CRM/PO/rejected_list.html",context)
+
+#CPO Rejected Lineitem
+@login_required(login_url="/employee/login/")
+def cpo_rejected_lineitem(request,cpo_id=None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                return HttpResponseRedirect(reverse('cpo-create-selected-lineitem',args=[cpo_id]))
 

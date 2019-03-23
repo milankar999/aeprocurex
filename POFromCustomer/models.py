@@ -33,14 +33,15 @@ class CustomerPO(models.Model):
         customer_contact_person = models.ForeignKey(CustomerContactPerson,on_delete=models.CASCADE)
         delivery_contact_person = models.ForeignKey(DeliveryContactPerson,null=True,blank=True,on_delete=models.CASCADE)
 
-        customer_po_no = models.CharField(max_length=200)
-        customer_po_date = models.DateField()
-        delivery_date = models.DateField()
-        billing_address = models.TextField()
-        shipping_address = models.TextField()
-        inco_terms = models.CharField(max_length = 200)
-        payment_terms = models.IntegerField(default = 0)
+        customer_po_no = models.CharField(max_length=200,null=True,blank=True)
+        customer_po_date = models.DateField(null=True,blank=True)
+        delivery_date = models.DateField(null=True,blank=True)
+        billing_address = models.TextField(null=True,blank=True)
+        shipping_address = models.TextField(null=True,blank=True)
+        inco_terms = models.CharField(max_length = 200,null=True,blank=True)
+        payment_terms = models.IntegerField(default = 0,null=True,blank=True)
         status = models.CharField(max_length = 100, default='creation_inprogress')
+        po_type = models.CharField(max_length = 100, null=True, blank=True) 
 
         rejection_reason = models.TextField(null=True, blank = True)
 
@@ -49,6 +50,12 @@ class CustomerPO(models.Model):
         cpo_assign_detail = models.ForeignKey(CPOAssign, on_delete = models.CASCADE,null=True, blank=True)
 
         segmentation = models.BooleanField(default=False)
+
+        total_basic_value = models.FloatField(null = False, blank = False, default = 0)
+        total_value = models.FloatField(null = False, blank = False, default = 0)
+        
+        document1 = models.FileField(upload_to='cpo/',null=True,blank=True)
+        document2 = models.FileField(upload_to='cpo/',null=True,blank=True)
 
         def __str__(self):
                 return self.customer_po_no + ' ' + self.customer.name
@@ -77,6 +84,7 @@ class CPOLineitem(models.Model):
         uom = models.CharField(max_length=20,null = False, blank = False, default='Pcs')
         quantity = models.FloatField(null = False, blank = False)
         unit_price = models.FloatField(null = False, blank = False)
+        total_price = models.FloatField(null = False, blank = False, default = 0)
 
         segment_status = models.BooleanField(default=False)
 

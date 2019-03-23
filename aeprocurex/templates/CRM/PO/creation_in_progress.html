@@ -3,33 +3,33 @@
 
 {% block content %}
     <div class="container">
-        <h2>Pending RFP Approval List</h2>
+        <h2>Creation In Progress Po List</h2>
             <div class="table-responsive">          
                     <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
                       <thead>
                         <tr>
                           <th></th>
-                          <th>RFP No</th>
                           <th>Customer</th>
                           <th>Location</th>
-                          <th>Contact Person</th>
+                          <th>Code</th>
+                          <th>Requester</th>
                           <th>Creation Date</th>
                         </tr>
                       </thead>
                       <tbody>   
-                          {% for rfp in rfp_list %}
+                          {% for cpo in cpo_list %}
                             <tr>
                                <td>
-                                   <a href="/rfp/create/product_selection/1/2/3/{{rfp.rfp_no}}/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                   <a href="/po_from_customer/creation_in_progress/{{cpo.id}}/details/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
                                 </td>
-                                <td>{{rfp.rfp_no}}</td>
-                                <td>{{rfp.customer__name}}</td>
-                                <td>{{rfp.customer__location}}</td>
-                                <td>{{rfp.customer_contact_person__name}}</td>
-                                <td>{{rfp.rfp_creation_details__creation_date}}</td>
+                                <td>{{cpo.customer.name}}</td>
+                                <td>{{cpo.customer.location}}</td>
+                                <td>{{cpo.customer.code}}</td>
+                                <td>{{cpo.customer_contact_person.name}}</td>
+                                <td>{{cpo.cpo_creation_detail.creation_date}}</td>
                             </tr>
                           {% empty %}
-                            <p>No Pending RFP Approval Found</p>
+                            <p>No CPO Found</p>
                           {% endfor %}
                       </tbody>
                     </table>

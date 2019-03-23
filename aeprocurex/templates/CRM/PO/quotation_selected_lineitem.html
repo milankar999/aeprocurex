@@ -1,0 +1,219 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block content %}
+<div class="">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+        <h2>Enter the lineitem details for Customer PO - {{rfp_no}} 
+          <button class="btn btn-success" data-toggle="modal" data-target="#ADDNew">ADD New Lineitem &nbsp;<span class="glyphicon glyphicon-plus"></span></button>
+        </h2> 
+        
+        <!--New Product Modal -->
+    <div class="modal fade" id="ADDNew" role="dialog">
+           <div class="modal-dialog">
+           
+             <!-- Modal content-->
+             <div class="modal-content">
+               <div class="modal-header">
+                 <button type="button" class="close" data-dismiss="modal">&times;</button>
+                 <h4 class="modal-title">Fill the Product Details</h4>
+               </div>
+               <div class="modal-body">
+                 <form type="submit" id="customer-form" method="POST">
+                   {% csrf_token %}
+                   <div class="form-group">
+                    <label class="form-input" for="product_title">Product Title <a style="color: red">*</a></label>
+                    <input type="text" class="form-control" id="product_title" name="product_title" required>
+
+                    <label class="form-input" for="description">Product Description <a style="color: red">*</a></label>
+                    <textarea type="text" class="form-control" id="description" name="description" required></textarea>
+
+                    <label class="form-input" for="model">Model </label>
+                    <input type="text" class="form-control" id="model" name="model">
+
+                    <label class="form-input" for="brand">Brand</label>
+                    <input type="text" class="form-control" id="brand" name="brand">
+
+                    <label class="form-input" for="product_code">Product Code (Manufacturer Part No)</label>
+                    <input type="text" class="form-control" id="product_code" name="product_code">
+
+                    <label class="form-input" for="part_no">Customer Part No</label>
+                    <input type="text" class="form-control" id="part_no" name="part_no">
+
+                    <label class="form-input" for="pack_size">Pack Size </label>
+                    <input type="text" class="form-control" id="pack_size" name="pack_size">
+
+                    <label class="form-input" for="hsn_code">HSN Code</label>
+                    <input type="text" class="form-control" id="hsn_code" name="hsn_code">
+
+                    <label class="form-input" for="gst">GST %</label>
+                    <input type="number" class="form-control" id="gst" step="0.01" name="gst">
+
+                    <label class="form-input" for="uom">UOM <a style="color: red">*</a></label>
+                    <input type="text" class="form-control" id="uom" name="uom" required>
+
+                    <label class="form-input" for="quantity">Quantity <a style="color: red">*</a></label>
+                    <input type="number" class="form-control" id="quantity" name="quantity" required>
+
+                    <label class="form-input" for="unit_price">Unit Price(In INR)<a style="color: red">*</a> </label>
+                    <input type="number" class="form-control" id="unit_price" step="0.01" name="unit_price" required>  <br>                     
+
+                   </div>
+               </div>
+               <div class="modal-footer">
+                   <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                       <input type="submit" class="btn btn-success" value="Confirm">
+                 </form>
+               </div>
+             </div>
+             
+           </div>
+    </div>
+      <!--End of New Product Model-->
+       
+        
+       <div class="table-responsive">          
+               <table id="product" class="table table-hover table-bordered table-sm" width="100%">
+                 <thead>
+                   <tr>
+                     <th></th>
+                     <th>Sl No</th>
+                     <th>Product Title</th>
+                     <th>Description</th>
+                     <th>Model</th>
+                     <th>Brand</th>
+                     <th>Product Code</th>
+                     <th>Part no</th>
+                     <th>Pack Size</th>
+                     <th>HSN Code</th>
+                     <th>GST (%)</th>
+                     <th>UOM</th>
+                     <th>Quantity</th>
+                     <th>Unit Price</th>
+                     <th>Total Price</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                        
+                     {% for item in cpo_lineitem %}
+                       <tr>
+                          <td>
+                            <a href="{{item.id}}/edit/" data-toggle="tooltip" data-placement="top" title="Edit"> <span class="glyphicon glyphicon-pencil" style="color: orange"></span></a>
+                            <a href="{{item.id}}/delete/" data-toggle="tooltip" data-placement="top" title="Delete"> <span class="glyphicon glyphicon-trash" style="color: red"></span></a>                
+                           </td>
+                           <td>{{forloop.counter}}</td>
+                           <td>{{item.product_title}}</td>
+                           <td>{{item.description}}</td>
+                           <td>{{item.model}}</td>
+                           <td>{{item.brand}}</td>
+                           <td>{{item.product_code}}</td>
+                           <td>{{item.part_no}}</td>      
+                           <td>{{item.pack_size}}</td>
+                           <td>{{item.hsn_code}}</td>
+                           <td>{{item.gst}}</td>
+                           <td>{{item.uom}}</td>
+                           <td>{{item.quantity}}</td>
+                           <td>{{item.unit_price}}</td>
+                           <td>{{item.total_price}}</td>
+                       </tr>
+                     {% empty %}
+                       <p>No Lineitem Found</p>
+                     {% endfor %}
+                 </tbody>
+               </table>
+       </div><br>
+
+       <div class="row">
+        <div class="text-center">
+          <button type="button" class="btn btn-info btn-block rounded-0 py-2" id="btnGenerate" onclick="LineitemsCheck()">Generate Customer PO</button>
+      </div>
+       </div>
+       <div class="modal fade" id="generate" role="dialog">
+        <div class="modal-dialog">
+        
+          <!-- Modal content-->
+          <div class="modal-content">
+             <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Fill the PO Details</span></h4>
+            </div>
+            <div class="modal-body">
+              <form type="submit" id="customer-form"  enctype="multipart/form-data" method="POST" action="generate/">
+                {% csrf_token %}
+                <div class="form-group">
+
+                        <label class="form-input" for="customer_po_no">Customer PO Number <a style="color: red">*</a></label>
+                        <input type="text" class="form-control" id="customer_po_no" name="customer_po_no" required>
+
+                        <label class="form-input" for="customer_po_date">Customer PO Date <a style="color: red">*</a></label>
+                        <input type="date" class="form-control" id="customer_po_date" name="customer_po_date" required>
+
+                        <label class="form-input" for="billing_address">Billing Address<a style="color: red">*</a></label>
+                        <textarea type="text" class="form-control" id="billing_address" name="billing_address" required>{{billing_address}}</textarea>
+
+                        <label class="form-input" for="shipping_address">Shipping Address<a style="color: red">*</a></label>
+                        <textarea type="text" class="form-control" id="shipping_address" name="shipping_address" required>{{shipping_address}}</textarea>
+                        
+                        <label class="form-input" for="delivery_date">Delivery Date <a style="color: red">*</a></label>
+                        <input type="date" class="form-control" id="delivery_date" name="delivery_date" required>
+
+                        <label class="form-input" for="inco_terms">Inco Terms <a style="color: red">*</a></label>
+                        <input type="text" class="form-control" id="inco_terms" name="inco_terms" required value="{{inco_term}}">
+
+                        <label class="form-input" for="payment_terms">Payment Terms (In Days) <a style="color: red">*</a></label>
+                        <input type="number" class="form-control" id="payment_terms" name="payment_terms" required value="{{payment_term}}">
+
+                        <label class="form-input" for="priority">Please Select the type of the Order<a style="color: red">*</a></label>
+                        <select class="form-control" id="rfp_type" name="rfp_type" required>
+                            <option></option>
+                            <option>PSP</option>
+                            <option>Non PSP</option>
+                          </select>
+
+
+                        <label class="form-input" for="supporting_document1">Supporting Document 1 </label>
+                        <input type="file" id="supporting_document1" name="supporting_document1">
+
+                        <label class="form-input" for="supporting_document2">Supporting Document 2 </label>
+                        <input type="file" id="supporting_document2" name="supporting_document2">
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                    <input type="submit" class="btn btn-success" value="Confirm">
+              </form>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+     
+
+   </div>
+   <script type="text/javascript">
+    function LineitemsCheck(){
+      var totalRowCount = 0;
+        var rowCount = 0;
+        var table = document.getElementById("product");
+        var rows = table.getElementsByTagName("tr")
+        for (var i = 0; i < rows.length; i++) {
+            totalRowCount++;
+            if (rows[i].getElementsByTagName("td").length > 0) {
+                rowCount++;
+            }
+        }
+        if(rowCount == 0){
+          alert("No Lineitems found, please add some lineitems")
+        }
+        else{
+          $('#generate').modal('toggle');
+        }
+    }
+    </script>     
+
+{% endblock content %}

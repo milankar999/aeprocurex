@@ -500,7 +500,8 @@ def generate_quotation_process(request,rfp_no=None):
                     uom = item.uom,
                     unit_price = item.unit_price,
                     margin = item.margin,
-                    lead_time = item.lead_time
+                    lead_time = item.lead_time,
+                    creation_time = item.creation_time
                 )
             
             return HttpResponseRedirect(reverse('generate-quotation-column-selection',args=[rfp_no,quotation_obj.quotation_no]))
@@ -1230,7 +1231,7 @@ def Quotation_Generator(quotation_no,gst_price,image,total_basic,total_basic_wit
 
     #Extract Quotation Data
     quotation_obj = QuotationTracker.objects.get(quotation_no=quotation_no)
-    quotation_lineitem = QuotationLineitem.objects.filter(quotation=quotation_obj)
+    quotation_lineitem = QuotationLineitem.objects.filter(quotation=quotation_obj).order_by('creation_time')
     pdf = canvas.Canvas("media/quotation/" + quotation_no + ".pdf", pagesize=A4)
     pdf.setTitle(quotation_no + '.pdf')
     Add_Header(pdf)

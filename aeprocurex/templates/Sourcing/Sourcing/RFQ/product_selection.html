@@ -88,17 +88,24 @@
                     alert('Minimum one Product You Have To Select');
                 }
                 else{
-                    console.log(values);
-                    //alert(values);
-                    data = $.post(
-                    '',
+                    document.getElementById("preceed").disabled = true;
                     data = {
                     'lineitem' : values,
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
-                    },
-                    data_type = 'data/json')
-                    document.getElementById("preceed").disabled = true;
-                    setTimeout(redirect, 1000);
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: "",
+                        data: data,
+                        success: function() {
+                            redirect();
+                        },
+                        failure: function(){
+                            window.alert('Some Error Occurred, Please Try Again');
+                            document.getElementById("btnGenerate").disabled = false;
+                        }
+                    }
+                );
                 }
             }
         </script>     

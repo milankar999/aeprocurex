@@ -1,0 +1,76 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="container">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+    
+    
+                        <!--Form with header-->
+    
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="card border-primary rounded-0">
+                                <div class="card-header p-0">
+                                    <div class="bg-info text-white text-center py-2">
+                                        <h3>Do You want to delete this PO Lineitem ?</h3>
+                                    </div>
+                                </div>
+                                <div class="card-body p-3">
+    
+                           <label class="form-input" for="product_title">Product Title</label>
+                           : {{cpo_lineitem.product_title}}<br>
+
+                           <label class="form-input" for="description">Product Description <a style="color: red">*</a></label>
+                           : {{cpo_lineitem.description}}<br>
+   
+                           <label class="form-input" for="model">Model </label>
+                           : {{cpo_lineitem.model}}<br>
+   
+                           <label class="form-input" for="brand">Brand</label>
+                           : {{cpo_lineitem.brand}}<br>
+
+                           <label class="form-input" for="product_code">Product Code (Manufacturer Part No)</label>
+                           : {{cpo_lineitem.product_code}}<br>
+
+                           <label class="form-input" for="part_no">Customer Part No</label>
+                           : {{cpo_lineitem.part_no}}<br>
+
+                           <label class="form-input" for="pack_size">Pack Size </label>
+                           : {{cpo_lineitem.pack_size}}<br>
+   
+                           <label class="form-input" for="hsn_code">HSN Code</label>
+                           : {{cpo_lineitem.hsn_code}}<br>
+
+                           <label class="form-input" for="gst">GST %</label>
+                           : {{cpo_lineitem.gst}}<br>
+
+                           <label class="form-input" for="uom">UOM <a style="color: red">*</a></label>
+                           : {{cpo_lineitem.uom}}<br>
+
+                           <label class="form-input" for="quantity">Quantity <a style="color: red">*</a></label>
+                           : {{cpo_lineitem.quantity}}<br>
+
+                           <label class="form-input" for="unit_price">Unit Price(In INR)<a style="color: red">*</a> </label>
+                           : {{cpo_lineitem.unit_price}}  <br>                                 
+    
+                                    <div class="text-center">
+                                        <input type="submit" value="Confirm" class="btn btn-danger btn-block rounded-0 py-2">
+                                    </div>
+                                </div><br>
+    
+                            </div>
+                        </form>
+                        <!--Form with header-->
+        </div>
+</div>
+
+{% endblock content %}

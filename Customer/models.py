@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from BankAccount.models import *
 
 class CustomerProfile(models.Model):
     id = models.CharField(max_length=50 ,primary_key = True)
@@ -21,12 +22,14 @@ class CustomerProfile(models.Model):
     inco_term = models.CharField(max_length=50, null=True, blank = True)
     tax_type = models.CharField(max_length=50,null=True, blank=True,default='Normal')
 
-    billing_address = models.TextField(null=True,blank=True,default='Same')
+    billing_address = models.TextField(null=True,blank=True,default='Same') 
     shipping_address = models.TextField(null=True,blank=True,default='Same')
     
     created_by = models.ForeignKey(User,on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    bank_account = models.ForeignKey(BankAccountList,null=True,blank=True,on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name + ' - ' + self.location
