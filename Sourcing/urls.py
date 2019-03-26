@@ -28,4 +28,6 @@ urlpatterns = [
     path('single_vendor/approval_list/pending/<rfp_no>/details/approve/',single_vendor_approve,name='single-vendor-approve'),
     path('single_vendor/approval_list/pending/<rfp_no>/details/reject/',single_vendor_reject,name='single-vendor-reject'),
     path('single_vendor/history/',single_vendor_history,name='single-vendor-history'),
+
+    path('history/item_wise/',sourcing_item_wise,name='sourcing-item-wise'),
     ]

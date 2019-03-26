@@ -938,9 +938,7 @@ def cpo_quotation_no_search(request):
         type = u.profile.type
 
         if request.method == 'GET':
-                quotation_lineitem = QuotationLineitem.objects.all().annotate(
-                                basic_value = F('unit_price') + (F('unit_price') * F('margin') / 100)
-                        )
+                quotation_lineitem = QuotationLineitem.objects.all()
                 context['quotation_lineitem'] = quotation_lineitem
                 return render(request,"CRM/PO/quotation_no_search.html",context)
 

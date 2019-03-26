@@ -1,0 +1,92 @@
+{% extends 'Sales/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="">
+        <h2>Enquiry Tracking</h2>
+            <div class="table-responsive">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>SL #</th>
+                          <th>Enquiry Status</th>
+                          <th>RFP No</th>
+                          <th>Date</th>
+                          <th>Customer</th>
+                          <th>Location</th>
+                          <th>Contact Person</th>
+                          <th>Type</th>
+                          <th>Created By</th>
+                          <th>Sourcing Person</th>
+                          <th>Opportunity Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for enquiry in enquiry_list %}
+                            <tr>
+                                <td>                                  
+                                   <a
+                                   data-toggle="tooltip"
+                                   data-placement="top"
+                                   title="Select this contact person"
+                                   onclick="window.open(
+                                  '/enquiry_tracker/rfp/{{enquiry.rfp_no}}/lineitems/', 
+                                  'newwindow', 
+                                  'height=1600,width=1800,resizable=yes,scrollbars=yes,toolbar=yes,menubar=yes,location=yes'); 
+                                  return false;"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td>{{forloop.counter}}</td>
+
+
+                                {% if enquiry.enquiry_status == 'Approved' %}
+                                <td>Sourcing Pending</td>
+
+                                {% elif enquiry.enquiry_status == '' %}
+                                <td>Creation In Progress</td>
+                                
+                                {% elif enquiry.enquiry_status == 'Created' %}
+                                <td>Waiting For Approval</td>
+                                
+                                {% elif enquiry.enquiry_status == 'Rejected' %}
+                                <td>Rejected</td>
+
+                                {% elif enquiry.enquiry_status == 'Sourcing_Completed' %}
+                                <td>Quotation Pending</td>
+
+                                {% elif enquiry.enquiry_status == 'COQ Done' %}
+                                <td>Quotatio Pending</td>
+            
+                                {% elif enquiry.enquiry_status == 'Quoted' %}
+                                <td>Quoted</td>
+
+                                {% else %}
+                                <td>Closed</td>
+                                {% endif %}
+                                
+                                
+                                <td>{{enquiry.rfp_no}}</td>
+                                <td>{{enquiry.rfp_creation_details__creation_date}}</td>
+                                <td>{{enquiry.customer__name}}</td>
+                                <td>{{enquiry.customer__location}}</td>
+                                <td>{{enquiry.customer_contact_person__name}}</td>
+                                <td>{{enquiry.rfp_type}}</td>
+                                <td>{{enquiry.rfp_creation_details__created_by__username}}</td>
+                                <td>{{enquiry.rfp_assign1__assign_to1__username}}</td>
+                                <td>{{enquiry.opportunity_status}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Enquiry Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable({
+                  "bPaginate": false
+                });
+            } );
+            </script>     
+{% endblock content %}

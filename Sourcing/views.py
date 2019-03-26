@@ -432,8 +432,8 @@ def add_requester(pdf,y,request_number,requester_name,email,phone):
                 pdf.setFont('Helvetica', 9)
         pdf.setFont('Helvetica-Bold', 8)
 
-        pdf.drawString(20,y,"Note : Kindly Mention Pack Size, MOQ, Lead Time, MRP, HSN Code and GST(%) In Your Offer")
-        y = y - 10
+        pdf.drawString(20,y,"Note : Kindly Mention Payment Terms, Inco Terms and Pack Size, MOQ, Lead Time, MRP, HSN Code and GST(%) of each item In Your Offer.")
+        y = y - 15
 
         try:
                 pdf.drawString(400,y,"Requester :")
@@ -1465,3 +1465,23 @@ def sourcing_completed(request,rfp_no=None):
                                 context['error'] = "Round 2 Price Not found"
                                 return render(request,"Sourcing/Sourcing/error.html",context)
             
+##Sourcing History
+@login_required(login_url="/employee/login/")
+def sourcing_item_wise(request,rfp_no=None):
+        context={}
+        context['sourcing'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                item_list = SourcingLineitem.objects.all()
+
+                context['item_list'] = item_list
+
+                if type == 'Sourcing':
+                        return render(request,"Sourcing/Sourcing/History/item_list.html",context)
+
+                if type == 'Sales':
+                        return render(request,"Sales/Sourcing/History/item_list.html",context)

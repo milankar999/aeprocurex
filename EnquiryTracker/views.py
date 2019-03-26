@@ -17,6 +17,9 @@ import os
 from django.views.static import serve
 from django.http import FileResponse
 from django.db.models import Q
+from django.core.mail import send_mail, EmailMessage
+from django.core import mail
+from django.conf import settings
 
 
 @login_required(login_url="/employee/login/")
@@ -44,7 +47,10 @@ def enquiry_list(request):
 
         if type == 'Sales':
             return render(request,"Sales/EnquiryTracker/enquiry_list.html",context)
-
+        
+        if type == 'CRM':
+            return render(request,"CRM/EnquiryTracker/enquiry_list.html",context)
+        
 @login_required(login_url="/employee/login/")
 def pending_enquiry_list(request):
     context={}
@@ -69,7 +75,10 @@ def pending_enquiry_list(request):
         context['enquiry_list'] = enquiry
 
         if type == 'Sales':
-            return render(request,"Sales/EnquiryTracker/enquiry_list.html",context)
+            return render(request,"Sales/EnquiryTracker/pending_enquiry_list.html",context)
+
+        if type == 'CRM':
+            return render(request,"CRM/EnquiryTracker/pending_enquiry_list.html",context)
 
 @login_required(login_url="/employee/login/")
 def lineitem_list(request):
@@ -103,6 +112,9 @@ def lineitem_list(request):
 
         if type == 'Sales':
             return render(request,"Sales/EnquiryTracker/lineitem_list.html",context)
+
+        if type == 'CRM':
+            return render(request,"CRM/EnquiryTracker/lineitem_list.html",context)
 
 #RFP Details
 @login_required(login_url="/employee/login/")
@@ -151,8 +163,18 @@ def rfp_lineitem(request,rfp_no=None):
         context['rfp_lineitems'] = rfp_lineitems
         context['rfp_no'] = rfp_no
 
+        context['rfp_status'] = rfp[0]['enquiry_status']
+
+        users = User.objects.filter(profile__type='Sourcing')
+        context['users'] = users
+        keyaccounts = User.objects.all()
+        context['keyaccounts'] = keyaccounts
+
         if type == 'Sales':
             return render(request,"Sales/EnquiryTracker/rfp_lineitems.html",context)
+
+        if type == 'CRM':
+            return render(request,"CRM/EnquiryTracker/rfp_lineitems.html",context)
 
 #RFP Details
 @login_required(login_url="/employee/login/")
@@ -199,3 +221,96 @@ def rfp_mark_closed(request,rfp_no=None):
         else:
             context['error'] = "This is Already Quoted , Cannot be mark as Duplicate"
             return render(request,"Sales/error.html",context)
+
+#RFP Reassign
+@login_required(login_url="/employee/login/")
+def rfp_reassign(request,rfp_no=None):
+    context={}
+    context['enquiry_tracker'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+    if request.method == "POST":
+        data = request.POST
+        rfp = RFP.objects.get(rfp_no = rfp_no)
+
+        assign1 = RFPAssign1.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to1=User.objects.get(username=data['assign1']))
+        rfp.rfp_assign1 = assign1
+        
+        key_instance = User.objects.get(username=data['keyPerson'])    
+        keyaccounts = RFPKeyAccountsDetail.objects.create(id=rfp_no+str(random.randint(1000,99999)),key_accounts_manager = key_instance)
+        rfp.rfp_keyaccounts_details = keyaccounts
+
+        rfpapprovaldetail = RFPApprovalDetail.objects.create(id=rfp_no+str(random.randint(1000,99999)),approved_by=u)
+        rfp.rfp_approval_details = rfpapprovaldetail
+
+        rfp.save()
+
+        #Sending mail Notification
+        email_receiver = rfp.rfp_assign1.assign_to1.email
+        lineitems = RFPLineitem.objects.filter(rfp_no=rfp)
+        email_body = '<head>'\
+        '<style>'\
+        'table {'\
+        'width:100%;'\
+        '}'\
+        'table, th, td {'\
+        'border: 1px solid black;'\
+        'border-collapse: collapse;'\
+        '}'\
+        'th, td {'\
+        'padding: 15px;'\
+        'text-align: left;'\
+        '}'\
+        'table#t01 tr:nth-child(even) {'\
+        'background-color: #eee;'\
+        '}'\
+        'table#t01 tr:nth-child(odd) {'\
+        'background-color: #fff;'\
+        '}'\
+        'table#t01 th {'\
+        'background-color: #1E2DFF;'\
+        'color: white;'\
+        '}'\
+        '</style>'\
+        '</head>'\
+        '<body>'\
+        '<h1 style="text-align: center;"><span style="color: #0000ff;"><strong>AEPROCUREX ERP</strong></span></h1>'\
+        '<h2><span style="color: #008000;">Hello, ' + rfp.rfp_assign1.assign_to1.first_name + ' ' + rfp.rfp_assign1.assign_to1.last_name + '</span></h2>'\
+        '<h2><span style="color: #008000;">&nbsp; &nbsp; &nbsp; One New RFP Has Been Assigned to You, Please Complete the Sourcing Earliest</span></h2>'\
+        '<p><span style="color: #0000ff;"><strong>Assigned By ' + request.user.first_name + ' ' + request.user.last_name + ' '\
+        '</strong></span><span style="color: #0000ff;">'\
+        '<p><span style="color: #0000ff;"><strong>RFP No : '+ rfp_no +'</strong></span></p>'\
+        '<p><span style="color: #0000ff;"><strong>Customer : '+ rfp.customer.name +'</strong></span></p>'\
+        '<p><span style="color: #0000ff;"><strong>Requester : '+ rfp.customer_contact_person.name +'</strong></span></p>'\
+        '<table id="t01">'\
+        '<tr>'\
+        '<th align="Centre">Sl #</th>'\
+        '<th align="Centre">Product Title</th>'\
+        '<th align="Centre">Description</th>' \
+        '<th align="Centre">Quantity</th>'\
+        '<th align="Centre">UOM</th>'\
+        '</tr>'
+        i = 1
+
+        for items in lineitems:
+            email_body = email_body + '<tr>'\
+                '<td>'+ str(i) +'</td>'\
+                '<td>'+ items.product_title +'</td>'\
+                '<td>'+ items.description +'</td>'\
+                '<td>'+ str(items.quantity) +'</td>'\
+                '<td>'+ items.uom +'</td>'\
+                '</tr>'
+            i = i + 1
+        email_body = email_body + '</table>'\
+        '</body>'
+
+        msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['crm.p@aeprocurex.com','sales.p@aeprocurex.com','milan.kar@aeprocurex.com'])
+        msg.content_subtype = "html"  # Main content is now text/html
+        try:
+            msg.send()
+        except:
+            pass
+
+        return HttpResponseRedirect(reverse('pending_enquiry_list'))

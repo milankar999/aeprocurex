@@ -1,0 +1,93 @@
+{% extends 'CRM/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="">
+        <h2>Enquiry Lineitem Tracking List</h2>
+            <div class="table-responsive">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>SL No</th>
+                          <th>RFP No</th>
+                          <th>Date</th>
+                          <th>Type</th>
+                          <th>Enquiry Status</th>
+                          <th>Product Title</th>
+                          <th>Description</th>
+                          <th>Model</th>
+                          <th>Brand</th>
+                          <th>Product Code</th>
+                          <th>Part No</th>
+                          <th>Quantity</th>
+                          <th>UOM</th>
+                          <th>Customer</th>
+                          <th>Location</th>
+                          <th>Key Accounts</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for item in lineitem_list %}
+                            <tr>
+                                <td>
+                                   <a href="/enquiry_tracker/rfp/{{item.rfp_no__rfp_no}}/lineitems/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td>{{forloop.counter}}</td>
+                                <td>{{item.rfp_no__rfp_no}}</td>
+                                <td>{{item.rfp_no__rfp_creation_details__creation_date}}</td>
+                                <td>{{item.rfp_no__rfp_type}}</td>
+
+                                {% if item.rfp_no__enquiry_status == 'Approved' %}
+                                <td>Sourcing Pending</td>
+
+                                {% elif item.rfp_no__enquiry_status == '' %}
+                                <td>Creation In Progress</td>
+                                
+
+                                {% elif item.rfp_no__enquiry_status == 'Created' %}
+                                <td>Waiting For Approval</td>
+                                
+                                {% elif item.rfp_no__enquiry_status == 'Rejected' %}
+                                <td>Rejected</td>
+
+                                {% elif item.rfp_no__enquiry_status == 'Sourcing_Completed' %}
+                                <td>Quotation Pending</td>
+
+                                {% elif item.rfp_no__enquiry_status == 'COQ Done' %}
+                                <td>Quotatio Pending</td>
+            
+                                {% elif item.rfp_no__enquiry_status == 'Quoted' %}
+                                <td>Quoted</td>
+
+                                {% else %}
+                                <td>Closed</td>
+                                {% endif %}
+
+                              
+                                
+                                <td>{{item.product_title}}</td>
+                                <td>{{item.description}}</td>
+                                <td>{{item.model}}</td>
+                                <td>{{item.brand}}</td>
+                                <td>{{item.product_code}}</td>
+                                <td>{{item.part_no}}</td>
+                                <td>{{item.quantity}}</td>
+                                <td>{{item.uom}}</td>
+                                <td>{{item.rfp_no__customer__name}}</td>
+                                <td>{{item.rfp_no__customer__location}}</td>
+                                <td>{{item.rfp_no__rfp_keyaccounts_details__key_accounts_manager__username}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Lineitem Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable();
+            } );
+            </script>     
+{% endblock content %}

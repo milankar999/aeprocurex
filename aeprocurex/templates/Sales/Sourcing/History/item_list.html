@@ -1,0 +1,61 @@
+{% extends '../../base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="">
+        <h2>All Sourcing History</h2>
+            <div class="table-responsive">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>SL No</th>
+                          <th>Vendor Name</th>
+                          <th>Offer Date</th>
+                          <th>Offer Reference</th>
+                          <th>Enquiry Type</th>
+                          <th>Product Title</th>
+                          <th>Description</th>
+                          <th>Model</th>
+                          <th>Brand</th>
+                          <th>Lead Time</th>
+                          <th>MRP</th>
+                          <th>Initial Price</th>
+                          <th>Negotiated Price</th>
+                          <th>Buyer</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for item in item_list %}
+                            <tr>
+                                <td>
+                                   <a href="/enquiry_tracker/rfp/{{item.rfp_no__rfp_no}}/lineitems/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td>{{forloop.counter}}</td>
+                                <td>{{item.sourcing.supplier.name}}</td>
+                                <td>{{item.sourcing.offer_date}}</td>
+                                <td>{{item.sourcing.offer_reference}}</td>
+                                <td>{{item.sourcing.rfp.rfp_type}}</td>
+                                <td>{{item.product_title}}</td>
+                                <td>{{item.description}}</td>
+                                <td>{{item.model}}</td>
+                                <td>{{item.brand}}</td>
+                                <td>{{item.lead_time}}</td>
+                                <td>{{item.mrp}}</td>
+                                <td>{{item.price1}}</td>
+                                <td>{{item.price2}}</td>
+                                <td>{{item.sourcing.rfp.rfp_sourcing_detail.sourcing_completed_by.first_name}}&nbsp;{{item.sourcing.rfp.rfp_sourcing_detail.sourcing_completed_by.last_name}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Lineitem Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable();
+            } );
+            </script>     
+{% endblock content %}
