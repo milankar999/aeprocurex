@@ -31,6 +31,9 @@ class QuotationTracker(models.Model):
     tc9 = models.TextField(null=True,blank=True)
     tc10 = models.TextField(null=True,blank=True)
 
+    total_basic_price = models.FloatField(null = True, blank = True,default = 0)
+    total_price = models.FloatField(null = True, blank = True,default = 0)
+
     def __str__(self):
         return self.quotation_no + ',' + str(self.quotation_date) + ',' + self.customer.name
 
@@ -57,6 +60,13 @@ class QuotationLineitem(models.Model):
 
     unit_price = models.FloatField(null = True, blank = True)
     margin = models.FloatField(null=True, blank=True)
+    
+    basic_price = models.FloatField(null = True, blank = True,default = 0)
+
+    total_basic_price = models.FloatField(null = True, blank = True,default = 0)
+    total_price = models.FloatField(null = True, blank = True,default = 0)
+
+
 
     lead_time = models.CharField(max_length=200,null = True, blank = True)
 

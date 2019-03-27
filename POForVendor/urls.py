@@ -43,6 +43,9 @@ urlpatterns = [
     #ASK for Approval
     path('pending_cpo/<cpo_id>/vpo/<vpo_id>/launch/',VPOLaunch.as_view()),
 
+    #Mark as 
+    path('pending_cpo/<cpo_id>/vpo/<vpo_id>/request_direct_purchase/',VPOLaunchDirectPurchase.as_view()),
+
     #See The Demo Page
     path('pending_cpo/<cpo_id>/vpo/<vpo_id>/preview/',VPOPreview.as_view()),
     path('pending_cpo/<cpo_id>/vpo/<id>/preview_lineitems/',VPOPreviewLineitems.as_view()),
@@ -55,6 +58,12 @@ urlpatterns = [
     path('vpo/<vpo_id>/<po_number>/preview/',VPOApprovalPreview.as_view()),    
     path('vpo/<vpo_id>/<po_number>/lineitems/approve/',VPOApprove.as_view()),
     path('vpo/<vpo_id>/<po_number>/lineitems/reject/',VPOReject.as_view()),
+
+    
+    #Application View
+    #Regular VPO Approval list
+    path('vendor_po/pending_approval_list/',VPOPendingApprovalList,name='regular-vpo-pending-approval-list'),
+    path('vendor_po/pending_approval/<po_number>/lineitems/',VPOPendingApprovalLineitems,name='regular-vpo-pending-approval-lineitems'),
 
     #Generating VPO
     path('vpo/ready_list/',VPOReadyList.as_view()),

@@ -80,10 +80,11 @@ class CPOLineitem(models.Model):
         part_no = models.CharField(max_length=200,null = True, blank = True)
         hsn_code = models.CharField(max_length=10,null = True, blank = True)
         pack_size = models.CharField(max_length=10,null = True, blank = True)
-        gst = models.FloatField(null = True, blank = True)
+        gst = models.FloatField(null = True, blank = True, default = 0)
         uom = models.CharField(max_length=20,null = False, blank = False, default='Pcs')
         quantity = models.FloatField(null = False, blank = False)
         unit_price = models.FloatField(null = False, blank = False)
+        total_basic_price = models.FloatField(null = False, blank = False, default = 0)
         total_price = models.FloatField(null = False, blank = False, default = 0)
 
         segment_status = models.BooleanField(default=False)

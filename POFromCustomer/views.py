@@ -581,6 +581,8 @@ from django.core import mail
 import random
 from django.conf import settings
 from django.db.models import F
+from POForVendor.models import *
+from django.db.models import Count
 
 #Customer Selection
 @login_required(login_url="/employee/login/")
@@ -895,6 +897,7 @@ def cpo_create_quotation_lineitem_selection(request, cpo_id=None):
                 for item in product_list:
                         if item != "":
                                 quotation_lineitem = QuotationLineitem.objects.get(id = item)
+
                                 CPOLineitem.objects.create(
                                         cpo = cpo,
                                         quotation_lineitem = quotation_lineitem,
@@ -909,8 +912,9 @@ def cpo_create_quotation_lineitem_selection(request, cpo_id=None):
                                         gst = quotation_lineitem.gst,
                                         uom = quotation_lineitem.uom,
                                         quantity = quotation_lineitem.quantity,
-                                        unit_price = quotation_lineitem.unit_price + ( quotation_lineitem.unit_price * quotation_lineitem.margin / 100),
-                                        total_price = (quotation_lineitem.unit_price + ( quotation_lineitem.unit_price * quotation_lineitem.margin / 100)) * quotation_lineitem.quantity
+                                        unit_price = quotation_lineitem.basic_price,
+                                        total_basic_price = quotation_lineitem.total_basic_price,
+                                        total_price = quotation_lineitem.total_price
                                 )
                 #return HttpResponse([{"dd":"ddd"}], content_type='application/json')
                 return JsonResponse(data)
@@ -997,7 +1001,8 @@ def cpo_create_selected_lineitem(request, cpo_id=None):
                         uom = data['uom'],
                         quantity = data['quantity'],
                         unit_price = data['unit_price'],
-                        total_price = float(data['quantity']) * float(data['unit_price'])
+                        total_basic_price = round((float(data['quantity']) * float(data['unit_price'])),2),
+                        total_price = round(((float(data['quantity']) * float(data['unit_price'])) + (float(data['quantity']) * float(data['unit_price']) * float(data['unit_price']) / 100)),2)
                 )
                 return HttpResponseRedirect(reverse('cpo-create-selected-lineitem',args=[cpo_id]))
 
@@ -1021,6 +1026,9 @@ def cpo_create_lineitem_edit(request, cpo_id=None, lineitem_id = None):
 
         if request.method == 'POST':
                 data = request.POST
+                total_basic_price = round((float(data['quantity']) * float(data['unit_price'])),2)
+                total_price = round((total_basic_price + float(total_basic_price * float(data['gst']) / 100)),2)
+
                 cpo_lineitem = CPOLineitem.objects.get(id=lineitem_id)
                 cpo_lineitem.product_title = data['product_title']
                 cpo_lineitem.description = data['description']
@@ -1034,7 +1042,8 @@ def cpo_create_lineitem_edit(request, cpo_id=None, lineitem_id = None):
                 cpo_lineitem.uom = data['uom']
                 cpo_lineitem.quantity = data['quantity']
                 cpo_lineitem.unit_price = data['unit_price']
-                cpo_lineitem.total_price = float(data['quantity']) * float(data['unit_price'])
+                cpo_lineitem.total_basic_price = total_basic_price
+                cpo_lineitem.total_price = total_price
                 cpo_lineitem.save()
 
                 return HttpResponseRedirect(reverse('cpo-create-selected-lineitem',args=[cpo_id]))
@@ -1077,6 +1086,16 @@ def cpo_generate(request, cpo_id=None):
                 data = request.POST
 
                 cpo = CustomerPO.objects.get(id = cpo_id)
+
+                cpo_lineitem = CPOLineitem.objects.filter(cpo = cpo)
+
+                basic_value = 0
+                total_value = 0
+
+                for item in cpo_lineitem:
+                        basic_value = basic_value + item.total_basic_price
+                        total_value = total_value + item.total_price                
+
                 cpo.customer_po_no = data['customer_po_no']
                 cpo.customer_po_date = data['customer_po_date']
                 cpo.billing_address = data['billing_address']
@@ -1084,6 +1103,8 @@ def cpo_generate(request, cpo_id=None):
                 cpo.delivery_date = data['delivery_date']
                 cpo.inco_terms = data['inco_terms']
                 cpo.payment_terms = data['payment_terms']
+                cpo.total_basic_value = basic_value
+                cpo.total_value = total_value
                 
                 try:
                         cpo.document1 = request.FILES['supporting_document1']
@@ -1219,9 +1240,92 @@ def cpo_approve(request,cpo_id=None):
                 cpo.status = 'approved'
                 cpo.cpo_assign_detail = assign
                 cpo.save()
+                VendorProductSegmentation(cpo_id)
                 
                 print(data)
                 return HttpResponseRedirect(reverse('cpo-approval-list'))
+
+#Vendor Product Segmentation
+def VendorProductSegmentation(cpo_id):
+        sourcing_list = CPOLineitem.objects.filter(
+                cpo=CustomerPO.objects.get(id=cpo_id)
+                ).values('quotation_lineitem__sourcing_lineitem__sourcing').distinct()
+        print(sourcing_list)
+        
+        cpo = CustomerPO.objects.get(id=cpo_id)
+
+
+        #Truncate Process for existing 
+        if cpo.segmentation == True:
+                return 
+        
+        for sourcing_id in sourcing_list:
+                
+                print(sourcing_id)
+
+                sourcing = Sourcing.objects.get(id=sourcing_id['quotation_lineitem__sourcing_lineitem__sourcing'])
+
+                print(sourcing)
+
+                vpo = VendorPO.objects.create(
+                        cpo = cpo,
+                        vendor = sourcing.supplier,
+                        vendor_contact_person = sourcing.supplier_contact_person,
+                        offer_reference = sourcing.offer_reference,
+                        offer_date = sourcing.offer_date,
+                        billing_address = 'Shankarappa Complex #4, Hosapalya Main Road, Opposite to Om Shakti Temple, Hosapalya, HSR Layout Extension, Bangalore - 560068',
+                        shipping_address = 'Shankarappa Complex #4, Hosapalya Main Road, Opposite to Om Shakti Temple, Hosapalya, HSR Layout Extension, Bangalore - 560068',
+                        requester = cpo.cpo_assign_detail.assign_to,
+                        payment_term = sourcing.supplier.payment_term,
+                        advance_percentage = sourcing.supplier.advance_persentage,
+                        di1 = 'Original Invoice & Delivery Challans Four (4) copies each must be submitted at the time of delivery of goods.',
+                        di2 = 'Entire Goods must be delivered in Single Lot if not specified otherwise. For any changes, must inform IMMEDIATELY.',
+                        di3 = 'Product Specifications, Qty, Price, Delivery Terms are in accordance with your offer # dated: ' + str(sourcing.offer_date),
+                        di4 = 'Product Specifications, Qty, Price, Delivery Terms shall remain unchanged for this order.',
+                        di5 = 'Notify any delay in shipment as scheduled IMMEDIATELY.',
+                        di6 = 'Mail all correspondance to corporate office address only.',
+                        di7 = 'Must Submit Warranty Certificate, PO copy, TC copy (if any) and all other documents as per standard documentation'
+                        )
+                lineitems = CPOLineitem.objects.filter(quotation_lineitem__sourcing_lineitem__sourcing__supplier=sourcing.supplier, cpo = CustomerPO.objects.get(id = cpo_id))
+
+                for item in lineitems:
+                        VendorPOLineitems.objects.create(
+                                vpo=vpo,
+                                cpo_lineitem = item,
+                                product_title = item.product_title,
+                                description = item.description,
+                                model = item.model,
+                                brand = item.brand,
+                                product_code = item.product_code,
+                                hsn_code = item.hsn_code,
+                                pack_size = item.pack_size,
+                                gst = item.gst,
+                                uom = item.uom,
+                                quantity = item.quantity,
+                                unit_price = item.unit_price
+                        )
+                        item.segment_status = True
+                        item.save()
+        cpo.segmentation = True
+        cpo.save()
+        DuplicateVPORemover(cpo_id)
+
+#Duplicate VPO Remover
+def DuplicateVPORemover(cpo_id):
+        cpo = CustomerPO.objects.get(id=cpo_id)
+        vpo_counter = VendorPO.objects.filter(cpo=cpo).values('vendor').annotate(c=Count('vendor'))
+        print(vpo_counter)
+        
+        #VPO Counter
+        for item in vpo_counter:
+                if item['c']>1:
+                        print(item['vendor'])
+                        vpo_obj = VendorPO.objects.filter(cpo=cpo,vendor = item['vendor'])
+                        i = 1
+                        for vpo_item in vpo_obj:
+                                if i != 1:
+                                        vpo_item.delete()
+                                i = i + 1
 
 
 #CPO Rejection List

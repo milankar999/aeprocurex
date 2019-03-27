@@ -60,9 +60,13 @@ class VendorPOTracker(models.Model):
         po_number = models.CharField(primary_key=True, max_length=20, unique = True)
         po_date = models.DateField(auto_now_add=True)
         status = models.CharField(max_length=50, default='Requested')
+        vpo_type = models.CharField(max_length=50, default='Regular')
 
         vpo = models.ForeignKey(VendorPO,on_delete=models.CASCADE)
         requester = models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
+
+        basic_value = models.FloatField(default = 0)
+        total_value = models.FloatField(default = 0)
 
         def __str__(self):
                 return self.po_number + '  -  ' + str(self.po_date)
@@ -84,6 +88,8 @@ class VendorPOLineitems(models.Model):
         uom = models.CharField(max_length=20,null = False, blank = False, default='Pcs')
         quantity = models.FloatField(null = False, blank = False)
         unit_price = models.FloatField(null = False, blank = False)
+        total_basic_price = models.FloatField(default = 0)
+        total_price = models.FloatField(default = 0)
 
         discount = models.FloatField(default=0,null=True,blank=True)
 

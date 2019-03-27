@@ -15,6 +15,8 @@
                           <th>Customer PO Date</th>
                           <th>Requester</th>
                           <th>Creation Date</th>
+                          <th>Basic Value</th>
+                          <th>Total Value</th>
                         </tr>
                       </thead>
                       <tbody>   
@@ -29,6 +31,8 @@
                                 <td>{{cpo.customer_po_date}}</td>
                                 <td>{{cpo.customer_contact_person.name}}</td>
                                 <td>{{cpo.cpo_creation_detail.creation_date}}</td>
+                                <td>{{cpo.total_basic_value}}</td>
+                                <td>{{cpo.total_value}}</td>
                             </tr>
                           {% empty %}
                             <p>No CPO Found</p>

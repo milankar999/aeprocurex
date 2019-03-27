@@ -5,8 +5,10 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from django.http import Http404, HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from .models import *
 from .serializers import *
+from django.db.models import F
 import io
 import random
 import datetime
@@ -531,8 +533,8 @@ class VPOLaunch(APIView):
         def post(self, request, format=None, cpo_id = None, vpo_id=None):
                 #if 1<2:
                 try :
-                        vpo = VPO.objects.get(id=vpo_id)
-                        vpo_lineitem = VPOLineitems.objects.filter(vpo=vpo)
+                        vpo = VendorPO.objects.get(id=vpo_id)
+                        vpo_lineitem = VendorPOLineitems.objects.filter(vpo=vpo)
 
                         
                         if vpo.offer_reference == '':
@@ -575,11 +577,11 @@ class VPOLaunch(APIView):
                                         return Response({'Message': 'Undefined Unit Price Found'})
                         print(vpo.po_status)        
                         if vpo.po_status == 'Preparing': 
-                                vpo_count = VPOTracker.objects.count() + 1
-                                requester_name = VPO.objects.get(id=vpo_id).requester.first_name
+                                vpo_count = VendorPOTracker.objects.count() + 1
+                                requester_name = VendorPO.objects.get(id=vpo_id).requester.first_name
                                 po_number = 'ASPL-' + requester_name[0] + '-' + get_financial_year(datetime.datetime.today().strftime('%Y-%m-%d')) + "{:04d}".format(vpo_count)
                                 print(po_number)
-                                VPOTracker.objects.create(
+                                VendorPOTracker.objects.create(
                                         po_number = po_number,
                                         vpo = vpo,
                                         requester = self.request.user)
@@ -597,6 +599,72 @@ class VPOLaunch(APIView):
 
                 except:
                         return Response({'Message': 'Error Occured'})
+
+#Mark as Cash Purchase
+class VPOLaunchDirectPurchase(APIView):
+        parser_classes = (JSONParser,)
+
+        #Check Authentications
+        authentication_classes = [TokenAuthentication, SessionAuthentication]
+        permission_classes = [IsAuthenticated,]
+
+        def post(self, request, format=None, cpo_id = None, vpo_id=None):
+                #if 1<2:
+                try :
+                        vpo = VendorPO.objects.get(id=vpo_id)
+                        print(vpo)
+                        vpo_lineitem = VendorPOLineitems.objects.filter(vpo=vpo)
+
+                        if vpo.payment_term == 0 and vpo.advance_percentage == 0:
+                                return Response({'Message': 'Payment Terms and Advance Percentage are not Clear'})
+
+
+
+                        for item in vpo_lineitem:
+                                if item.product_title == '':
+                                        return Response({'Message': 'Undefined Product Title Found'})
+                                
+                                if item.description == '':
+                                        return Response({'Message': 'Undefined Product Description Found'})
+
+                                if item.gst == '':
+                                        return Response({'Message': 'Undefined GST Found'})
+
+                                if item.uom == '':
+                                        return Response({'Message': 'Undefined UOM Found'})
+
+                                if item.quantity == '':
+                                        return Response({'Message': 'Undefined Quantity Found'})
+
+                                if item.unit_price == '':
+                                        return Response({'Message': 'Undefined Unit Price Found'})
+                        print(vpo.po_status)        
+                        if vpo.po_status == 'Preparing': 
+                                vpo_count = VendorPOTracker.objects.count() + 1
+                                requester_name = VendorPO.objects.get(id=vpo_id).requester.first_name
+                                po_number = 'ASPL-' + requester_name[0] + '-' + get_financial_year(datetime.datetime.today().strftime('%Y-%m-%d')) + "{:04d}".format(vpo_count)
+                                print(po_number)
+                                VendorPOTracker.objects.create(
+                                        po_number = po_number,
+                                        vpo = vpo,
+                                        vpo_type = 'Direct Buying',
+                                        requester = self.request.user)
+                                vpo.po_status = 'Requested'
+
+                                vpo.save()
+                                return Response({'Message': 'Success'})
+
+                        if vpo.po_status == 'Rejected':
+                                vpo_tracker = VendorPOTracker.objects.get(vpo = vpo)
+                                vpo_tracker.status = 'Requested'
+                                vpo_tracker.save()
+                                vpo.po_status = 'Requested'
+                                vpo.save()
+                                return Response({'Message': 'Success'})
+
+                except:
+                        return Response({'Message': 'Error Occured'})
+
 
 #VPO Preview
 class VPOPreview(APIView):
@@ -671,6 +739,50 @@ class VPOApprovalList(APIView):
                         'vpo__vendor__location'
                 )
                 return Response(vpo)
+
+
+
+#VPO Pending Approval List
+@login_required(login_url="/employee/login/")
+def VPOPendingApprovalList(request):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+                vpo = VendorPOTracker.objects.filter(status = 'Requested')
+                context['vpo'] = vpo
+
+                if type == 'Sales':
+                        return render(request,"Sales/VPO/approval_list.html",context)
+
+
+#VPO Regular Pending Approval List
+@login_required(login_url="/employee/login/")
+def VPOPendingApprovalLineitems(request,po_number=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+                vpo = VendorPOTracker.objects.get(po_number=po_number)
+                vpo_lineitem = VendorPOLineitems.objects.filter(vpo=vpo.vpo).annotate(
+                        basic_value = F('unit_price') * F('quantity'),
+                        total_value = (F('unit_price') * F('quantity')) + ((F('unit_price') * F('quantity')) * F('gst') / 100)
+                )
+                context['vpo'] = vpo
+                context['vpo_lineitem'] = vpo_lineitem
+
+                if type == 'Sales':
+                        return render(request,"Sales/VPO/vpo_lineitem.html",context)
+
+
+
+
 
 
 #VPO Lineitems

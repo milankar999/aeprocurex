@@ -482,7 +482,16 @@ def generate_quotation_process(request,rfp_no=None):
             
             coq_item = COQLineitem.objects.filter(rfp_no=rfp_no)
 
+            
+            all_total_basic_value = 0
+            all_total_value = 0
+
             for item in coq_item:
+
+                basic_price = round((item.unit_price + (item.unit_price * item.margin / 100)),2)
+                total_basic_price = round((basic_price * item.quantity),2)
+                total_price = round((total_basic_price + (total_basic_price * item.gst / 100)),2)
+
                 QuotationLineitem.objects.create(
                     quotation = quotation_obj,
                     sourcing_lineitem = item.sourcing_lineitem,
@@ -501,8 +510,21 @@ def generate_quotation_process(request,rfp_no=None):
                     unit_price = item.unit_price,
                     margin = item.margin,
                     lead_time = item.lead_time,
-                    creation_time = item.creation_time
+                    creation_time = item.creation_time,
+                    basic_price = basic_price,
+                    total_basic_price = total_basic_price,
+                    total_price = total_price
                 )
+                all_total_basic_value = round((all_total_basic_value + total_basic_price),2)
+                all_total_value = round((all_total_value + total_price),2)
+            
+            print(all_total_basic_value)
+            print(all_total_value)
+
+            quotation_obj.total_basic_price = all_total_basic_value
+            quotation_obj.total_price = all_total_value
+
+            quotation_obj.save()
             
             return HttpResponseRedirect(reverse('generate-quotation-column-selection',args=[rfp_no,quotation_obj.quotation_no]))
 
@@ -1341,7 +1363,9 @@ def quoted_list(request):
                             'customer_contact_person__name',
                             'rfp__rfp_creation_details__creation_date',
                             'rfp__rfp_sourcing_detail__sourcing_completed_by__first_name',
-                            'quotation_date'
+                            'quotation_date',
+                            'total_basic_price',
+                            'total_price'
                             )    
             context['quoted_list'] = quoted_list
         return render(request,"Sales/Quotation/quoted_list.html",context)   
@@ -1364,7 +1388,9 @@ def quoted_quotation_list(request,rfp_no=None):
                             'customer_contact_person__name',
                             'rfp__rfp_creation_details__creation_date',
                             'rfp__rfp_sourcing_detail__sourcing_completed_by__first_name',
-                            'quotation_date'
+                            'quotation_date',
+                            'total_basic_price',
+                            'total_price'
                             )    
             context['quoted_list'] = quoted_quotation_list
         return render(request,"Sales/Quotation/quoted_quotation_list.html",context)
