@@ -57,7 +57,8 @@ INSTALLED_APPS = [
     'Leaves',
     'Expences',
     'BankAccount',
-    'Invoice'
+    'Invoice',
+    'GRNIR',
 ]
 
 MIDDLEWARE = [

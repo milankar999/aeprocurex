@@ -56,6 +56,9 @@ class PendingVPOLineitemsSerializer(serializers.ModelSerializer):
             'quantity',
             'unit_price',
             'discount',
+            'actual_price',
+            'total_basic_price',
+            'total_price'
         ]
 
 #Vendor Product Segmentation API View

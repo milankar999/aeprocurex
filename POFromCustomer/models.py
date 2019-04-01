@@ -57,6 +57,8 @@ class CustomerPO(models.Model):
         document1 = models.FileField(upload_to='cpo/',null=True,blank=True)
         document2 = models.FileField(upload_to='cpo/',null=True,blank=True)
 
+        lineitem_copy_status = models.BooleanField(default=False)
+
         def __str__(self):
                 return self.customer_po_no + ' ' + self.customer.name
 

@@ -67,6 +67,10 @@ class VendorPOTracker(models.Model):
 
         basic_value = models.FloatField(default = 0)
         total_value = models.FloatField(default = 0)
+        all_total_value = models.FloatField(default =0)
+
+        order_status = models.CharField(max_length = 100, default='Order Preparing')
+        remarks = models.TextField(null=True, blank=True)
 
         def __str__(self):
                 return self.po_number + '  -  ' + str(self.po_date)
@@ -88,10 +92,26 @@ class VendorPOLineitems(models.Model):
         uom = models.CharField(max_length=20,null = False, blank = False, default='Pcs')
         quantity = models.FloatField(null = False, blank = False)
         unit_price = models.FloatField(null = False, blank = False)
+        
+        discount = models.FloatField(default=0,null=True,blank=True)
+
+        actual_price = models.FloatField(default = 0)
+        
         total_basic_price = models.FloatField(default = 0)
         total_price = models.FloatField(default = 0)
 
-        discount = models.FloatField(default=0,null=True,blank=True)
 
         def __str__(self):
                 return self.vpo.vendor.name + ' - ' + self.product_title
+
+class VPOStatus(models.Model):
+        id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+        vpo = models.ForeignKey(VendorPOTracker,on_delete=models.CASCADE)
+        
+        order_status = models.CharField(max_length = 100)
+        remarks = models.TextField(null=True, blank=True)
+
+        update_date = models.DateTimeField(auto_now_add=True)
+
+        def __str__(self):
+                return self.vpo.po_number + ' - ' + self.order_status

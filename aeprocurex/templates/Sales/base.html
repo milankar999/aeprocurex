@@ -97,15 +97,24 @@
 
       <li class="{{po}}" role="presentation" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-          Customer PO <span class="caret"></span>
+          Order <span class="caret"></span>
         </a>
         <ul class="dropdown-menu">
-            <li><a href="/po_from_customer/cpo_approval/list/"> Approval List</a></li>
+            <li><a href="/po_from_customer/cpo_approval/list/">Customer PO Approval List</a></li>
             <hr>
             <li><a href="/api/po_to_vendor/vendor_po/pending_approval_list/">Pending PO releasing List</a></li>
-            
+            <li><a href="/api/po_to_vendor/approved_vendor_po/ready_list/">Open Vendor PO Tracker</a></li>
         </ul>
       </li>
+
+    <li class="{{invoice}}" role="presentation" class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+          Invoice <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            <li><a href="">Generate New</a></li>
+        </ul>
+     </li>
 
     </ul>
     <button type="button" class="btn btn-danger navbar-btn navbar-right" data-toggle="modal" data-target="#LogoutModal">{{login_user_name}}  <span class="glyphicon glyphicon-log-in"></span></button>

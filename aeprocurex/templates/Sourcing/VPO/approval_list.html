@@ -2,41 +2,45 @@
 {% load static %}
 
 {% block content %}
-    <div class="container">
-        <h2>Vendor PO Approval List</h2>
+    <div class="">
+        <h2>Vendor PO List</h2>
             <div class="table-responsive">          
                     <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
                       <thead>
                         <tr>
                           <th></th>
+                          <th></th>
                           <th>Vendor Name</th>
                           <th>Location</th>
                           <th>PO No</th>
-                          <th>PO Type</th>
                           <th>PO Date</th>
-                          <th>Requester</th>
                           <th>PO For</th>
                           <th>Basic Amount</th>
                           <th>Total Basic Amount</th>
                           <th>All Total Amount</th>
+                          <th>PO Type</th>
+                          <th>Order Status</th>
+                          <th>Payment Status</th>
                         </tr>
                       </thead>
                       <tbody>   
-                          {% for item in vpo %}
+                          {% for item in vpo_list %}
                             <tr>
-                               <td>
-                                   <a href="/api/po_to_vendor/vendor_po/pending_approval/{{item.po_number}}/lineitems/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                <td>
+                                   <a href="/api/po_to_vendor/approved_vendor_po/{{item.po_number}}/lineitems/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
                                 </td>
+                                <td>{{forloop.counter}}</td>
                                 <td>{{item.vpo.vendor.name}}</td>
                                 <td>{{item.vpo.vendor.location}}</td>
                                 <td>{{item.po_number}}</td>
-                                <td>{{item.vpo_type}}</td>
                                 <td>{{item.po_date}}</td>
-                                <td>{{item.requester.first_name}}&nbsp;{{item.requester.last_name}}</td>
                                 <td>{{item.vpo.cpo.customer.name}}</td>
                                 <td>{{item.basic_value}}</td>
                                 <td>{{item.total_value}}</td>
                                 <td>{{item.all_total_value}}</td>
+                                <td>{{item.vpo_type}}</td>
+                                <td>{{item.order_status}}</td>
+                                <td>{{item.remarks}}</td>
                             </tr>
                           {% empty %}
                             <p>No Vendor PO Found</p>

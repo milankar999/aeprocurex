@@ -1,0 +1,51 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <h2>Please Select Customer Purchase Order from This List</h2>
+            <div class="table-responsive">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Customer</th>
+                          <th>Location</th>
+                          <th>Customer PO No</th>
+                          <th>Customer PO Date</th>
+                          <th>Requester</th>
+                          <th>Creation Date</th>
+                          <th>Basic Value</th>
+                          <th>Total Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for cpo in cpo_list %}
+                            <tr>
+                               <td>
+                                   <a href="/invoice/new_creation/{{cpo.id}}/lineitem_selection/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td>{{cpo.customer.name}}</td>
+                                <td>{{cpo.customer.location}}</td>
+                                <td>{{cpo.customer_po_no}}</td>
+                                <td>{{cpo.customer_po_date}}</td>
+                                <td>{{cpo.customer_contact_person.name}}</td>
+                                <td>{{cpo.cpo_creation_detail.creation_date}}</td>
+                                <td>{{cpo.total_basic_value}}</td>
+                                <td>{{cpo.total_value}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No CPO Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+            <hr>
+            <a class="btn btn-info pull-right" href="/invoice/new_creation/customer_selection/">Direct Invoice</a>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable();
+            } );
+            </script>     
+{% endblock content %}

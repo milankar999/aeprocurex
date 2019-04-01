@@ -1,9 +1,11 @@
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.models import User
+from django.urls import reverse
 from django.shortcuts import render
 from rest_framework import viewsets
 from django.http import Http404, HttpResponse, JsonResponse
+from django.http import FileResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from .models import *
@@ -20,6 +22,8 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics, mixins
 from rest_framework.renderers import JSONRenderer
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponseRedirect
 
 from rest_framework.response import Response
 
@@ -95,56 +99,66 @@ def VendorProductSegmentation(cpo_id):
                 return 
         
         for sourcing_id in sourcing_list:
+
+                try:
                 
-                print(sourcing_id)
+                        print(sourcing_id)
 
-                sourcing = Sourcing.objects.get(id=sourcing_id['quotation_lineitem__sourcing_lineitem__sourcing'])
+                        sourcing = Sourcing.objects.get(id=sourcing_id['quotation_lineitem__sourcing_lineitem__sourcing'])
 
-                print(sourcing)
+                        print(sourcing)
 
-                vpo = VendorPO.objects.create(
-                        cpo = cpo,
-                        vendor = sourcing.supplier,
-                        vendor_contact_person = sourcing.supplier_contact_person,
-                        offer_reference = sourcing.offer_reference,
-                        offer_date = sourcing.offer_date,
-                        billing_address = 'Shankarappa Complex #4, Hosapalya Main Road, Opposite to Om Shakti Temple, Hosapalya, HSR Layout Extension, Bangalore - 560068',
-                        shipping_address = 'Shankarappa Complex #4, Hosapalya Main Road, Opposite to Om Shakti Temple, Hosapalya, HSR Layout Extension, Bangalore - 560068',
-                        requester = cpo.cpo_assign_detail.assign_to,
-                        payment_term = sourcing.supplier.payment_term,
-                        advance_percentage = sourcing.supplier.advance_persentage,
-                        di1 = 'Original Invoice & Delivery Challans Four (4) copies each must be submitted at the time of delivery of goods.',
-                        di2 = 'Entire Goods must be delivered in Single Lot if not specified otherwise. For any changes, must inform IMMEDIATELY.',
-                        di3 = 'Product Specifications, Qty, Price, Delivery Terms are in accordance with your offer # dated: ' + str(sourcing.offer_date),
-                        di4 = 'Product Specifications, Qty, Price, Delivery Terms shall remain unchanged for this order.',
-                        di5 = 'Notify any delay in shipment as scheduled IMMEDIATELY.',
-                        di6 = 'Mail all correspondance to corporate office address only.',
-                        di7 = 'Must Submit Warranty Certificate, PO copy, TC copy (if any) and all other documents as per standard documentation'
-                        )
-                lineitems = CPOLineitem.objects.filter(quotation_lineitem__sourcing_lineitem__sourcing__supplier=sourcing.supplier, cpo = CustomerPO.objects.get(id = cpo_id))
+                        vpo = VendorPO.objects.create(
+                                cpo = cpo,
+                                vendor = sourcing.supplier,
+                                vendor_contact_person = sourcing.supplier_contact_person,
+                                offer_reference = sourcing.offer_reference,
+                                offer_date = sourcing.offer_date,
+                                billing_address = 'Shankarappa Complex #4, Hosapalya Main Road, Opposite to Om Shakti Temple, Hosapalya, HSR Layout Extension, Bangalore - 560068',
+                                shipping_address = 'Shankarappa Complex #4, Hosapalya Main Road, Opposite to Om Shakti Temple, Hosapalya, HSR Layout Extension, Bangalore - 560068',
+                                requester = cpo.cpo_assign_detail.assign_to,
+                                payment_term = sourcing.supplier.payment_term,
+                                advance_percentage = sourcing.supplier.advance_persentage,
+                                di1 = 'Original Invoice & Delivery Challans Four (4) copies each must be submitted at the time of delivery of goods.',
+                                di2 = 'Entire Goods must be delivered in Single Lot if not specified otherwise. For any changes, must inform IMMEDIATELY.',
+                                di3 = 'Product Specifications, Qty, Price, Delivery Terms are in accordance with your offer # dated: ' + str(sourcing.offer_date),
+                                di4 = 'Product Specifications, Qty, Price, Delivery Terms shall remain unchanged for this order.',
+                                di5 = 'Notify any delay in shipment as scheduled IMMEDIATELY.',
+                                di6 = 'Mail all correspondance to corporate office address only.',
+                                di7 = 'Must Submit Warranty Certificate, PO copy, TC copy (if any) and all other documents as per standard documentation'
+                                )
+                        lineitems = CPOLineitem.objects.filter(quotation_lineitem__sourcing_lineitem__sourcing__supplier=sourcing.supplier, cpo = CustomerPO.objects.get(id = cpo_id))
 
-                for item in lineitems:
-                        VendorPOLineitems.objects.create(
-                                vpo=vpo,
-                                cpo_lineitem = item,
-                                product_title = item.product_title,
-                                description = item.description,
-                                model = item.model,
-                                brand = item.brand,
-                                product_code = item.product_code,
-                                hsn_code = item.hsn_code,
-                                pack_size = item.pack_size,
-                                gst = item.gst,
-                                uom = item.uom,
-                                quantity = item.quantity,
-                                unit_price = item.unit_price
-                        )
-                        item.segment_status = True
-                        item.save()
+                        for item in lineitems:
+                                unit_price = round(item.quotation_lineitem.sourcing_lineitem.price2,2)
+                                total_basic_price = round((unit_price * item.quantity),2)
+                                total_price = round((total_basic_price + (total_basic_price * item.gst / 100)),2) 
+                                VendorPOLineitems.objects.create(
+                                        vpo=vpo,
+                                        cpo_lineitem = item,
+                                        product_title = item.product_title,
+                                        description = item.description,
+                                        model = item.model,
+                                        brand = item.brand,
+                                        product_code = item.product_code,
+                                        hsn_code = item.hsn_code,
+                                        pack_size = item.pack_size,
+                                        gst = item.gst,
+                                        uom = item.uom,
+                                        quantity = item.quantity,
+                                        unit_price = round(unit_price),
+                                        actual_price = round(unit_price),
+                                        total_basic_price = round(total_basic_price,2),
+                                        total_price = round(total_price)
+                                )
+                                item.segment_status = True
+                                item.save()
+                
+                except:
+                        pass
         cpo.segmentation = True
         cpo.save()
         DuplicateVPORemover(cpo_id)
-
 
 #Duplicate VPO Remover
 def DuplicateVPORemover(cpo_id):
@@ -162,6 +176,38 @@ def DuplicateVPORemover(cpo_id):
                                 if i != 1:
                                         vpo_item.delete()
                                 i = i + 1
+
+
+#Mark CPO as PO Relesing Completed
+class PendingCPOMarkCompleted(APIView):
+        parser_classes = (JSONParser,)
+
+        #Check Authentications
+        authentication_classes = [TokenAuthentication, SessionAuthentication]
+        permission_classes = [IsAuthenticated,]
+
+        def post(self, request, format=None, cpo_id = None):
+                #if 1<2:
+                try :
+                        cpo = CustomerPO.objects.get(id=cpo_id)
+                        vpo_list = VendorPO.objects.filter(cpo=cpo)
+
+                        for vpo in vpo_list:
+                                if vpo.po_status == 'Preparing' or vpo.po_status == 'Rejected':     
+                                        return Response({'Message': 'Found Some Vendor PO Still pending'})
+
+                        cpo_lineitem = CPOLineitem.objects.filter(cpo=cpo)
+                        
+                        for item in cpo_lineitem:
+                                if item.segment_status == False:
+                                        return Response({'Message': 'Some Customer PO Lineitem found Still pending'})
+
+                        cpo.status = 'po_processed'
+                        cpo.save()
+                        return Response({'Message': 'Success'})
+
+                except:
+                        return Response({'Message': 'Error Occured'})
 
 
 # Vendor Product Segmentation API
@@ -189,6 +235,35 @@ class PendingCPOUnassignedLineitems(generics.GenericAPIView,
         def get(self,request,id):
                 return self.list(request)
 
+#Remove 
+class VPORemove(APIView):
+        parser_classes = (JSONParser,)
+
+        #Check Authentications
+        authentication_classes = [TokenAuthentication, SessionAuthentication]
+        permission_classes = [IsAuthenticated,]
+
+        def post(self, request, format=None, cpo_id = None, vpo_id = None):
+                #if 1<2:
+                try :
+                        cpo = CustomerPO.objects.get(id=cpo_id)
+                        vpo = VendorPO.objects.get(id=vpo_id)
+
+                        vpo_lineitem = VendorPOLineitems.objects.filter(vpo=vpo)
+
+                        for item in vpo_lineitem:
+                                item.cpo_lineitem.segment_status = False
+                                item.cpo_lineitem.save()
+
+                        vpo.delete()
+                        return Response({'Message': 'Success'})
+
+                except:
+                        return Response({'Message': 'Error Occured'})
+
+
+
+
 #Edit VPO Lineitem
 class VPOLineitemEdit(generics.GenericAPIView,
                                 mixins.ListModelMixin,
@@ -211,6 +286,16 @@ class VPOLineitemEdit(generics.GenericAPIView,
         
         def put(self,request,cpo_id=None,vpo_id=None,id=None):
                 return self.partial_update(request)
+
+        def perform_update(self, serializer):
+                serializer.save()
+                vpo_lineitem = VendorPOLineitems.objects.get(id = self.kwargs['id'])
+                vpo_lineitem.actual_price = round((vpo_lineitem.unit_price - (vpo_lineitem.unit_price * vpo_lineitem.discount / 100)),2)
+                vpo_lineitem.total_basic_price = round((vpo_lineitem.actual_price * vpo_lineitem.quantity),2)
+                vpo_lineitem.total_price = round((vpo_lineitem.total_basic_price + (vpo_lineitem.total_basic_price * vpo_lineitem.gst / 100)),2)
+                vpo_lineitem.save()
+                
+                
 
         def delete(self,request,cpo_id=None,vpo_id=None,id=None):
                 
@@ -326,14 +411,14 @@ class VPOAssignProducts(APIView):
         permission_classes = [IsAuthenticated,]
 
         def post(self, request, format=None, cpo_id = None, vpo_id=None):
-                
+                #if 1<2:
                 try :
                         vpo = VendorPO.objects.get(id=vpo_id)
                         for item_id in request.data['vpo_lineitems']:
                                 print(item_id)
                                 item = CPOLineitem.objects.get(id=item_id)
                                 
-                                VPOLineitems.objects.create(
+                                VendorPOLineitems.objects.create(
                                         vpo=vpo,
                                         cpo_lineitem = item,
                                         product_title = item.product_title,
@@ -346,7 +431,7 @@ class VPOAssignProducts(APIView):
                                         gst = item.gst,
                                         uom = item.uom,
                                         quantity = item.quantity,
-                                        unit_price = item.unit_price
+                                        unit_price = 0                                        
                                         )
                                 item.segment_status = True
                                 item.save()
@@ -489,6 +574,7 @@ class VPOTermsConditions(generics.GenericAPIView,
         def put(self,request,cpo_id=None,id=None):
                 return self.partial_update(request)
 
+ 
  #VPO Delivery Instructions
 class VPODeliveryInstructions(generics.GenericAPIView,
                                 mixins.UpdateModelMixin,
@@ -557,6 +643,8 @@ class VPOLaunch(APIView):
 
 
 
+                        basic_value = 0
+                        total_value = 0
                         for item in vpo_lineitem:
                                 if item.product_title == '':
                                         return Response({'Message': 'Undefined Product Title Found'})
@@ -575,6 +663,32 @@ class VPOLaunch(APIView):
 
                                 if item.unit_price == '':
                                         return Response({'Message': 'Undefined Unit Price Found'})
+                        
+                                basic_value = round((basic_value + item.total_basic_price),2)
+                                total_value = round((total_value + item.total_price),2)
+                        
+                        all_total_value = total_value
+
+                        try:
+                                all_total_value = all_total_value + vpo.freight_charges
+                        except:
+                                pass
+
+                        try:
+                                all_total_value = all_total_value + vpo.custom_duties
+                        except:
+                                pass
+
+                        try:
+                                all_total_value = all_total_value + vpo.pf
+                        except:
+                                pass
+
+                        try:
+                                all_total_value = all_total_value + vpo.insurance
+                        except:
+                                pass
+
                         print(vpo.po_status)        
                         if vpo.po_status == 'Preparing': 
                                 vpo_count = VendorPOTracker.objects.count() + 1
@@ -584,16 +698,24 @@ class VPOLaunch(APIView):
                                 VendorPOTracker.objects.create(
                                         po_number = po_number,
                                         vpo = vpo,
-                                        requester = self.request.user)
+                                        requester = self.request.user,
+                                        basic_value = basic_value,
+                                        total_value = total_value,
+                                        all_total_value = all_total_value)
                                 vpo.po_status = 'Requested'
                                 vpo.save()
                                 return Response({'Message': 'Success'})
 
                         if vpo.po_status == 'Rejected':
-                                vpo_tracker = VPOTracker.objects.get(vpo = vpo)
+                                vpo_tracker = VendorPOTracker.objects.get(vpo = vpo)
                                 vpo_tracker.status = 'Requested'
+                                vpo_tracker.basic_value = basic_value
+                                vpo_tracker.total_value = total_value
+                                vpo_tracker.all_total_value = all_total_value
                                 vpo_tracker.save()
+                                
                                 vpo.po_status = 'Requested'
+                                vpo.vpo_type = 'Regular'
                                 vpo.save()
                                 return Response({'Message': 'Success'})
 
@@ -618,7 +740,8 @@ class VPOLaunchDirectPurchase(APIView):
                         if vpo.payment_term == 0 and vpo.advance_percentage == 0:
                                 return Response({'Message': 'Payment Terms and Advance Percentage are not Clear'})
 
-
+                        basic_value = 0
+                        total_value = 0
 
                         for item in vpo_lineitem:
                                 if item.product_title == '':
@@ -638,6 +761,36 @@ class VPOLaunchDirectPurchase(APIView):
 
                                 if item.unit_price == '':
                                         return Response({'Message': 'Undefined Unit Price Found'})
+
+                                basic_value = round((basic_value + item.total_basic_price),2)
+                                total_value = round((total_value + item.total_price),2)
+
+                        print(basic_value)
+                        print(total_value)
+                        all_total_value = total_value
+
+                        try:
+                                all_total_value = all_total_value + vpo.freight_charges
+                        except:
+                                pass
+
+                        try:
+                                all_total_value = all_total_value + vpo.custom_duties
+                        except:
+                                pass
+
+                        try:
+                                all_total_value = all_total_value + vpo.pf
+                        except:
+                                pass
+
+                        try:
+                                all_total_value = all_total_value + vpo.insurance
+                        except:
+                                pass
+
+
+
                         print(vpo.po_status)        
                         if vpo.po_status == 'Preparing': 
                                 vpo_count = VendorPOTracker.objects.count() + 1
@@ -648,7 +801,10 @@ class VPOLaunchDirectPurchase(APIView):
                                         po_number = po_number,
                                         vpo = vpo,
                                         vpo_type = 'Direct Buying',
-                                        requester = self.request.user)
+                                        requester = self.request.user,
+                                        basic_value = basic_value,
+                                        total_value = total_value,
+                                        all_total_value = all_total_value)
                                 vpo.po_status = 'Requested'
 
                                 vpo.save()
@@ -657,8 +813,13 @@ class VPOLaunchDirectPurchase(APIView):
                         if vpo.po_status == 'Rejected':
                                 vpo_tracker = VendorPOTracker.objects.get(vpo = vpo)
                                 vpo_tracker.status = 'Requested'
+                                vpo_tracker.basic_value = basic_value
+                                vpo_tracker.total_value = total_value
+                                vpo_tracker.all_total_value = all_total_value
                                 vpo_tracker.save()
+
                                 vpo.po_status = 'Requested'
+                                vpo.vpo_type = 'Direct Buying'
                                 vpo.save()
                                 return Response({'Message': 'Success'})
 
@@ -740,8 +901,6 @@ class VPOApprovalList(APIView):
                 )
                 return Response(vpo)
 
-
-
 #VPO Pending Approval List
 @login_required(login_url="/employee/login/")
 def VPOPendingApprovalList(request):
@@ -770,20 +929,65 @@ def VPOPendingApprovalLineitems(request,po_number=None):
         
         if request.method == 'GET':
                 vpo = VendorPOTracker.objects.get(po_number=po_number)
-                vpo_lineitem = VendorPOLineitems.objects.filter(vpo=vpo.vpo).annotate(
-                        basic_value = F('unit_price') * F('quantity'),
-                        total_value = (F('unit_price') * F('quantity')) + ((F('unit_price') * F('quantity')) * F('gst') / 100)
-                )
+                vpo_lineitem = VendorPOLineitems.objects.filter(vpo=vpo.vpo)
                 context['vpo'] = vpo
                 context['vpo_lineitem'] = vpo_lineitem
+                PO_Generator(po_number)
 
                 if type == 'Sales':
                         return render(request,"Sales/VPO/vpo_lineitem.html",context)
 
+#VPO Regular Pending Approval Get Copy
+@login_required(login_url="/employee/login/")
+def VPOPendingApprovalGetCopy(request,po_number=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+                PO_Generator(po_number)
+                return FileResponse('/api/media/po/'+po_number+'.pdf', as_attachment=True, filename= po_number + '.pdf')
 
 
+#VPO Approve
+@login_required(login_url="/employee/login/")
+def VPOApprove(request,po_number=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'POST':
+                vpo_tracker = VendorPOTracker.objects.get(po_number=po_number)
+                vpo_tracker.status = 'Approved' 
+                vpo_tracker.vpo.po_status = 'Approved'
+                vpo_tracker.vpo.save()
+                vpo_tracker.save()
 
+                if type == 'Sales':
+                        return HttpResponseRedirect(reverse('vpo-pending-approval-list'))
 
+#VPO Reject
+@login_required(login_url="/employee/login/")
+def VPOReject(request,po_number=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'POST':
+                vpo_tracker = VendorPOTracker.objects.get(po_number=po_number)
+                vpo_tracker.status = 'Rejected' 
+                vpo_tracker.vpo.po_status = 'Rejected'
+                vpo_tracker.vpo.save()
+                vpo_tracker.save()
+
+                if type == 'Sales':
+                        return HttpResponseRedirect(reverse('vpo-pending-approval-list'))
 
 #VPO Lineitems
 class VPOApprovalLineitems(generics.GenericAPIView,
@@ -862,51 +1066,51 @@ class VPOApprovalPreview(APIView):
                 return Response(vpo)  
 
 #VPO Approve
-class VPOApprove(APIView):
-        parser_classes = (JSONParser,)
+#class VPOApprove(APIView):
+#        parser_classes = (JSONParser,)
 
         #Check Authentications
-        authentication_classes = [TokenAuthentication, SessionAuthentication]
-        permission_classes = [IsAuthenticated,]
+#        authentication_classes = [TokenAuthentication, SessionAuthentication]
+#        permission_classes = [IsAuthenticated,]
 
-        def post(self, request, format=None, vpo_id = None, po_number=None):    
+#        def post(self, request, format=None, vpo_id = None, po_number=None):    
                                           
-                try:
-                        vpo = VPO.objects.get(id = vpo_id)
-                        vpo_tracker = VPOTracker.objects.get(po_number=po_number)
+#                try:
+#                        vpo = VPO.objects.get(id = vpo_id)
+#                        vpo_tracker = VPOTracker.objects.get(po_number=po_number)
 
-                        vpo.po_status = 'Approved'
-                        vpo_tracker.status = 'Approved' 
+#                        vpo.po_status = 'Approved'
+#                        vpo_tracker.status = 'Approved' 
 
-                        vpo.save()
-                        vpo_tracker.save()
+#                        vpo.save()
+#                        vpo_tracker.save()
 
-                        return Response({'Message': 'Success'})                      
-                except:
-                        return Response({'Message': 'Error Occured'})
+#                        return Response({'Message': 'Success'})                      
+#                except:
+#                        return Response({'Message': 'Error Occured'})
 
 #VPO Reject
-class VPOReject(APIView):
-        parser_classes = (JSONParser,)
+#class VPOReject(APIView):
+#        parser_classes = (JSONParser,)
 
         #Check Authentications
-        authentication_classes = [TokenAuthentication, SessionAuthentication]
-        permission_classes = [IsAuthenticated,]
+#        authentication_classes = [TokenAuthentication, SessionAuthentication]
+#        permission_classes = [IsAuthenticated,]
 
-        def post(self, request, format=None, po_number=None):            
-                try:
-                        vpo = VPO.objects.get(id = vpo_id)
-                        vpo_tracker = VPOTracker.objects.get(po_number=po_number)
+#        def post(self, request, format=None, po_number=None):            
+#                try:
+#                        vpo = VPO.objects.get(id = vpo_id)
+#                        vpo_tracker = VPOTracker.objects.get(po_number=po_number)#
 
-                        vpo.po_status = 'Rejected'
-                        vpo_tracker.status = 'Rejected' 
+#                        vpo.po_status = 'Rejected'
+#                        vpo_tracker.status = 'Rejected' 
 
-                        vpo.save()
-                        vpo_tracker.save()
+#                        vpo.save()
+#                        vpo_tracker.save()
 
-                        return Response({'Message': 'Success'})                      
-                except:
-                        return Response({'Message': 'Error Occured'})
+#                        return Response({'Message': 'Success'})                      
+#                except:
+#                        return Response({'Message': 'Error Occured'})
 
 #VPO Ready List
 class VPOReadyList(APIView):
@@ -1814,3 +2018,97 @@ class VPOGeneratePO(APIView):
         def get(self, request, format=None, po_number=None):
                 PO_Generator(po_number)
                 return Response({'po_url' : '/api/media/po/' + po_number + '.pdf'})
+
+
+
+#VPO Approved Ready List
+@login_required(login_url="/employee/login/")
+def VPOApprovedReadyList(request):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+                if type == 'Sourcing':
+                        vpo_list = VendorPOTracker.objects.filter(status='Approved',vpo__requester=u)
+                        context['vpo_list'] = vpo_list
+                        return render(request,"Sourcing/VPO/approval_list.html",context)
+
+                if type == 'Sales':
+                        vpo_list = VendorPOTracker.objects.filter(status='Approved')
+                        context['vpo_list'] = vpo_list
+                        return render(request,"Sales/VPO/ready_approval_list.html",context)
+
+#VPO Approved Ready List
+@login_required(login_url="/employee/login/")
+def VPOApprovedReadyLineitems(request,po_number):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+                vpo = VendorPOTracker.objects.get(po_number=po_number)
+                vpo_lineitem = VendorPOLineitems.objects.filter(vpo=vpo.vpo)
+                context['vpo'] = vpo
+                context['vpo_lineitem'] = vpo_lineitem
+                PO_Generator(po_number)
+
+                if type == 'Sourcing':
+                        return render(request,"Sourcing/VPO/vpo_lineitem.html",context)   
+
+                if type == 'Sales':
+                        vpo_status = VPOStatus.objects.filter(vpo = vpo)
+                        context['vpo_status'] = vpo_status
+                        return render(request,"Sales/VPO/ready_vpo_lineitem.html",context)                
+
+
+#VPO Approved change info
+@login_required(login_url="/employee/login/")
+def VPOApprovedChangeData(request,po_number):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'POST':
+                vpo_tracker = VendorPOTracker.objects.get(po_number=po_number)
+                vpo_tracker.status = 'Rejected' 
+                vpo_tracker.vpo.po_status = 'Rejected'
+                vpo_tracker.vpo.cpo.status = 'approved'
+                vpo_tracker.vpo.cpo.save()
+                vpo_tracker.vpo.save()
+                vpo_tracker.save()
+
+                return HttpResponseRedirect(reverse('vpo-approved-ready-list'))
+
+
+#VPO Approved change info
+@login_required(login_url="/employee/login/")
+def VPOUpdateStatus(request,po_number):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'POST':
+                data = request.POST
+                
+                vpo = VendorPOTracker.objects.get(po_number=po_number)
+                vpo.order_status = data['order_status']
+                vpo.remarks = data['remarks']
+                vpo.save()
+
+                VPOStatus.objects.create(
+                        vpo = vpo,
+                        order_status = data['order_status'],
+                        remarks = data['remarks']
+                )
+
+                return HttpResponseRedirect(reverse('vpo-approved-ready-list'))
+
