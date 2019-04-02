@@ -37,6 +37,8 @@ urlpatterns = [
     path('api/po_from_customer/',include('POFromCustomer.api_urls')),
 
     path('invoice/',include('Invoice.urls')),
+    path('grnir/',include('GRNIR.urls')),
+
     path('api/po_8_vendor/',include('POToVendor.urls')),
     path('api/po_to_vendor/',include('POForVendor.urls')),
     path('api/leaves/',include('Leaves.urls')),

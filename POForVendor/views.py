@@ -388,11 +388,9 @@ class VPONewVenndorPOSegmentCreation(generics.GenericAPIView,
                         cpo = CustomerPO.objects.get(id=self.kwargs['cpo_id']),
                         vendor = SupplierProfile.objects.get(id=self.kwargs['vendor_id']),
                         vendor_contact_person = SupplierContactPerson.objects.get(id=self.kwargs['contact_person_id']),
-                        billing_address = 'Shankarappa Complex #4, Hosapalya Main Road, Opposite to Om Shakti Temple, Hosapalya, HSR Layout Extension, Bangalore - 560068',
-                        shipping_address = 'Shankarappa Complex #4, Hosapalya Main Road, Opposite to Om Shakti Temple, Hosapalya, HSR Layout Extension, Bangalore - 560068',
+                        billing_address = 'Aeprocurex Sourcing Private Limited, Shankarappa Complex #4, Hosapalya Main Road, Opposite to Om Shakti Temple, Hosapalya, HSR Layout Extension, Bangalore - 560068',
+                        shipping_address = 'Aeprocurex Sourcing Private Limited,No 1318, 3rd Floor, 24th Main Rd, Sector 2, HSR Layout, Bengaluru, Karnataka 560102',
                         requester = self.request.user,
-                        payment_term = SupplierProfile.objects.get(id=self.kwargs['vendor_id']).payment_term,
-                        advance_percentage = SupplierProfile.objects.get(id=self.kwargs['vendor_id']).advance_persentage,
                         di1 = 'Original Invoice & Delivery Challans Four (4) copies each must be submitted at the time of delivery of goods.',
                         di2 = 'Entire Goods must be delivered in Single Lot if not specified otherwise. For any changes, must inform IMMEDIATELY.',
                         di3 = 'Product Specifications, Qty, Price, Delivery Terms are in accordance with your offer # ',
@@ -1545,7 +1543,7 @@ def add_pricing_amount(pdf,po_number,state,y,total_basic_amount,total_gst,freigh
                 pdf.setFont('Helvetica', 9)
         pdf.setFont('Helvetica-Bold', 8)
 
-        pdf.drawString(330,y,"ALl Total Basic Value")
+        pdf.drawString(330,y,"All Total Basic Value")
         pdf.drawString(490,y,"INR " + total_basic_amount)
         y = y - 10
 

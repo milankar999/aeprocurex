@@ -74,6 +74,9 @@ def user_login(request):
                         #context['rfp_quotation_pending'] = rfp_quotation_pending
                         
                         return render(request,"CRM/crm_home.html",context)
+
+                if type == 'GRN':
+                        return render(request,"GRN/grn_home.html",context)
         except:
                 context={}
                 if request.method=="POST":
@@ -161,6 +164,9 @@ def success(request):
                 context['rfp_quotation_pending_count'] = rfp_quotation_pending_count
                 #context['rfp_quotation_pending'] = rfp_quotation_pending
                 return render(request,"CRM/crm_home.html",context)
+
+        if type == 'GRN':
+                return render(request,"GRN/grn_home.html",context)
 
 @login_required(login_url="/employee/login/")
 def crm_home_load(request):
