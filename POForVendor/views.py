@@ -114,8 +114,8 @@ def VendorProductSegmentation(cpo_id):
                                 vendor_contact_person = sourcing.supplier_contact_person,
                                 offer_reference = sourcing.offer_reference,
                                 offer_date = sourcing.offer_date,
-                                billing_address = 'Shankarappa Complex #4, Hosapalya Main Road, Opposite to Om Shakti Temple, Hosapalya, HSR Layout Extension, Bangalore - 560068',
-                                shipping_address = 'Shankarappa Complex #4, Hosapalya Main Road, Opposite to Om Shakti Temple, Hosapalya, HSR Layout Extension, Bangalore - 560068',
+                                billing_address = 'Aeprocurex Sourcing Private Limited, Shankarappa Complex #4, Hosapalya Main Road, Opposite to Om Shakti Temple, Hosapalya, HSR Layout Extension, Bangalore - 560068',
+                                shipping_address = 'Aeprocurex Sourcing Private Limited No 1318, 3rd Floor, 24th Main Rd, Sector 2, HSR Layout, Bengaluru, Karnataka 560102',
                                 requester = cpo.cpo_assign_detail.assign_to,
                                 payment_term = sourcing.supplier.payment_term,
                                 advance_percentage = sourcing.supplier.advance_persentage,
@@ -1538,7 +1538,7 @@ def add_lineitem(pdf,y,i,po_number,product_title,description,model,brand,product
         return(y)
 
 #Add pricing Amount
-def add_pricing_amount(pdf,po_number,y,total_basic_amount,total_gst,freight_charges,pf,custom_duties,insurance,grand_total):
+def add_pricing_amount(pdf,po_number,state,y,total_basic_amount,total_gst,freight_charges,pf,custom_duties,insurance,grand_total):
         #Page Break
         if y < 50:
                 y = add_new_page(pdf,po_number)
@@ -1555,10 +1555,34 @@ def add_pricing_amount(pdf,po_number,y,total_basic_amount,total_gst,freight_char
                 pdf.setFont('Helvetica', 9)
         pdf.setFont('Helvetica-Bold', 8)
 
-        pdf.drawString(330,y,"Total Applicable GST Value")
-        pdf.drawString(490,y,"INR " + total_gst)
-        y = y - 10
+        if state.upper() == 'KARNATAKA':
+                if y < 50:
+                        y = add_new_page(pdf,po_number)
+                        pdf.setFont('Helvetica', 9)
+                pdf.setFont('Helvetica-Bold', 8)
+                
+                pdf.drawString(330,y,"Total Applicable CGST Value")
+                pdf.drawString(490,y,"INR " + str(round((float(total_gst)/2),2)))
+                y = y - 10
 
+                if y < 50:
+                        y = add_new_page(pdf,po_number)
+                        pdf.setFont('Helvetica', 9)
+                pdf.setFont('Helvetica-Bold', 8)
+
+                pdf.drawString(330,y,"Total Applicable SGST Value")
+                pdf.drawString(490,y,"INR " + str(round((float(total_gst)/2),2)))
+                y = y - 10
+
+        else:
+                if y < 50:
+                        y = add_new_page(pdf,po_number)
+                        pdf.setFont('Helvetica', 9)
+                pdf.setFont('Helvetica-Bold', 8)
+                
+                pdf.drawString(330,y,"Total Applicable IGST Value")
+                pdf.drawString(490,y,"INR " + str(round((float(total_gst)),2)))
+                y = y - 10 
 
         #Page Break
         if y < 50:
@@ -1873,6 +1897,7 @@ def PO_Generator(po_number):
         #Extract PO Data
         vpo_tracker_object = VendorPOTracker.objects.get(po_number = po_number)
         vpo_object = vpo_tracker_object.vpo
+        state = vpo_tracker_object.vpo.vendor.state
         vpo_lineitems = VendorPOLineitems.objects.filter(vpo = vpo_object)
         pdf = canvas.Canvas("media/po/" + po_number + ".pdf", pagesize=A4)
         pdf.setTitle(po_number + '.pdf')
@@ -1961,6 +1986,7 @@ def PO_Generator(po_number):
         y = add_pricing_amount(
                 pdf,
                 po_number,
+                state,
                 y,
                 '{0:.2f}'.format(total_basic_amount),
                 '{0:.2f}'.format(total_gst),

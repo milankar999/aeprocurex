@@ -46,9 +46,9 @@
                                         <input type="text" class="form-control" id="city" name="city" required value="{{Customer.city}}">
                                         <label class="form-input" for="state">State <a style="color: red">*</a></label>
                                         <select class="form-control" id="state" name="state" required>
-                                          <option>"{{Customer.state}}"</option>
+                                          <option>{{Customer.state}}</option>
                                           {% for state in StateList %}
-                                            <option>"{{state}}"</option>
+                                            <option>{{state}}</option>
                                           {% endfor %}
                                         </select>
                                         <label class="form-input" for="pin">Pin </label>

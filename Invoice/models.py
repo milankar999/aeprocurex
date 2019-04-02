@@ -14,6 +14,7 @@ class PendingDelivery(models.Model):
 
 class InvoiceTracker(models.Model):
         invoice_no = models.CharField(max_length = 20, primary_key=True)
+        invoice_date = models.DateField(auto_now_add = True,null=True, blank=True)
         cpo = models.ForeignKey(CustomerPO,on_delete = models.CASCADE, null=True, blank=True)
 
         customer = models.ForeignKey(CustomerProfile,on_delete=models.CASCADE)

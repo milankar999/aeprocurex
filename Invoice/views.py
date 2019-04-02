@@ -28,6 +28,13 @@ def purchare_order_selection(request):
         context['login_user_name'] = u.first_name + ' ' + u.last_name
     
         if request.method == 'GET':
+                processing_count = InvoiceTracker.objects.filter(generating_status='creation_in_progress').count()
+
+                if processing_count > 0:
+                        processing_invoice_list = InvoiceTracker.objects.filter(generating_status='creation_in_progress')
+                        context['processing_invoicce_list'] = processing_invoice_list
+                        return render(request,"Sales/Invoice/invoice_processing_list.html",context)
+
                 cpo_list = CustomerPO.objects.all()
                 context['cpo_list'] = cpo_list
 
@@ -150,6 +157,22 @@ def invoice_selected_lineitem(request,invoice_no=None):
                 if type == 'Sales':
                         return render(request,"Sales/Invoice/invoice_selected_lineitem.html",context)
 
+@login_required(login_url="/employee/login/")
+def invoice_delete(request,invoice_no=None):
+        context={}
+        context['invoice'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                invoice = InvoiceTracker.objects.get(invoice_no = invoice_no)
+                if invoice.generating_status != 'creation_in_progress':
+                        return HttpResponseRedirect(reverse('invoice-selected-lineitem',args=[invoice_no]))
+
+                else:
+                        invoice.delete()
+                        return HttpResponseRedirect(reverse('invoice-creation-purchase-order-selection'))
 
 @login_required(login_url="/employee/login/")
 def customer_selection(request):

@@ -12,8 +12,8 @@ class VendorPO(models.Model):
         offer_reference =  models.CharField(max_length=100,null=True,blank=True)
         offer_date = models.DateField(null=True,blank=True)
 
-        billing_address = models.TextField(null=True,blank=True)
-        shipping_address = models.TextField(null=True,blank=True)
+        billing_address = models.TextField(default = 'Aeprocurex Sourcing Private Limited, Shankarappa Complex #4, Hosapalya Main Road, Opposite to Om Shakti Temple, Hosapalya, HSR Layout Extension, Bangalore - 560068')
+        shipping_address = models.TextField(default = 'Aeprocurex Sourcing Private Limited No 1318, 3rd Floor, 24th Main Rd, Sector 2, HSR Layout, Bengaluru, Karnataka 560102')
         delivery_date = models.DateField(null=True, blank=True)
 
         requester = models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
@@ -31,9 +31,9 @@ class VendorPO(models.Model):
         pf = models.FloatField(default = 0.0)
         insurance = models.FloatField(default = 0.0)
         
-        mode_of_transport = models.CharField(max_length=200,null=True,blank=True)
-        inco_terms = models.CharField(max_length=200,null=True,blank=True)
-        installation = models.CharField(max_length=200,null=True,blank=True)
+        mode_of_transport = models.CharField(max_length=200, default = 'Road')
+        inco_terms = models.CharField(max_length=200, default = 'DAP')
+        installation = models.CharField(max_length=200, default = 'Supplier Scope')
         terms_of_payment = models.CharField(max_length=200,null=True,blank=True)
 
         currency = models.CharField(max_length=20,default='INR')

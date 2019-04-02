@@ -3,7 +3,27 @@
 {% block content %}
 <div>
     <div class="">
-            <h2>Please Check the Quantity of this order</h2>
+            <h2>Please Check the Quantity of this order
+                <button class="btn btn-info" data-toggle="modal" data-target="#AddModel">Add New Item </button>
+
+
+<!--Add item Modal -->
+<div class="modal fade" id="AddModel" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+
+        </div>
+      </div>
+    </div>
+  </div>
+<!--Add Item Model-->
+
+
+
+
+
+            </h2>
         </div>
        <div class="table-responsive">          
                <table id="pending_items" class="table table-hover table-bordered table-sm" width="100%">
@@ -55,8 +75,43 @@
                <label>Total Basic Value in INR = {{invoice_total_basic}}</label><br>
                <label>Total GST in INR = {{invoice_total_gst}}</label><br>
                <label>Grand Total in INR= {{invoice_total}}</label>
-               <button class="btn btn-success pull-right" id='preceed' type="button" onclick="getCheckedCheckboxesFor('cpo_lineitem');" value="Get Values">Select</button>
-               
+               <form method="POST" action="">
+                <input type="submit" class="btn btn-success pull-right" id='preceed' value="Continue"/>
+               </form>   
+               <button class="btn btn-danger pull-left" data-toggle="modal" data-target="#DeleteModel">Delete This Invoice </button>
+
+<!--Delete Invoice Modal -->
+    <div class="modal fade" id="DeleteModel" role="dialog">
+        <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+           <button type="button" class="close" data-dismiss="modal">&times;</button>
+           <h4 class="modal-title">Are you Sure want to delete this Invoice</span></h4>
+         </div>
+         <div class="modal-body">
+           <form type="submit" id="customer-form" method="POST" action="/invoice/new_creation/{{invoice_no}}/delete/">
+            {% csrf_token %}
+            <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      <h4 class="modal-title">Press Continue To Delete this Invoice...</span></h4>
+                    <div class="modal-body">
+                        <div class="form-group">
+                                                  
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" class="btn btn-success" value="Continue">
+                    </div>
+                  </div>                    
+            </div>
+           </form>
+         </div>
+       </div>
+      </div>
+      </div>
+<!--Delete Invoice Model-->
+
        </div>
 </div>
 <script type="text/javascript">
