@@ -23,8 +23,8 @@ class VendorPO(models.Model):
         receiver_phone2 = models.CharField(max_length = 20, null=True, blank=True)
         receiver_dept = models.CharField(max_length = 50, null=True, blank=True)
 
-        payment_term = models.IntegerField(default=0)
-        advance_percentage = models.IntegerField(default=0)
+        payment_term = models.IntegerField(default=0,null=True, blank=True)
+        advance_percentage = models.IntegerField(default=0,null=True, blank=True)
 
         freight_charges = models.FloatField(default = 0.0)
         custom_duties = models.FloatField(default = 0.0)
