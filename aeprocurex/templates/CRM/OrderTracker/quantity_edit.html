@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title></title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+</head>
+  <body>
+
+
+
+{% block content %}
+  <div>
+    <style>
+      .content {
+          max-width: 500px;
+          margin: auto;
+          background: white;
+          padding: 10px;
+      }
+      </style>        
+      <div class="content">
+        <h3>Please Enter the Pending Delivery Quantity</h3>
+        <form type="submit" id="vendor-form" method="POST">
+          {% csrf_token %}
+          <div class="form-group">
+                  <h4>Total Quantity : {{item.quantity}}</h4>
+                  <hr>
+                  <label class="form-input" for="pending_quantity">Pending Quantity <a style="color: red">*</a></label>
+                  <input type="number" step="0.01" class="form-control" id="pending_quantity" name="pending_quantity" value={{item.pending_delivery_quantity}} required>
+          </div>
+      </div>
+      <div class="modal-footer">
+              <input type="submit" class="btn btn-success" value="Confirm">
+        </form>
+      </div>
+  </div>   
+
+{% endblock content %}
+</body>
+</html>

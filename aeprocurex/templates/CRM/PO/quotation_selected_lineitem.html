@@ -57,7 +57,7 @@
                     <input type="text" class="form-control" id="uom" name="uom" required>
 
                     <label class="form-input" for="quantity">Quantity <a style="color: red">*</a></label>
-                    <input type="number" class="form-control" id="quantity" name="quantity" required>
+                    <input type="number" class="form-control" step="0.01" id="quantity" name="quantity" required>
 
                     <label class="form-input" for="unit_price">Unit Price(In INR)<a style="color: red">*</a> </label>
                     <input type="number" class="form-control" id="unit_price" step="0.01" name="unit_price" required>  <br>                     
@@ -173,7 +173,7 @@
                         <input type="number" class="form-control" id="payment_terms" name="payment_terms" required value="{{payment_term}}">
 
                         <label class="form-input" for="priority">Please Select the type of the Order<a style="color: red">*</a></label>
-                        <select class="form-control" id="rfp_type" name="rfp_type" required>
+                        <select class="form-control" id="po_type" name="po_type" required>
                             <option></option>
                             <option>PSP</option>
                             <option>Non PSP</option>

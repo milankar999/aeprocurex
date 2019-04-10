@@ -91,7 +91,7 @@ class CPOLineitem(models.Model):
 
         segment_status = models.BooleanField(default=False)
 
+        pending_delivery_quantity = models.FloatField(null=True, blank=True, default=0)
+
         def __str__(self):
                 return self.product_title + ' ' + str(self.quantity) + ' ' + str(self.unit_price)
-
-        

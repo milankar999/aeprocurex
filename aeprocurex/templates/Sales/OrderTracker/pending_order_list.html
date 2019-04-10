@@ -1,0 +1,86 @@
+{% extends 'Sales/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="">
+        <h2>Customer Order Tracker</h2>
+        <br><label>Total Basic Pending : {{total_basic_pending}}</label>
+        <br><label>Total Pending : {{total_pending}}</label>
+            <div class="table-responsive">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>SL #</th>
+                          <th>Order Status</th>
+                          <th>Customer</th>
+                          <th>Location</th>
+                          <th>Contact Person</th>
+                          <th>Type</th>
+                          <th>PO Number</th>
+                          <th>PO Date</th>
+                          <th>Delivery Date</th>
+                          <th>Delivery Status</th>
+                          <th>Buyer</th>
+                          <th>Basic Value</th>
+                          <th>Total Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for cpo in pending_cpo_list %}
+                            <tr>
+                                <td>                                  
+                                   <a
+                                   data-toggle="tooltip"
+                                   data-placement="top"
+                                   title="Select this contact person"
+                                   onclick="window.open(
+                                  '/order_tracker/pending_customer_order_list/{{cpo.id}}/details/', 
+                                  'newwindow', 
+                                  'height=1600,width=1800,resizable=yes,scrollbars=yes,toolbar=yes,menubar=yes,location=yes'); 
+                                  return false;"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td>{{forloop.counter}}</td>
+
+
+                                {% if cpo.status == 'Created' %}
+                                <td>Waiting For Approval</td>
+
+                                {% elif cpo.status == 'approved' %}
+                                <td>Order Releasing Pending</td>
+                                
+                                {% elif cpo.status == 'direct_processing' %}
+                                <td>Direct Processing</td>
+                                
+                                {% elif cpo.status == 'po_processed' %}
+                                <td>Vendor PO Released</td>   
+                                
+                                {% endif %}
+                                
+                                <td>{{cpo.customer.name}}</td>
+                                <td>{{cpo.customer.location}}</td>
+                                <td>{{cpo.customer_contact_person.name}}</td>
+                                <td>{{cpo.po_type}}</td>
+                                <td>{{cpo.customer_po_no}}</td>
+                                <td>{{cpo.customer_po_date}}</td>
+                                <td>{{cpo.delivery_date}}</td>
+                                <td></td>
+                                <td>{{cpo.cpo_assign_detail.assign_to.first_name}}&nbsp{{cpo.cpo_assign_detail.assign_to.last_name}}</td>
+                                <td>{{cpo.total_basic_value}}</td>
+                                <td>{{cpo.total_value}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Pending Order</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable({
+                  "bPaginate": false
+                });
+            } );
+            </script>     
+{% endblock content %}

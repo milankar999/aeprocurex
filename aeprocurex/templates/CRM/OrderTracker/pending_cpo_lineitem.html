@@ -1,0 +1,135 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title></title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+</head>
+  <body>
+
+
+
+{% block content %}
+<div class="">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+        <h2>Customer PO Lineitem
+          <button class="btn btn-success" data-toggle="modal" data-target="#ViewDetails">View Details &nbsp;<span class="glyphicon glyphicon-plus"></span></button>
+        </h2> 
+        <br><label>Total Basic Value = {{cpo.total_basic_value}}</label>
+        <br><label>Total Value = {{cpo.total_value}}</label>
+    <!--New Product Modal -->
+    <div class="modal fade" id="ViewDetails" role="dialog">
+      <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+         <button type="button" class="close" data-dismiss="modal">&times;</button>
+         <h4 class="modal-title">Customer PO Details</span></h4>
+         <br><label>Total Basic Value = {{cpo.total_basic_value}}</label>
+         <br><label>Total Value = {{cpo.total_value}}</label>
+       </div>
+       <div class="modal-body">
+         <form type="submit" id="customer-form"  enctype="multipart/form-data" method="POST" action="generate/">
+           {% csrf_token %}
+           <div class="form-group">
+
+            {% ifnotequal cpo.document1 "" %}
+              <label>Supporting Document <a href="/api/media/{{cpo.document1}}" target="-blank">Click Here</a></label><br><hr>
+            {% endifnotequal %}
+
+            {% ifnotequal cpo.document2 "" %}
+              <label>Supporting Document <a href="/api/media/{{cpo.document2}}" target="-blank">Click Here</a></label><br><hr>
+            {% endifnotequal %}
+
+            <label>Customer</label> : {{cpo.customer.name}}<br>
+            <label>Customer Location</label> : {{cpo.customer.location}}<br>
+            <label>Requester</label> : {{cpo.customer_contact_person.name}}<br>
+            <hr>
+            <label>PO No</label> : {{cpo.customer_po_no}}<br>
+            <label>PO Date</label> : {{cpo.customer_po_date}}<br>
+            <label>Delivery Date</label> : {{cpo.delivery_date}}<br>
+            <hr>
+            <label>Billing Address</label> : {{cpo.billing_address}}<br>
+            <label>Shipping Address</label> : {{cpo.shipping_address}}<br>
+            <hr>
+            <label>Inco Terms</label> : {{cpo.inco_terms}}<br>
+            <label>Payment Terms</label> : {{cpo.payment_terms}} &nbsp;Days<br>
+            <hr>
+            <label>PO Type</label> : {{cpo.po_type}}<br>  
+           </div>
+       </div>
+       <div class="modal-footer">
+           <input type="button" class="btn btn-information" data-dismiss="modal" value="Cancel">
+         </form>
+       </div>
+     </div>
+    </div>
+    </div>
+    <!--End of New Product Model-->
+       
+        
+       <div class="table-responsive">          
+               <table id="product" class="table table-hover table-bordered table-sm" width="100%">
+                 <thead>
+                   <tr>
+                     <th>Sl No</th>
+                     <th>Product Title</th>
+                     <th>Description</th>
+                     <th>Model</th>
+                     <th>Brand</th>
+                     <th>Product Code</th>
+                     <th>Part no</th>
+                     <th>Pack Size</th>
+                     <th>HSN Code</th>
+                     <th>UOM</th>
+                     <th>Quantity</th>
+                     <th>Unit Price</th>
+                     <th>Total Basic Value</th>
+                     <th>GST (%)</th>
+                     <th>Including GST Value</th>
+                     <th>Pending Delivery Quantity</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                        
+                     {% for item in pending_cpo_lineitem %}
+                       <tr>
+                           <td>{{forloop.counter}}</td>
+                           <td>{{item.product_title}}</td>
+                           <td>{{item.description}}</td>
+                           <td>{{item.model}}</td>
+                           <td>{{item.brand}}</td>
+                           <td>{{item.product_code}}</td>
+                           <td>{{item.part_no}}</td>      
+                           <td>{{item.pack_size}}</td>
+                           <td>{{item.hsn_code}}</td>
+                           <td>{{item.uom}}</td>
+                           <td>{{item.quantity}}</td>
+                           <td>{{item.unit_price}}</td>
+                           <td>{{item.total_basic_price}}</td>
+                           <td>{{item.gst}}</td>
+                           <td>{{item.total_price}}</td>
+                           <td>{{item.pending_delivery_quantity}}</td>
+                       </tr>
+                     {% empty %}
+                       <p>No Lineitem Found</p>
+                     {% endfor %}
+                 </tbody>
+               </table>
+       </div><br>
+   </div>   
+
+{% endblock content %}
+</body>
+</html>

@@ -895,27 +895,32 @@ def cpo_create_quotation_lineitem_selection(request, cpo_id=None):
                 
                 cpo = CustomerPO.objects.get(id = cpo_id)
                 for item in product_list:
-                        if item != "":
-                                quotation_lineitem = QuotationLineitem.objects.get(id = item)
+                        if item != '':
+                                try:
 
-                                CPOLineitem.objects.create(
-                                        cpo = cpo,
-                                        quotation_lineitem = quotation_lineitem,
-                                        product_title = quotation_lineitem.product_title,
-                                        description =  quotation_lineitem.description,
-                                        model = quotation_lineitem.model,
-                                        brand = quotation_lineitem.brand,
-                                        product_code = quotation_lineitem.product_code,
-                                        part_no = quotation_lineitem.part_number,
-                                        hsn_code = quotation_lineitem.hsn_code,
-                                        pack_size = quotation_lineitem.pack_size,
-                                        gst = quotation_lineitem.gst,
-                                        uom = quotation_lineitem.uom,
-                                        quantity = quotation_lineitem.quantity,
-                                        unit_price = quotation_lineitem.basic_price,
-                                        total_basic_price = quotation_lineitem.total_basic_price,
-                                        total_price = quotation_lineitem.total_price
-                                )
+                                        quotation_lineitem = QuotationLineitem.objects.get(id = item)
+
+                                        CPOLineitem.objects.create(
+                                                cpo = cpo,
+                                                quotation_lineitem = quotation_lineitem,
+                                                product_title = quotation_lineitem.product_title,
+                                                description =  quotation_lineitem.description,
+                                                model = quotation_lineitem.model,
+                                                brand = quotation_lineitem.brand,
+                                                product_code = quotation_lineitem.product_code,
+                                                part_no = quotation_lineitem.part_number,
+                                                hsn_code = quotation_lineitem.hsn_code,
+                                                pack_size = quotation_lineitem.pack_size,
+                                                gst = quotation_lineitem.gst,
+                                                uom = quotation_lineitem.uom,
+                                                quantity = quotation_lineitem.quantity,
+                                                unit_price = quotation_lineitem.basic_price,
+                                                total_basic_price = quotation_lineitem.total_basic_price,
+                                                total_price = quotation_lineitem.total_price,
+                                                pending_delivery_quantity = float(quotation_lineitem.quantity)
+                                        )
+                                except Exception as e:
+                                        print(e)                      
                 #return HttpResponse([{"dd":"ddd"}], content_type='application/json')
                 return JsonResponse(data)
 
@@ -1044,6 +1049,7 @@ def cpo_create_lineitem_edit(request, cpo_id=None, lineitem_id = None):
                 cpo_lineitem.unit_price = data['unit_price']
                 cpo_lineitem.total_basic_price = round(total_basic_price,2)
                 cpo_lineitem.total_price = round(total_price,2)
+                cpo_lineitem.pending_delivery_quantity = data['quantity']
                 cpo_lineitem.save()
 
                 return HttpResponseRedirect(reverse('cpo-create-selected-lineitem',args=[cpo_id]))
@@ -1105,6 +1111,7 @@ def cpo_generate(request, cpo_id=None):
                 cpo.payment_terms = data['payment_terms']
                 cpo.total_basic_value = round(basic_value,2)
                 cpo.total_value = round(total_value,2)
+                cpo.po_type = data['po_type']
                 
                 try:
                         cpo.document1 = request.FILES['supporting_document1']
@@ -1243,6 +1250,27 @@ def cpo_approve(request,cpo_id=None):
                 VendorProductSegmentation(cpo_id)
                 
                 print(data)
+                return HttpResponseRedirect(reverse('cpo-approval-list'))
+
+#Mark as Direct Material processing
+@login_required(login_url="/employee/login/")
+def mark_direct_processing(request,cpo_id=None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                data = request.POST
+                assign_user = User.objects.get(username=data['assign1'])
+
+                assign = CPOAssign.objects.create(assign_to=assign_user)
+                cpo = CustomerPO.objects.get(id=cpo_id)
+                cpo.status = 'direct_processing'
+                cpo.cpo_assign_detail = assign
+                cpo.save()
                 return HttpResponseRedirect(reverse('cpo-approval-list'))
 
 #Vendor Product Segmentation

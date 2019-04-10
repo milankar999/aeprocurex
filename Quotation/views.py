@@ -845,7 +845,7 @@ def add_lineitem(pdf,sl_no,product_title,description,model,brand,part_number,pro
 
     y=y-3
     #model
-    if brand != '':
+    if brand != '' and brand != 'None':
         try:
             brand_word_list = material_wrapper.wrap('Make :' + brand)
             for element in brand_word_list:
@@ -862,7 +862,7 @@ def add_lineitem(pdf,sl_no,product_title,description,model,brand,part_number,pro
             pass
 
     #Make
-    if model != '':
+    if model != '' and model !='None':
         try:
             model_word_list = material_wrapper.wrap('Model :' + model)
             for element in model_word_list:
@@ -880,7 +880,7 @@ def add_lineitem(pdf,sl_no,product_title,description,model,brand,part_number,pro
             pass
 
     #Product code
-    if product_code != '':
+    if product_code != '' and product_code != 'None':
         try:
             product_code_word_list = material_wrapper.wrap('Manufacturer Part No :' + product_code)
             for element in product_code_word_list:
@@ -897,7 +897,7 @@ def add_lineitem(pdf,sl_no,product_title,description,model,brand,part_number,pro
             pass
 
     #Part Number Code
-    if part_number != '':
+    if part_number != '' and part_number != 'None':
         try:
             part_number_word_list = material_wrapper.wrap('Your Part Number :' + part_number)
             for element in part_number_word_list:
@@ -915,19 +915,19 @@ def add_lineitem(pdf,sl_no,product_title,description,model,brand,part_number,pro
     y = y - 4
     #Additional Informations
     additional_info = ''
-    if pack_size != '':
+    if pack_size != '' and pack_size != 'None':
         try:
             additional_info = additional_info +'Pack Size -' + pack_size
         except:
             pass
    
-    if moq != '':
+    if moq != '' and moq != 'None':
         try:
             additional_info = additional_info + ', MOQ -' + moq
         except:
             pass
     
-    if hsn_code != '':
+    if hsn_code != '' and hsn_code != 'None':
         try:
             additional_info = additional_info + ', HSN Code - ' + hsn_code
         except:

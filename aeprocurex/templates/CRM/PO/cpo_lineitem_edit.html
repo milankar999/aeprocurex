@@ -57,7 +57,7 @@
                            <input type="text" class="form-control" id="uom" name="uom" required value={{cpo_lineitem.uom}}>
 
                            <label class="form-input" for="quantity">Quantity <a style="color: red">*</a></label>
-                           <input type="number" class="form-control" id="quantity" name="quantity" required value={{cpo_lineitem.quantity}}>
+                           <input type="number" class="form-control" step="0.01" id="quantity" name="quantity" required value={{cpo_lineitem.quantity}}>
 
                            <label class="form-input" for="unit_price">Unit Price(In INR)<a style="color: red">*</a> </label>
                            <input type="number" class="form-control" id="unit_price" step="0.01" name="unit_price" required value={{cpo_lineitem.unit_price}}>  <br>                                 

@@ -45,6 +45,7 @@ urlpatterns = [
     path('api/expences/',include('Expences.api_urls')),
     path('expences/',include('Expences.urls')),
     path('enquiry_tracker/',include('EnquiryTracker.urls')),
+    path('order_tracker/',include('OrderTracker.urls')),
 ]
 
 if settings.DEBUG:

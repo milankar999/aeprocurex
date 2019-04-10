@@ -27,6 +27,8 @@ urlpatterns = [
     path('cpo_approval/<cpo_id>/reject/',cpo_reject,name='cpo-reject'),
     path('cpo_approval/<cpo_id>/approve/',cpo_approve,name='cpo-approve'),
 
+    path('cpo_approval/<cpo_id>/mark_as_direct_vendor_order_processing/',mark_direct_processing,name='cpo-mark-direct-processing'),
+
     path('cpo/rejected_list/',cpo_rejected_list,name='cpo-rejected-list'),
     path('rejected_cpo/<cpo_id>/lineitems/',cpo_rejected_lineitem,name='cpo-rejected-lineitems'),
 ]

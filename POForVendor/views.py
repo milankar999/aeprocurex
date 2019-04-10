@@ -1411,7 +1411,7 @@ def add_lineitem(pdf,y,i,po_number,product_title,description,model,brand,product
                         pdf.setFont('Helvetica', 9)
         y=y-3
         #Make
-        if brand != '':
+        if brand != '' and brand != 'None':
                 try:
                         brand_word_list = material_wrapper.wrap('Make :' + brand)
                         for element in brand_word_list:
@@ -1430,7 +1430,7 @@ def add_lineitem(pdf,y,i,po_number,product_title,description,model,brand,product
                         pass
 
         #Model
-        if model != '':
+        if model != '' and model != 'None':
                 try:
                         model_word_list = material_wrapper.wrap('Model :' + model)
                         for element in model_word_list:
@@ -1449,7 +1449,7 @@ def add_lineitem(pdf,y,i,po_number,product_title,description,model,brand,product
                         pass
 
         #Product Code
-        if product_code != '':
+        if product_code != '' and product_code != 'None':
                 try:
                         product_code_word_list = material_wrapper.wrap('Product Code :' + product_code)
                         for element in product_code_word_list:
@@ -1468,7 +1468,7 @@ def add_lineitem(pdf,y,i,po_number,product_title,description,model,brand,product
                         pass
 
         #HSN COde
-        if hsn_code != '':
+        if hsn_code != '' and hsn_code != 'None':
                 try:
                         hsn_code_word_list = material_wrapper.wrap('HSN Code :' + hsn_code)
                         for element in hsn_code_word_list:
@@ -2131,8 +2131,12 @@ def VPOUpdateStatus(request,po_number):
                 VPOStatus.objects.create(
                         vpo = vpo,
                         order_status = data['order_status'],
-                        remarks = data['remarks']
+                        remarks = data['remarks'],
+                        update_by = u
                 )
 
-                return HttpResponseRedirect(reverse('vpo-approved-ready-list'))
-
+                if type == 'Sourcing':
+                        return HttpResponseRedirect(reverse('vpo-approved-ready-list'))
+                
+                if type == 'Sales':
+                        return HttpResponseRedirect(reverse('vpo-approved-ready-lineitems',args=[po_number]))

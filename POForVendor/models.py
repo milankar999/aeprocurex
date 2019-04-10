@@ -100,6 +100,8 @@ class VendorPOLineitems(models.Model):
         total_basic_price = models.FloatField(default = 0)
         total_price = models.FloatField(default = 0)
 
+        receivable_quantity = models.FloatField(null = True, blank = True, default = 0)
+
 
         def __str__(self):
                 return self.vpo.vendor.name + ' - ' + self.product_title
@@ -112,6 +114,7 @@ class VPOStatus(models.Model):
         remarks = models.TextField(null=True, blank=True)
 
         update_date = models.DateTimeField(auto_now_add=True)
+        update_by = models.ForeignKey(User, null=True, blank=True, on_delete = models.CASCADE)
 
         def __str__(self):
                 return self.vpo.po_number + ' - ' + self.order_status

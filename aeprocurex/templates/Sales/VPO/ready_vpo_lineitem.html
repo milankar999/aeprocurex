@@ -11,6 +11,7 @@
         <hr>
         <div class="container">
           <label>Update Status of This Order</label>
+          <button class="btn btn-info" data-toggle="modal" data-target="#UpdateOrderStatus">Update Status &nbsp;<span class="glyphicon glyphicon-pencil"></span></button>
           <hr>
           <table id="product" class="table table-hover table-bordered table-sm" width="100%">
             <thead>
@@ -18,7 +19,8 @@
                 <th></th>
                 <th>Date</th>
                 <th>PO Status</th>
-                <th>Remarks</th>                
+                <th>Remarks</th> 
+                <th>Updated By</th>               
               </tr>
             </thead>
             <tbody>
@@ -29,6 +31,7 @@
                       <td>{{item.update_date}}</td>
                       <td>{{item.order_status}}</td>
                       <td>{{item.remarks}}</td>
+                      <td>{{item.update_by.first_name}}&nbsp;{{item.update_by.last_name}}</td>
                   </tr>
                 {% empty %}
                   <p>No Lineitem Found</p>
@@ -42,6 +45,47 @@
         <h2>Vendor PO Lineitem
           <button class="btn btn-info" data-toggle="modal" data-target="#ViewOrderDetails">View Details of this Order &nbsp;<span class="glyphicon glyphicon-resize-full"></span></button>
         </h2> 
+
+<!--Update Order Status Modal -->
+    <div class="modal fade" id="UpdateOrderStatus" role="dialog">
+      <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+         <button type="button" class="close" data-dismiss="modal">&times;</button>
+         <h4 class="modal-title">Vendor PO Details</span></h4>
+       </div>
+       <div class="modal-body">
+        <form type="submit" id="customer-form" method="POST" action="/api/po_to_vendor/approved_vendor_po/{{vpo.po_number}}/update_status/">
+          {% csrf_token %}
+          <div class="form-group">
+            <label class="form-input" for="priority">Current Status of this order<a style="color: red">*</a></label>
+            <select class="form-control" id="order_status" name="order_status" required>
+              <option>{{vpo.order_status}}</option>
+              <option>Order Preparing</option>
+              <option>PO Released</option>
+              <option>Order Accepted</option>
+              <option>Material Processing</option>
+              <option>Intransit</option>
+              <option>Ordered Cancelled</option>
+            </select>
+        
+            <label class="form-input" for="rfp_reference">Remarks <a style="color: red">*</a></label>
+            <input type="text" class="form-control" id="remarks" name="remarks" required value="{{vpo.remarks}}">
+              <br>
+            <input type="submit" class="btn btn-success pull-right" value="Update">
+          </div>
+        </form>
+        <br>
+       </div>
+     </div>
+    </div>
+    </div>
+<!--End of Update Order Status Model-->
+
+
+
+
+
 
     <!--Vendor Order Modal -->
         <div class="modal fade" id="ViewOrderDetails" role="dialog">

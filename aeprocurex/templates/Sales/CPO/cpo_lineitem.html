@@ -167,6 +167,34 @@
                         </form>
                     </div>
               </div>
+              <button class="btn btn-info pull-left" data-toggle="modal" data-target="#direct_process">Mark as Direct Vendor Order Processing &nbsp;<span class="glyphicon glyphicon-flag"></span></button>
+              <div class="modal fade" id="direct_process" role="dialog">
+                  <div class="modal-dialog">
+                  
+                    <!-- Modal content-->
+                    <form method="POST" action="/po_from_customer/cpo_approval/{{cpo.id}}/mark_as_direct_vendor_order_processing/">   
+                      {% csrf_token %}
+                          <div class="modal-content">
+                                  <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title">Are You Sure Want to mark this as direct Material Process ?</span></h4>
+                                  <div class="modal-body">
+                                    <label class="form-input" for="assign1">Assign to <a style="color: red">*</a></label>
+                                    <select class="form-control" id="assign1" name="assign1" required>
+                                        <option></option>
+                                        {% for user in users %}
+                                        <option>{{user.username}}</option>
+                                        {% endfor %}
+                                    </select>
+                                  </div>
+                                  <div class="modal-footer">
+                                      <input type="submit" class="btn btn-success" value="Confirm">
+                                  </div>
+                                </div>                    
+                          </div>
+                    </form>
+                </div>
+              </div>
           </div><br>
        </div>
    </div>   
