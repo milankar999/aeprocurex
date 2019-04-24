@@ -1,0 +1,187 @@
+{% extends 'Sourcing/base.html' %}
+{% load static %}
+{% block content %}
+<div class="">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}      
+       
+        <h1 style="text-align: center">Vendor Product Segmentation</h1>
+        {% for vpo in vendor_po %}
+        <hr>
+        <div class="container-well">
+          <div class="container">
+            
+            <label>{{vpo.vendor.name}} :: {{vpo.vendor.location}} :: {{vpo.vendor_contact_person.name}} :: {{vpo.vendor_contact_person.mobileNo1}} </label><br>
+            <label>All The Values is in >> {{vpo.currency}} // Index : {{vpo.inr_value}}</label> # <a href="/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/{{vpo.id}}/change_currency/">Change Currency</a><br>
+            <a href="/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/{{vpo.id}}/add_order_info/" type="button" class="btn btn-success pull-left">Add Order Information</a>
+            <a href="/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/{{vpo.id}}/delete_vpo/" class="btn btn-danger pull-right"> Delete This Vendor PO</a>&nbsp;&nbsp;
+            <button type="button" class="btn btn-info pull-right" id="btnAbsorve" onclick="getCheckedCheckboxesFor('cpo_lineitem','{{vpo.id}}')"> Add Selected Unassigned Products</button>
+          </div>
+          
+            <div class="table-responsive">          
+              <table id="product" class="table table-hover table-bordered table-sm" width="100%">
+                <thead>
+                  <tr>
+                    <th>
+                      
+                    </th>
+                    <th>Product Title</th>
+                    <th>Description</th>
+                    <th>Model</th>
+                    <th>Brand</th>
+                    <th>Product Code</th>
+                    <th>HSN Code</th>
+                    <th>Quantity</th>
+                    <th>UOM</th>
+                    <th>Unit Price</th>
+                    <th>Discount (%)</th>
+                    <th>Actual Price / Unit</th>
+                    <th>Total Basic Value</th>
+                    <th>GST (%)</th>
+                    <th>Including GST Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                     
+                  {% for item in vendor_po_lineitem %}
+                    {% if item.vpo.id == vpo.id %}  
+                      <tr>
+                        <td>
+                            <a href="/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/{{item.id}}/edit/"><span class="glyphicon glyphicon-edit"></span></a>
+                            &nbsp;
+                            <a href="/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/{{item.id}}/delete/"><span class="glyphicon glyphicon-trash" style="color: red"></span></a>
+                        </td>
+                        <td>{{item.product_title}}</td>
+                        <td>{{item.description}}</td>
+                        <td>{{item.model}}</td>
+                        <td>{{item.brand}}</td>
+                        <td>{{item.product_code}}</td>      
+                        <td>{{item.hsn_code}}</td>
+                        <td>{{item.quantity}}</td>
+                        <td>{{item.uom}}</td>
+                        <td>{{item.unit_price}}</td>
+                        <td>{{item.discount}}</td>
+                        <td>{{item.actual_price}}</td>
+                        <td>{{item.total_basic_price}}</td>
+                        <td>{{item.gst}}</td>
+                        <td>{{item.total_price}}</td>
+                      </tr>
+                    {% endif %}
+                  {% empty %}
+                    <p>No Lineitem Found</p>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          <div class="container">
+            <a href="/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/{{vpo.id}}/add_other_expences/" type="button" class="btn btn-success pull-left">Add Other Costs &nbsp;<span class="glyphicon glyphicon-menu-up"></span></a>
+            <a href="/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/{{vpo.id}}/approval_request/" type="button" class="btn btn-info pull-right">Approval Request &nbsp;<span class="glyphicon glyphicon-menu-right"></span></a>
+          </div>
+        </div>
+        {% endfor %}
+      <hr>
+
+      <h1 style="text-align: center">Remaining Products of This Order</h1>
+      
+
+       <div class="table-responsive">          
+               <table id="product" class="table table-hover table-bordered table-sm" width="100%">
+                 <thead>
+                   <tr>
+                     <th>Check</th>
+                     <th>Sl No</th>
+                     <th>Product Title</th>
+                     <th>Description</th>
+                     <th>Model</th>
+                     <th>Brand</th>
+                     <th>Product Code</th>
+                     <th>HSN Code</th>
+                     <th>UOM</th>
+                     <th>Quantity</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                        
+                     {% for item in unassigned_product %}
+                       <tr>
+                          <td>
+                              <input type="checkbox" 
+                              name="cpo_lineitem"
+                              value="{{item.id}}"
+                              change="getCheckedCheckboxesFor('cpo_lineitem')"
+                              /> 
+                          </td>
+                          <td>{{forloop.counter}}</td>
+                          <td>{{item.product_title}}</td>
+                          <td>{{item.description}}</td>
+                          <td>{{item.model}}</td>
+                          <td>{{item.brand}}</td>
+                          <td>{{item.product_code}}</td>      
+                          <td>{{item.hsn_code}}</td>
+                          <td>{{item.uom}}</td>
+                          <td>{{item.pending_po_releasing_quantity}}</td>
+                       </tr>
+                     {% empty %}
+                       <p>No Lineitem Found</p>
+                     {% endfor %}
+                 </tbody>
+               </table>
+               <a class="btn btn-success pull-right" href="/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/select_new_vendor/">Select a New Vendor&nbsp; <span class="glyphicon glyphicon-plus"></span></a>
+       </div><br>
+
+   </div>   
+<script type="text/javascript">
+    function redirect(){
+        window.location.href = "/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/";
+     }
+
+    function getCheckedCheckboxesFor(checkboxName,vpo_id) {
+         var checkboxes = document.querySelectorAll('input[name="' + checkboxName + '"]:checked'), values = [];
+         Array.prototype.forEach.call(checkboxes, function(el) {
+           values = values + ',' + el.value;
+       });
+       
+       if(values.length==0){
+         alert('Minimum one item You Have To Select');
+       }
+       else{
+        $('body').append('<div id="requestOverlay" class="request-overlay"></div>'); /*Create overlay on demand*/
+        $("#requestOverlay").show();
+         data = {
+             'cpo_lineitems' : values,
+             'csrfmiddlewaretoken': '{{ csrf_token }}'
+             }
+             $.ajax({
+               type: "POST",
+               url: "/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/"+ vpo_id +"/assign_product/",
+               data: data,
+               success: function() {
+                 redirect();
+               },
+               failure: function(){
+                 window.alert('Some Error Occurred, Please Try Again');
+                 document.getElementById("btnAbsorve").disabled = false;
+               }
+           }
+         );
+       }
+     }
+</script> 
+<style>
+    .request-overlay {
+      z-index: 9999;
+      position: fixed; /*Important to cover the screen in case of scolling content*/
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      text-align: center;
+      background: rgba(200,200,200,0.5) url('/api/media/media/ldm.gif') no-repeat center; /*.gif file or just div with message etc. however you like*/
+  }
+</style>  
+{% endblock content %}

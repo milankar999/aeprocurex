@@ -15,6 +15,7 @@
                           <th>Creation Date</th>
                           <th>Key Accounts Person</th>
                           <th>Priority</th>
+                          <th>Current Sourcing Status</th>
                         </tr>
                       </thead>
                       <tbody>   
@@ -29,6 +30,7 @@
                                 <td>{{rfp.rfp_creation_details__creation_date}}</td>
                                 <td>{{rfp.rfp_keyaccounts_details__key_accounts_manager__first_name}}</td>
                                 <td>{{rfp.priority}}</td>
+                                <td>{{rfp.current_sourcing_status}}</td>
                             </tr>
                           {% empty %}
                             <p>No Pending RFP Approval Found</p>

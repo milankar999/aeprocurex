@@ -44,7 +44,8 @@
         <hr>
         <h2>Vendor PO Lineitem
           <button class="btn btn-info" data-toggle="modal" data-target="#ViewOrderDetails">View Details of this Order &nbsp;<span class="glyphicon glyphicon-resize-full"></span></button>
-        </h2> 
+        </h2><label>Currency = {{vpo.vpo.currency}} // Index {{vpo.vpo.inr_value}}</label> 
+        
 
 <!--Update Order Status Modal -->
     <div class="modal fade" id="UpdateOrderStatus" role="dialog">
@@ -52,7 +53,7 @@
       <div class="modal-content">
         <div class="modal-header">
          <button type="button" class="close" data-dismiss="modal">&times;</button>
-         <h4 class="modal-title">Vendor PO Details</span></h4>
+         <h4 class="modal-title">Please Update</span></h4>
        </div>
        <div class="modal-body">
         <form type="submit" id="customer-form" method="POST" action="/api/po_to_vendor/approved_vendor_po/{{vpo.po_number}}/update_status/">
@@ -98,7 +99,7 @@
            <div class="modal-body">
              <form type="submit" id="customer-form"  enctype="multipart/form-data" method="POST" action="generate/">
                <div class="form-group">
-    
+                
                 <label>Vendor</label> : {{vpo.vpo.vendor.name}}<br>
                 <label>Customer Location</label> : {{vpo.vpo.vendor.location}}<br>
                 <label>Requester</label> : {{vpo.vpo.requester.first_name}}&nbsp;{{vpo.vpo.requester.last_name}}<br>
@@ -179,6 +180,7 @@
 
                <div class="container">
                 <div class="row">
+                    <label class="pull-left">Total Value of this Order {{vpo.non_inr_value}}&nbsp;{{vpo.vpo.currency.currency_code}}</label><br>
                     <label class="pull-right">Total Basic Value : {{vpo.basic_value}} &nbsp; INR</label>
                 </div>
                 <div class="row">

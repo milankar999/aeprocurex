@@ -917,7 +917,8 @@ def cpo_create_quotation_lineitem_selection(request, cpo_id=None):
                                                 unit_price = quotation_lineitem.basic_price,
                                                 total_basic_price = quotation_lineitem.total_basic_price,
                                                 total_price = quotation_lineitem.total_price,
-                                                pending_delivery_quantity = float(quotation_lineitem.quantity)
+                                                pending_delivery_quantity = float(quotation_lineitem.quantity),
+                                                pending_po_releasing_quantity = float(quotation_lineitem.quantity),
                                         )
                                 except Exception as e:
                                         print(e)                      
@@ -1007,7 +1008,9 @@ def cpo_create_selected_lineitem(request, cpo_id=None):
                         quantity = data['quantity'],
                         unit_price = data['unit_price'],
                         total_basic_price = round((float(data['quantity']) * float(data['unit_price'])),2),
-                        total_price = round(((float(data['quantity']) * float(data['unit_price'])) + (float(data['quantity']) * float(data['unit_price']) * float(data['unit_price']) / 100)),2)
+                        total_price = round(((float(data['quantity']) * float(data['unit_price'])) + (float(data['quantity']) * float(data['unit_price']) * float(data['unit_price']) / 100)),2),
+                        pending_po_releasing_quantity = data['quantity'],
+                        pending_delivery_quantity = data['quantity'],
                 )
                 return HttpResponseRedirect(reverse('cpo-create-selected-lineitem',args=[cpo_id]))
 
@@ -1050,6 +1053,7 @@ def cpo_create_lineitem_edit(request, cpo_id=None, lineitem_id = None):
                 cpo_lineitem.total_basic_price = round(total_basic_price,2)
                 cpo_lineitem.total_price = round(total_price,2)
                 cpo_lineitem.pending_delivery_quantity = data['quantity']
+                cpo_lineitem.pending_po_releasing_quantity = data['quantity']
                 cpo_lineitem.save()
 
                 return HttpResponseRedirect(reverse('cpo-create-selected-lineitem',args=[cpo_id]))
@@ -1341,6 +1345,7 @@ def VendorProductSegmentation(cpo_id):
                                         total_price = round(total_price)
                                 )
                                 item.segment_status = True
+                                item.pending_po_releasing_quantity = 0
                                 item.save()
                 
                 except:

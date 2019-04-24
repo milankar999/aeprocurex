@@ -70,7 +70,8 @@ def pending_enquiry_list(request):
             'rfp_creation_details__created_by__username',
             'rfp_assign1__assign_to1__username',
             'opportunity_status',
-            'enquiry_status').order_by('-rfp_creation_details__creation_date')
+            'enquiry_status',
+            'current_sourcing_status').order_by('-rfp_creation_details__creation_date')
         
         context['enquiry_list'] = enquiry
 
@@ -170,11 +171,28 @@ def rfp_lineitem(request,rfp_no=None):
         keyaccounts = User.objects.all()
         context['keyaccounts'] = keyaccounts
 
+        rfp_status_list = RFPStatus.objects.filter(rfp = RFP.objects.get(rfp_no=rfp_no))
+        context['rfp_status_list'] = rfp_status_list
+
         if type == 'Sales':
             return render(request,"Sales/EnquiryTracker/rfp_lineitems.html",context)
 
         if type == 'CRM':
             return render(request,"CRM/EnquiryTracker/rfp_lineitems.html",context)
+
+    if request.method == 'POST':
+        data = request.POST
+        rfp = RFP.objects.get(rfp_no=rfp_no)
+        rfp.current_sourcing_status = data['status']
+        rfp.save()
+
+        RFPStatus.objects.create(
+            rfp = rfp,
+            status = data['status'],
+            updated_by = u
+            )
+
+        return HttpResponseRedirect(reverse('tracker_rfp_lineitem',args=[rfp_no]))
 
 #RFP Details
 @login_required(login_url="/employee/login/")

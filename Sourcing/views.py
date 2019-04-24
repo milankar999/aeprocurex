@@ -42,7 +42,7 @@ def rfp_pending_list(request):
 
         if type == 'Sourcing':
                 if request.method == "GET":
-                        rfp = RFP.objects.filter(opportunity_status='Open',enquiry_status='Approved',rfp_assign1__assign_to1=user).values('rfp_no','customer__name','customer__location','rfp_creation_details__creation_date','rfp_keyaccounts_details__key_accounts_manager__first_name','priority')    
+                        rfp = RFP.objects.filter(opportunity_status='Open',enquiry_status='Approved',rfp_assign1__assign_to1=user).values('rfp_no','customer__name','customer__location','rfp_creation_details__creation_date','rfp_keyaccounts_details__key_accounts_manager__first_name','priority','current_sourcing_status')    
                         context['rfp_list'] = rfp
                         return render(request,"Sourcing/Sourcing/pending_list.html",context)
 
@@ -65,7 +65,23 @@ def rfp_pending_lineitems(request,rfp_no=None):
                         
                         context['rfp_no'] = rfp_no
                         context['lineitems'] = rfp_lineitems
+
+                        rfp_status = RFPStatus.objects.filter(rfp = rfp)
+                        context['rfp_status'] = rfp_status
                         return render(request,"Sourcing/Sourcing/pending_lineitems.html",context)
+
+                if request.method == 'POST':
+                        data = request.POST
+                        rfp = RFP.objects.get(rfp_no=rfp_no)
+                        rfp.current_sourcing_status = data['status']
+                        rfp.save()
+
+                        RFPStatus.objects.create(
+                                rfp = rfp,
+                                status = data['status'],
+                                updated_by = u
+                        )
+                        return HttpResponseRedirect(reverse('rfp_pending_lineitems',args=[rfp_no]))
 
 @login_required(login_url="/employee/login/")
 def lineitem_edit_tax(request,rfp_no=None,lineitem_id=None):

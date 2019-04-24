@@ -20,6 +20,7 @@
                           <th>Created By</th>
                           <th>Sourcing Person</th>
                           <th>Opportunity Status</th>
+                          <th>Sourcing Status</th>
                         </tr>
                       </thead>
                       <tbody>   
@@ -74,6 +75,7 @@
                                 <td>{{enquiry.rfp_creation_details__created_by__username}}</td>
                                 <td>{{enquiry.rfp_assign1__assign_to1__username}}</td>
                                 <td>{{enquiry.opportunity_status}}</td>
+                                <td>{{enquiry.current_sourcing_status}}</td>
                             </tr>
                           {% empty %}
                             <p>No Enquiry Found</p>

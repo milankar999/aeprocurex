@@ -15,9 +15,10 @@
                           <th>PO No</th>
                           <th>PO Date</th>
                           <th>PO For</th>
-                          <th>Basic Amount</th>
-                          <th>Total Basic Amount</th>
-                          <th>All Total Amount</th>
+                          <th>Basic Amount ₹</th>
+                          <th>Total Basic Amount ₹</th>
+                          <th>All Total Amount ₹</th>
+                          <th>Currency</th>
                           <th>PO Type</th>
                           <th>Order Status</th>
                           <th>Payment Status</th>
@@ -38,6 +39,7 @@
                                 <td>{{item.basic_value}}</td>
                                 <td>{{item.total_value}}</td>
                                 <td>{{item.all_total_value}}</td>
+                                <td>{{item.vpo.currency.currency_code}}</td>
                                 <td>{{item.vpo_type}}</td>
                                 <td>{{item.order_status}}</td>
                                 <td>{{item.remarks}}</td>

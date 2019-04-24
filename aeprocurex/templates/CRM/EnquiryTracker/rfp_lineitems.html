@@ -2,213 +2,279 @@
 {% load static %}
 
 {% block content %}
-      <h2>RFP Lineitems of RFP No {{rfp_no}}</h2>
-      <div class="container">
-            <button class="btn btn-info" data-toggle="modal" data-target="#ViewDetails">View Details &nbsp;<span class="glyphicon glyphicon-zoom-in"></span></button>
+<h2>RFP Lineitems of RFP No {{rfp_no}}</h2>
+<div class="container">
+      <button class="btn btn-info" data-toggle="modal" data-target="#ViewDetails">View Details &nbsp;<span class="glyphicon glyphicon-zoom-in"></span></button>
+      
+      {% if rfp_status == 'Approved' %}
+      <button class="btn btn-success" data-toggle="modal" data-target="#re_assign">Re Assign  &nbsp;<span class="glyphicon glyphicon-ok"></span></button>
+      {% endif %}
+      <br>
+
+
+
+      <label>Update Status of This Enquiry</label>
+      <button class="btn btn-info" data-toggle="modal" data-target="#UpdateOrderStatus">Update Status &nbsp;<span class="glyphicon glyphicon-pencil"></span></button>
+
+      <table id="product" class="table table-hover table-bordered table-sm" width="100%">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Date</th>
+              <th>Status</th> 
+              <th>Updated By</th>               
+            </tr>
+          </thead>
+          <tbody>
+                 
+              {% for item in rfp_status_list %}
+                <tr>
+                    <td>{{forloop.counter}}</td>
+                    <td>{{item.update_time}}</td>
+                    <td>{{item.status}}</td>
+                    <td>{{item.updated_by.first_name}}&nbsp;{{item.updated_by.last_name}}</td>
+                </tr>
+              {% empty %}
+                <p>No Lineitem Found</p>
+              {% endfor %}
+          </tbody>
+        </table>
+
+
+
+<!--Update enquiry Status Modal -->
+<div class="modal fade" id="UpdateOrderStatus" role="dialog">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+ <button type="button" class="close" data-dismiss="modal">&times;</button>
+ <h4 class="modal-title">Please Update Status</span></h4>
+</div>
+<div class="modal-body">
+<form type="submit" id="customer-form" method="POST">
+  {% csrf_token %}
+  <div class="form-group">      
+    <label class="form-input" for="rfp_reference">Mention Here <a style="color: red">*</a></label>
+    <input type="text" class="form-control" id="status" name="status" required>
+      <br>
+    <input type="submit" class="btn btn-success pull-right" value="Update">
+  </div>
+</form>
+<br>
+</div>
+</div>
+</div>
+</div>
+<!--End of Update Order Status Model-->
+
+
+
+
+
+
+      <!--Reassign-->
+      <div class="modal fade" id="re_assign" role="dialog">
+        <div class="modal-dialog">
+        
+          <!-- Modal content-->
+          <form method="POST" action="/enquiry_tracker/rfp/{{rfp_no}}/reassign/">   
+            {% csrf_token %}
+                <div class="modal-content">
+                        <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal">&times;</button>
+                          <h4 class="modal-title">Please Mention these details</span></h4>
+                        <div class="modal-body">
+                            
+                                <div class="form-group">
+                                    <label class="form-input" for="assign1">Assign To<a style="color: red">*</a></label>
+                                    <select class="form-control" id="assign1" name="assign1" required>
+                                        <option></option>
+                                        {% for user in users %}
+                                        <option>{{user.username}}</option>
+                                        {% endfor %}
+                                    </select>
+
+                                    <hr>
+                                    <label class="form-input" for="keyPerson">Key Accounts Person <a style="color: red">*</a></label>
+                                    <select class="form-control" id="keyPerson" name="keyPerson" required>
+                                        <option></option>
+                                        {% for user in keyaccounts %}
+                                        <option>{{user.username}}</option>
+                                        {% endfor %}
+                                    </select>
+                                    
+                                </div>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="submit" class="btn btn-success" value="Submit">
+                        </div>
+                      </div>                    
+                </div>
+          </form>
+      </div>
+      </div>
+      <!--Reassign-->
+
+      <div class="modal fade" id="ViewDetails" role="dialog">
+          <div class="modal-dialog">
+          
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">RFP Details</span></h4>
+              </div class="container">
+              {% for info in rfp_details %}
+              <h6>&nbsp;&nbsp;RFP Type</h6>
+              <h4>&nbsp;&nbsp;{{info.rfp_type}}</h4>
+              <hr> 
+              <h6>&nbsp;&nbsp;Customer Name</h6>
+              <h4>&nbsp;&nbsp;{{info.customer__name}}</h4>
+              <hr> 
+              <h6>&nbsp;&nbsp;Customer Location</h6>
+              <h4>&nbsp;&nbsp;{{info.customer__location}}</h4>
+              <hr> 
+              <h6>&nbsp;&nbsp;Contact Person</h6>
+              <h4>&nbsp;&nbsp;{{info.customer_contact_person__name}}</h4>
+              <hr> 
+              <h6>&nbsp;&nbsp;Contact No</h6>
+              <h4>&nbsp;&nbsp;{{info.customer_contact_person__mobileNo1}}</h4>
+              <hr> 
+              <h6>&nbsp;&nbsp;Email</h6>
+              <h4>&nbsp;&nbsp;{{info.customer_contact_person__email1}}</h4>
+              <hr> 
+              <h6>&nbsp;&nbsp;End User</h6>
+              <h4>&nbsp;&nbsp;{{info.end_user__user_name}}</h4>
+              <hr> 
+              <h6>&nbsp;&nbsp;Department</h6>
+              <h4>&nbsp;&nbsp;{{info.end_user__department_name}}</h4>
+              <hr> 
+              <h6>&nbsp;&nbsp;Contact No</h6>
+              <h4>&nbsp;&nbsp;{{info.end_user__mobileNo1}}</h4>
+              <hr> 
+              <h6>&nbsp;&nbsp;Email</h6>
+              <h4>&nbsp;&nbsp;{{info.end_user__email1}}</h4>
+              <hr> 
+              <h6>&nbsp;&nbsp;RFP Creation Date</h6>
+              <h4>&nbsp;&nbsp;{{info.rfp_creation_details__creation_date}}</h4>
+              <hr> 
+              <h6>&nbsp;&nbsp;Created By</h6>
+              <h4>&nbsp;&nbsp;{{info.rfp_creation_details__created_by__username}}</h4>
+              {% if info.priority == 1 %}
+              <hr> 
+              <h6>&nbsp;&nbsp;Priority</h6>
+              <h4>&nbsp;&nbsp;High</h4>
+              {% endif %}                    
+              <hr> 
+              <h6>&nbsp;&nbsp;Reference</h6>
+              <h4>&nbsp;&nbsp;{{info.reference}}</h4>
+              {% endfor %}
+              <div class="modal-body">
+
+              </div>
+              <div class="modal-footer">
+                  <input type="button" class="btn btn-danger" data-dismiss="modal" value="Close">
+              </div>
+            </div>
             
-            {% if rfp_status == 'Approved' %}
-            <button class="btn btn-success" data-toggle="modal" data-target="#re_assign">Re Assign  &nbsp;<span class="glyphicon glyphicon-ok"></span></button>
-            {% endif %}
-            <!--Reassign-->
-            <div class="modal fade" id="re_assign" role="dialog">
+            </div>
+      </div>
+      </div> 
+
+
+
+      <div class="table-responsive">          
+              <table id="lineitems" class="table table-hover table-bordered table-sm" width="100%">
+                <thead>
+                  <tr>
+                    <th>Product Title</th>
+                    <th>Description</th>
+                    <th>Model</th>
+                    <th>Brand</th>
+                    <th>Product Code</th>
+                    <th>Part no</th>
+                    <th>Category</th>
+                    <th>HSN Code</th>
+                    <th>GST</th>
+                    <th>UOM</th>
+                    <th>Quantity</th>
+                  </tr>
+                </thead>
+                <tbody>   
+                    {% for item in rfp_lineitems %}
+                      <tr>
+                          <td>{{item.product_title}}</td>
+                          <td>{{item.description}}</td>
+                          <td>{{item.model}}</td>
+                          <td>{{item.brand}}</td>
+                          <td>{{item.product_code}}</td>
+                          <td>{{item.part_no}}</td>
+                          <td>{{item.category}}</td>
+                          <td>{{item.hsn_code}}</td>
+                          <td>{{item.gst}}</td>
+                          <td>{{item.uom}}</td>
+                          <td>{{item.quantity}}</td>
+                      </tr>
+                    {% empty %}
+                      <p>No Pending RFP Approval Found</p>
+                    {% endfor %}
+                </tbody>
+              </table>
+      </div>
+
+  <div class="container">
+      <button class="btn btn-danger" data-toggle="modal" data-target="#reject">Mark As Duplicate &nbsp;<span class="glyphicon glyphicon-remove"></span></button>
+      <div class="modal fade" id="reject" role="dialog">
+          <div class="modal-dialog">
+          
+            <!-- Modal content-->
+            <form method="POST" action="/enquiry_tracker/rfp/{{rfp_no}}/mark_duplicate/">   
+              {% csrf_token %}
+                  <div class="modal-content">
+                          <div class="modal-header">
+                            <label>Are You Sure Want to mark as duplicate ?</label>
+                          </div>
+                          <div class="modal-footer">
+                              {% for info in rfp_details %}
+                              <label>Current Status {{info.enquiry_status}}</label><br>
+                              {% endfor %}
+                              <input type="submit" class="btn btn-success" value="Submit">
+                              <input type="button" class="btn btn-info" data-dismiss="modal" value="Cancel">
+                          </div>
+                                           
+                  </div>
+            </form>
+        </div>
+      </div>
+
+      <button class="btn btn-success" data-toggle="modal" data-target="#approve">Mark As Closed &nbsp;<span class="glyphicon glyphicon-ok"></span></button>
+      <div class="modal fade" id="approve" role="dialog">
               <div class="modal-dialog">
               
                 <!-- Modal content-->
-                <form method="POST" action="/enquiry_tracker/rfp/{{rfp_no}}/reassign/">   
+                <form method="POST" action="/enquiry_tracker/rfp/{{rfp_no}}/mark_closed/">   
                   {% csrf_token %}
                       <div class="modal-content">
                               <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                <h4 class="modal-title">Please Mention these details</span></h4>
-                              <div class="modal-body">
-                                  
-                                      <div class="form-group">
-                                          <label class="form-input" for="assign1">Assign To<a style="color: red">*</a></label>
-                                          <select class="form-control" id="assign1" name="assign1" required>
-                                              <option></option>
-                                              {% for user in users %}
-                                              <option>{{user.username}}</option>
-                                              {% endfor %}
-                                          </select>
-
-                                          <hr>
-                                          <label class="form-input" for="keyPerson">Key Accounts Person <a style="color: red">*</a></label>
-                                          <select class="form-control" id="keyPerson" name="keyPerson" required>
-                                              <option></option>
-                                              {% for user in keyaccounts %}
-                                              <option>{{user.username}}</option>
-                                              {% endfor %}
-                                          </select>
-                                          
-                                      </div>
+                                <label>Are You Sure Want to mark as closed ?</label>
                               </div>
                               <div class="modal-footer">
+                                  {% for info in rfp_details %}
+                                  <label>Current Status {{info.enquiry_status}}</label><br>
+                                  {% endfor %}
                                   <input type="submit" class="btn btn-success" value="Submit">
+                                  <input type="button" class="btn btn-info" data-dismiss="modal" value="Cancel">
                               </div>
-                            </div>                    
+                                               
                       </div>
                 </form>
             </div>
-            </div>
-            <!--Reassign-->
-
-            <div class="modal fade" id="ViewDetails" role="dialog">
-                <div class="modal-dialog">
-                
-                  <!-- Modal content-->
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal">&times;</button>
-                      <h4 class="modal-title">RFP Details</span></h4>
-                    </div class="container">
-                    {% for info in rfp_details %}
-                    <h6>&nbsp;&nbsp;RFP Type</h6>
-                    <h4>&nbsp;&nbsp;{{info.rfp_type}}</h4>
-                    <hr> 
-                    <h6>&nbsp;&nbsp;Customer Name</h6>
-                    <h4>&nbsp;&nbsp;{{info.customer__name}}</h4>
-                    <hr> 
-                    <h6>&nbsp;&nbsp;Customer Location</h6>
-                    <h4>&nbsp;&nbsp;{{info.customer__location}}</h4>
-                    <hr> 
-                    <h6>&nbsp;&nbsp;Contact Person</h6>
-                    <h4>&nbsp;&nbsp;{{info.customer_contact_person__name}}</h4>
-                    <hr> 
-                    <h6>&nbsp;&nbsp;Contact No</h6>
-                    <h4>&nbsp;&nbsp;{{info.customer_contact_person__mobileNo1}}</h4>
-                    <hr> 
-                    <h6>&nbsp;&nbsp;Email</h6>
-                    <h4>&nbsp;&nbsp;{{info.customer_contact_person__email1}}</h4>
-                    <hr> 
-                    <h6>&nbsp;&nbsp;End User</h6>
-                    <h4>&nbsp;&nbsp;{{info.end_user__user_name}}</h4>
-                    <hr> 
-                    <h6>&nbsp;&nbsp;Department</h6>
-                    <h4>&nbsp;&nbsp;{{info.end_user__department_name}}</h4>
-                    <hr> 
-                    <h6>&nbsp;&nbsp;Contact No</h6>
-                    <h4>&nbsp;&nbsp;{{info.end_user__mobileNo1}}</h4>
-                    <hr> 
-                    <h6>&nbsp;&nbsp;Email</h6>
-                    <h4>&nbsp;&nbsp;{{info.end_user__email1}}</h4>
-                    <hr> 
-                    <h6>&nbsp;&nbsp;RFP Creation Date</h6>
-                    <h4>&nbsp;&nbsp;{{info.rfp_creation_details__creation_date}}</h4>
-                    <hr> 
-                    <h6>&nbsp;&nbsp;Created By</h6>
-                    <h4>&nbsp;&nbsp;{{info.rfp_creation_details__created_by__username}}</h4>
-                    {% if info.priority == 1 %}
-                    <hr> 
-                    <h6>&nbsp;&nbsp;Priority</h6>
-                    <h4>&nbsp;&nbsp;High</h4>
-                    {% endif %}                    
-                    <hr> 
-                    <h6>&nbsp;&nbsp;Reference</h6>
-                    <h4>&nbsp;&nbsp;{{info.reference}}</h4>
-                    {% endfor %}
-                    <div class="modal-body">
-
-                    </div>
-                    <div class="modal-footer">
-                        <input type="button" class="btn btn-danger" data-dismiss="modal" value="Close">
-                    </div>
-                  </div>
-                  
-                  </div>
-            </div>
-            </div> 
-            <div class="table-responsive">          
-                    <table id="lineitems" class="table table-hover table-bordered table-sm" width="100%">
-                      <thead>
-                        <tr>
-                          <th>Product Title</th>
-                          <th>Description</th>
-                          <th>Model</th>
-                          <th>Brand</th>
-                          <th>Product Code</th>
-                          <th>Part no</th>
-                          <th>Category</th>
-                          <th>HSN Code</th>
-                          <th>GST</th>
-                          <th>UOM</th>
-                          <th>Quantity</th>
-                        </tr>
-                      </thead>
-                      <tbody>   
-                          {% for item in rfp_lineitems %}
-                            <tr>
-                                <td>{{item.product_title}}</td>
-                                <td>{{item.description}}</td>
-                                <td>{{item.model}}</td>
-                                <td>{{item.brand}}</td>
-                                <td>{{item.product_code}}</td>
-                                <td>{{item.part_no}}</td>
-                                <td>{{item.category}}</td>
-                                <td>{{item.hsn_code}}</td>
-                                <td>{{item.gst}}</td>
-                                <td>{{item.uom}}</td>
-                                <td>{{item.quantity}}</td>
-                            </tr>
-                          {% empty %}
-                            <p>No Pending RFP Approval Found</p>
-                          {% endfor %}
-                      </tbody>
-                    </table>
-            </div>
-
-        <div class="container">
-            <button class="btn btn-danger" data-toggle="modal" data-target="#reject">Mark As Duplicate &nbsp;<span class="glyphicon glyphicon-remove"></span></button>
-            <div class="modal fade" id="reject" role="dialog">
-                <div class="modal-dialog">
-                
-                  <!-- Modal content-->
-                  <form method="POST" action="/enquiry_tracker/rfp/{{rfp_no}}/mark_duplicate/">   
-                    {% csrf_token %}
-                        <div class="modal-content">
-                                <div class="modal-header">
-                                  <label>Are You Sure Want to mark as duplicate ?</label>
-                                </div>
-                                <div class="modal-footer">
-                                    {% for info in rfp_details %}
-                                    <label>Current Status {{info.enquiry_status}}</label><br>
-                                    {% endfor %}
-                                    <input type="submit" class="btn btn-success" value="Submit">
-                                    <input type="button" class="btn btn-info" data-dismiss="modal" value="Cancel">
-                                </div>
-                                                 
-                        </div>
-                  </form>
-              </div>
-            </div>
-
-            <button class="btn btn-success" data-toggle="modal" data-target="#approve">Mark As Closed &nbsp;<span class="glyphicon glyphicon-ok"></span></button>
-            <div class="modal fade" id="approve" role="dialog">
-                    <div class="modal-dialog">
-                    
-                      <!-- Modal content-->
-                      <form method="POST" action="/enquiry_tracker/rfp/{{rfp_no}}/mark_closed/">   
-                        {% csrf_token %}
-                            <div class="modal-content">
-                                    <div class="modal-header">
-                                      <label>Are You Sure Want to mark as closed ?</label>
-                                    </div>
-                                    <div class="modal-footer">
-                                        {% for info in rfp_details %}
-                                        <label>Current Status {{info.enquiry_status}}</label><br>
-                                        {% endfor %}
-                                        <input type="submit" class="btn btn-success" value="Submit">
-                                        <input type="button" class="btn btn-info" data-dismiss="modal" value="Cancel">
-                                    </div>
-                                                     
-                            </div>
-                      </form>
-                  </div>
-            </div>
-        </div><br>
       </div>
-        <script type="text/javascript">
-            $(document).ready( function () {
-                $('#lineitems').DataTable();
-            } );
-            </script>     
+  </div><br>
+</div>
+  <script type="text/javascript">
+      $(document).ready( function () {
+          $('#lineitems').DataTable();
+      } );
+      </script>     
 {% endblock content %}

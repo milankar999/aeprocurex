@@ -41,6 +41,9 @@ def pending_cpo_list(request):
             total_basic_pending = total_basic_pending + item.total_basic_value
             total_pending = total_pending + item.total_value
 
+            print(total_basic_pending)
+            print(total_pending)
+
         context['total_basic_pending'] = format_currency(total_basic_pending, 'INR', locale='en_IN')
         context['total_pending'] = format_currency(total_pending, 'INR', locale='en_IN')
 

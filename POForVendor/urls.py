@@ -66,6 +66,32 @@ urlpatterns = [
     #path('vpo/<vpo_id>/<po_number>/lineitems/approve/',VPOApprove.as_view()),
     #path('vpo/<vpo_id>/<po_number>/lineitems/reject/',VPOReject.as_view()),
 
+    #Application View
+
+    path('vendor_po_prepare/pending_list/',VPOPreparePendingList,name='vpo-prepare-pending-list'),
+    path('vendor_po_prepare/<cpo_id>/lineitems/',VPOPreparePendingLineitems,name='vpo-prepare-pending-lineitems'),
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/',VPOVendorProductSegmentation,name='vpo-vendor-product-segmentation'),
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/select_new_vendor/',VPOVendorProductSegmentationSelectNewVendor,name='vpo-vendor-product-segmentation-select-new-vendor'),
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/vendor/<vendor_id>/select_contact_person/',VPOVendorProductSegmentationSelectVendorContactPerson,name='vpo-vendor-product-segmentation-select-new-vendor-contact-person'),
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/vendor/<vendor_id>/contact_person/<contact_person_id>/confirmation/',VPOVendorProductSegmentationNewVendorConfirmation,name='vpo-vendor-product-segmentation-new-vendor-conformation'),
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_lineitem>/edit/',VPOVendorProductSegmentationLineitemEdit,name='vpo-vendor-product-segmentation-lineitem-edit'),
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_lineitem>/delete/',VPOVendorProductSegmentationLineitemDelete,name='vpo-vendor-product-segmentation-lineitem-delete'),
+
+    #Assign a unselected lineitem
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/assign_product/',VPOAssignProduct,name='vpo-vendor-product-segmentation-assign-product'),
+    
+    #Add Order Information
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/add_order_info/',VPOAddOrderInformation,name='vpo-vendor-product-segmentation-add-order-information'),
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/add_order_info/vendor_info_change/',VPOVendorInfoChange,name='vpo-vendor-info-change'),
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/add_order_info/vendor_contact_person_edit/',VPOVendorContactPersonEdit,name='vpo-vendor-contact-person-edit'),
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/add_other_expences/',VPOAddOtherExpences,name='vpo-add-other-expences'),
+
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/change_currency/',VPOChangeCurrency,name='vpo-change-currency'),
+
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/approval_request/',VPOApprovalRequest,name='vpo-approval-request'),
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/mark_as_regular/',VPOMarkRegular,name='vpo-mark-as-regular-po'),
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/mark_direct_buying/',VPOMarkDirectBuying,name='vpo-mark-as-regular-po'),
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/delete_vpo/',VPODelete,name='vpo-delete'),
     
     #Application View
     #Regular VPO Approval list
@@ -87,5 +113,7 @@ urlpatterns = [
     path('approved_vendor_po/<po_number>/lineitems/',VPOApprovedReadyLineitems,name='vpo-approved-ready-lineitems'),
     path('approved_vendor_po/<po_number>/change_data/',VPOApprovedChangeData,name='vpo-approved-change-data'),
     path('approved_vendor_po/<po_number>/update_status/',VPOUpdateStatus,name='vpo-update-status'),
+
+    path('approved_vendor_po/<po_number>/new_payment_request/',VPONewPaymentRequest,name='vpo-new-payment-request'),
 
 ]

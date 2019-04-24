@@ -10,34 +10,89 @@
         {% endif %}
         <hr>
         <div class="container">
-          <label>Update This Order Status</label>
-          <hr>
-          <form type="submit" id="customer-form" method="POST" action="/api/po_to_vendor/approved_vendor_po/{{vpo.po_number}}/update_status/">
-            {% csrf_token %}
-            <div class="form-group" style="width: 30%;">
-              <label class="form-input" for="priority">Current Status of this order<a style="color: red">*</a></label>
-              <select class="form-control" id="order_status" name="order_status" required>
-                <option>{{vpo.order_status}}</option>
-                <option>Order Preparing</option>
-                <option>PO Released</option>
-                <option>Order Accepted</option>
-                <option>Material Processing</option>
-                <option>Intransit</option>
-                <option>Ordered Cancelled</option>
-              </select>
+          <div class="row">
+            
+            <div class="col-md-6">
+                <label>Update This Order Status</label>
+                <hr>
+                <form type="submit" id="customer-form" method="POST" action="/api/po_to_vendor/approved_vendor_po/{{vpo.po_number}}/update_status/">
+                  {% csrf_token %}
+                  <div class="form-group">
+                    <label class="form-input" for="priority">Current Status of this order<a style="color: red">*</a></label>
+                    <select class="form-control" id="order_status" name="order_status" required>
+                      <option>{{vpo.order_status}}</option>
+                      <option>Order Preparing</option>
+                      <option>PO Released</option>
+                      <option>Order Accepted</option>
+                      <option>Material Processing</option>
+                      <option>Intransit</option>
+                      <option>Ordered Cancelled</option>
+                    </select>
           
-              <label class="form-input" for="rfp_reference">Remarks <a style="color: red">*</a></label>
-              <input type="text" class="form-control" id="remarks" name="remarks" required value="{{vpo.remarks}}">
-                <br>
-              <input type="submit" class="btn btn-success pull-right" value="Update">
+                    <label class="form-input" for="rfp_reference">Remarks <a style="color: red">*</a></label>
+                    <input type="text" class="form-control" id="remarks" name="remarks" required value="{{vpo.remarks}}">
+                    <br>
+                    <input type="submit" class="btn btn-success pull-right" value="Update">
+                  </div>
+                </form>
             </div>
-          </form>
+
+            <div class="col-md-6">
+                <h1>Pending Payment :: INR {{vpo.pending_payment_amount}}</h1>
+              
+              <hr>
+              <label>Request List</label>
+              <div>
+                  <table class="table table-bordered">
+                      <thead>
+                        <tr>
+                          <th>Sl No</th>
+                          <th>Date</th>
+                          <th>Note</th>
+                          <th>Amount</th>
+                          <th>Status</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                             
+                          {% for item in payment_request %}
+                            <tr>
+                                <td>{{forloop.counter}}</td>
+                                <td>{{item.date}}</td>
+                                <td>{{item.note}}</td>
+                                <td>{{item.amount}}</td>
+                                <td>{{item.status}}</td>
+                            </tr>
+                          {% empty %}
+                            <p></p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+              </div>
+              {% if payment_request_count == 0 %}
+              <form type="submit" id="customer-form" method="POST" onsubmit="makePaymentRequest();" action="/api/po_to_vendor/approved_vendor_po/{{vpo.po_number}}/new_payment_request/">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label class="form-input" for="request_note">Request Note<a style="color: red">*</a></label>
+                  <input type="text" class="form-control" id="request_note" name="request_note" required>
+        
+                  <label class="form-input" for="amount">Amount <a style="color: red">*</a></label>
+                  <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
+                  <br>
+                  <input type="submit" class="btn btn-success pull-right" value="Make Request">
+                </div>
+              </form>
+              {% endif %}
+              
+            </div>
+
+          </div>
         </div>
         
         <hr>
         <h2>Vendor PO Lineitem
           <button class="btn btn-info" data-toggle="modal" data-target="#ViewOrderDetails">View Details of this Order &nbsp;<span class="glyphicon glyphicon-resize-full"></span></button>
-        </h2> 
+        </h2> <label>Currency = {{vpo.vpo.currency}} // Index {{vpo.vpo.inr_value}}</label>
 
     <!--Vendor Order Modal -->
         <div class="modal fade" id="ViewOrderDetails" role="dialog">
@@ -131,6 +186,7 @@
 
                <div class="container">
                 <div class="row">
+                    <label class="pull-left">Total Value of this Order {{vpo.non_inr_value}}&nbsp;{{vpo.vpo.currency.currency_code}}</label>
                     <label class="pull-right">Total Basic Value : {{vpo.basic_value}} &nbsp; INR</label>
                 </div>
                 <div class="row">
@@ -195,5 +251,23 @@
           </div><br>
        </div>
    </div>   
-
+<script type="text/javascript">
+    function makePaymentRequest() {
+      $('body').append('<div id="requestOverlay" class="request-overlay"></div>'); /*Create overlay on demand*/
+      $("#requestOverlay").show();
+     }
+</script> 
+<style>
+    .request-overlay {
+      z-index: 9999;
+      position: fixed; /*Important to cover the screen in case of scolling content*/
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      text-align: center;
+      background: rgba(200,200,200,0.5) url('/api/media/media/ldm.gif') no-repeat center; /*.gif file or just div with message etc. however you like*/
+  }
+</style> 
 {% endblock content %}

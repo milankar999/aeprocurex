@@ -8,7 +8,7 @@
             <strong>{{message}}</strong>
         </div>
         {% endif %}
-        <h2>Customer PO Lineitem</h2>        
+        <h2>Supplier PO Lineitem</h2>        
        <div class="table-responsive">          
                <table id="product" class="table table-hover table-bordered table-sm" width="100%">
                  <thead>
@@ -59,8 +59,7 @@
                </table>
        </div><br>
        <div class="container">
-          <button class="btn btn-success pull-left">Go for GRN & IR both</button>
-          <button class="btn btn-success pull-right">Go for only GRN</button>
+          <a class="btn btn-success pull-right" href="/grnir/supplier_po/{{vpo_no}}/proceed_for_grn/">Proceed for GRN</a>
        </div>
 </div>   
 

@@ -9,8 +9,10 @@
         </div>
         {% endif %}
         <h2>Vendor PO Lineitem
-          <button class="btn btn-success" data-toggle="modal" data-target="#ViewDetails">View Customer Order Details &nbsp;<span class="glyphicon glyphicon-zoom-in"></span></button>
-          <button class="btn btn-info" data-toggle="modal" data-target="#ViewOrderDetails">View Details of this Order &nbsp;<span class="glyphicon glyphicon-resize-full"></span></button>
+          <button class="btn btn-success pull-right" data-toggle="modal" data-target="#ViewDetails">View Customer Order Details &nbsp;<span class="glyphicon glyphicon-zoom-in"></span></button>
+          <button class="btn btn-info pull-right" data-toggle="modal" data-target="#ViewOrderDetails">View Details of this Order &nbsp;<span class="glyphicon glyphicon-resize-full"></span></button>
+          <br>
+          <label>Currency = {{vpo.vpo.currency}} // Index {{vpo.vpo.inr_value}}</label>
         </h2> 
         
     <!--Customer Order Modal -->
@@ -150,8 +152,11 @@
                  </tbody>
                </table>
 
+              
+               
                <div class="container">
                 <div class="row">
+                    <label class="pull-left">Total Value of this Order {{vpo.non_inr_value}}&nbsp;{{vpo.vpo.currency.currency_code}}</label>
                     <label class="pull-right">Total Basic Value : {{vpo.basic_value}} &nbsp; INR</label>
                 </div>
                 <div class="row">

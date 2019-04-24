@@ -91,6 +91,7 @@ class CPOLineitem(models.Model):
 
         segment_status = models.BooleanField(default=False)
 
+        pending_po_releasing_quantity = models.FloatField(null=True, blank=True, default=0)
         pending_delivery_quantity = models.FloatField(null=True, blank=True, default=0)
 
         def __str__(self):

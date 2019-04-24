@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from Customer.models import *
+import uuid
 
 
 class RFPCreationDetail(models.Model):
@@ -81,6 +82,8 @@ class RFP(models.Model):
     single_vendor_approval = models.CharField(max_length=10,default='No')
     single_vendor_reason = models.TextField(null=True,blank=True)
 
+    current_sourcing_status = models.CharField(max_length = 200, default = 'Not Mentioned')
+
     #attachment
     document1 = models.FileField(upload_to='rfp/',null=True,blank=True)
     document2 = models.FileField(upload_to='rfp/',null=True,blank=True)
@@ -114,3 +117,14 @@ class RFPLineitem(models.Model):
     
     def __str__(self):
         return self.lineitem_id+ '  ' +  self.product_title
+
+class RFPStatus(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    rfp = models.ForeignKey(RFP, on_delete = models.CASCADE)
+    status = models.CharField(max_length=200)
+
+    update_time = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(User,on_delete = models.CASCADE)
+
+    def __str__(self):
+        return str(self.rfp.rfp_no) + '     ' + self.status 

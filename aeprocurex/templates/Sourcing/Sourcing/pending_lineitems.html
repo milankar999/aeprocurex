@@ -33,8 +33,69 @@
                       {% ifnotequal rfp.document5 "" %}
                         <label>Supporting Document <a href="/api/media/{{rfp.document5}}" target="-blank">Click Here</a></label><br>
                       {% endifnotequal %}
+
+                      <label>Update Status of This Enquiry</label>
+                      <button class="btn btn-info" data-toggle="modal" data-target="#UpdateOrderStatus">Update Status &nbsp;<span class="glyphicon glyphicon-pencil"></span></button>
+         
+                      <table id="product" class="table table-hover table-bordered table-sm" width="100%">
+                          <thead>
+                            <tr>
+                              <th></th>
+                              <th>Date</th>
+                              <th>Status</th> 
+                              <th>Updated By</th>               
+                            </tr>
+                          </thead>
+                          <tbody>
+                                 
+                              {% for item in rfp_status %}
+                                <tr>
+                                    <td>{{forloop.counter}}</td>
+                                    <td>{{item.update_time}}</td>
+                                    <td>{{item.status}}</td>
+                                    <td>{{item.updated_by.first_name}}&nbsp;{{item.updated_by.last_name}}</td>
+                                </tr>
+                              {% empty %}
+                                <p>No Lineitem Found</p>
+                              {% endfor %}
+                          </tbody>
+                        </table>
                             
         </div>
+
+
+
+<!--Update enquiry Status Modal -->
+<div class="modal fade" id="UpdateOrderStatus" role="dialog">
+    <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+       <button type="button" class="close" data-dismiss="modal">&times;</button>
+       <h4 class="modal-title">Please Update Status</span></h4>
+     </div>
+     <div class="modal-body">
+      <form type="submit" id="customer-form" method="POST">
+        {% csrf_token %}
+        <div class="form-group">      
+          <label class="form-input" for="rfp_reference">Mention Here <a style="color: red">*</a></label>
+          <input type="text" class="form-control" id="status" name="status" required>
+            <br>
+          <input type="submit" class="btn btn-success pull-right" value="Update">
+        </div>
+      </form>
+      <br>
+     </div>
+   </div>
+  </div>
+  </div>
+<!--End of Update Order Status Model-->
+
+
+
+
+
+
+
             <div class="table-responsive">          
                     <table id="lineitems" class="table table-hover table-bordered table-sm" width="100%">
                       <thead>
