@@ -37,55 +37,6 @@
                 </form>
             </div>
 
-            <div class="col-md-6">
-                <h1>Pending Payment :: INR {{vpo.pending_payment_amount}}</h1>
-              
-              <hr>
-              <label>Request List</label>
-              <div>
-                  <table class="table table-bordered">
-                      <thead>
-                        <tr>
-                          <th>Sl No</th>
-                          <th>Date</th>
-                          <th>Note</th>
-                          <th>Amount</th>
-                          <th>Status</th>
-                          </tr>
-                      </thead>
-                      <tbody>
-                             
-                          {% for item in payment_request %}
-                            <tr>
-                                <td>{{forloop.counter}}</td>
-                                <td>{{item.date}}</td>
-                                <td>{{item.note}}</td>
-                                <td>{{item.amount}}</td>
-                                <td>{{item.status}}</td>
-                            </tr>
-                          {% empty %}
-                            <p></p>
-                          {% endfor %}
-                      </tbody>
-                    </table>
-              </div>
-              {% if payment_request_count == 0 %}
-              <form type="submit" id="customer-form" method="POST" onsubmit="makePaymentRequest();" action="/api/po_to_vendor/approved_vendor_po/{{vpo.po_number}}/new_payment_request/">
-                {% csrf_token %}
-                <div class="form-group">
-                  <label class="form-input" for="request_note">Request Note<a style="color: red">*</a></label>
-                  <input type="text" class="form-control" id="request_note" name="request_note" required>
-        
-                  <label class="form-input" for="amount">Amount <a style="color: red">*</a></label>
-                  <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
-                  <br>
-                  <input type="submit" class="btn btn-success pull-right" value="Make Request">
-                </div>
-              </form>
-              {% endif %}
-              
-            </div>
-
           </div>
         </div>
         

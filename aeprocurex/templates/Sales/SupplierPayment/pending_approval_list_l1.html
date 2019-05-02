@@ -1,0 +1,49 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="">
+        <h2>Applied Supplier Payment List</h2>
+            <div class="container">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th></th>
+                          <th>Vendor Name</th>
+                          <th>Location</th>
+                          <th>PO No</th>
+                          <th>PO Date</th>
+                          <th>Payment Terms</th>
+                          <th>Requester</th>
+                          <th>Requested Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for item in request_list %}
+                            <tr>
+                                <td>
+                                   <a href="/supplier_payment/payment_request/pending_approval_list_1/{{item.id}}/details/" data-toggle="tooltip" data-placement="top" title="Delete Request"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td>{{forloop.counter}}</td>
+                                <td>{{item.vpo__vpo__vendor__name}}</td>
+                                <td>{{item.vpo__vpo__vendor__location}}</td>
+                                <td>{{item.vpo__po_number}}</td>
+                                <td>{{item.vpo__po_date}}</td>
+                                <td>{{item.vpo__vpo__terms_of_payment}}</td>
+                                <td>{{item.vpo__vpo__requester__first_name}}&nbsp;{{item.vpo__vpo__requester__last_name}}</td>
+                                <td>{{item.amount}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Vendor PO Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable();
+            } );
+            </script>     
+{% endblock content %}

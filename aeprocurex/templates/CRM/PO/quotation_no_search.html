@@ -46,9 +46,9 @@
                           <td>
                             {{forloop.counter}} 
                            </td>
-                           <td>{{item.quotation.quotation_no}}</td>
-                           <td>{{item.quotation.quotation_date}}</td>
-                           <td>{{item.quotation.rfp.rfp_type}}</td>
+                           <td>{{item.quotation__quotation_no}}</td>
+                           <td>{{item.quotation__quotation_date}}</td>
+                           <td>{{item.quotation__rfp__rfp_type}}</td>
                            <td>{{item.product_title}}</td>
                            <td>{{item.description}}</td>
                            <td>{{item.model}}</td>
@@ -59,7 +59,7 @@
                            <td>{{item.uom}}</td>
                            <td>{{item.hsn_code}}</td>
                            <td>{{item.gst}}</td>
-                           <td>{{item.quotation.rfp.rfp_no}}</td>
+                           <td>{{item.quotation__rfp__rfp_no}}</td>
                        </tr>
                      {% empty %}
                        <p>No Item Found</p>

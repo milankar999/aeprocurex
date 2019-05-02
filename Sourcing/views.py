@@ -1492,7 +1492,23 @@ def sourcing_item_wise(request,rfp_no=None):
         context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if request.method == 'GET':
-                item_list = SourcingLineitem.objects.all()
+                item_list = SourcingLineitem.objects.all().values(
+                        'sourcing__rfp__rfp_no',
+                        'sourcing__supplier__name',
+                        'sourcing__offer_date',
+                        'sourcing__offer_reference',
+                        'sourcing__rfp__rfp_type',
+                        'product_title',
+                        'description',
+                        'model',
+                        'brand',
+                        'lead_time',
+                        'mrp',
+                        'price1',
+                        'price2',
+                        'sourcing__rfp__rfp_sourcing_detail__sourcing_completed_by__first_name',
+                        'sourcing__rfp__rfp_sourcing_detail__sourcing_completed_by__last_name'
+                )
 
                 context['item_list'] = item_list
 

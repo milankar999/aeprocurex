@@ -77,6 +77,24 @@
             <li><a href="/api/po_to_vendor/approved_vendor_po/ready_list/">Approved Vendor PO List</a></li>
         </ul>
       </li>
+      <li class="{{supplier_payment}}" role="presentation" class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+          Supplier Payment <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            <li><a href="/supplier_payment/make_new_request/po_selection/">New Request</a></li>
+            <li><a href="/supplier_payment/payment_request/applied_list/">Applied List</a></li>
+            <li><a>&nbsp;</a></li>
+            <li><label>Label 1</label></li>
+            <li><a href="/supplier_payment/payment_request/lavel1/approved_list/">Approved List</a></li>
+            <li><a href="/supplier_payment/payment_request/lavel1/rejected_list/">Rejected List</a></li>
+            <li><a>&nbsp;</a></li>
+            <li><label>Label 2</label></li>
+            <li><a href="/supplier_payment/payment_request/lavel2/rejected_list/">Rejected List</a></li>
+            <li><a>&nbsp;</a></li>
+            <li><a href="/supplier_payment/all_payment_list/">Payment List</a></li>
+        </ul>
+      </li>
     </ul>
     <button type="button" class="btn btn-danger navbar-btn navbar-right" data-toggle="modal" data-target="#LogoutModal">{{login_user_name}}  <span class="glyphicon glyphicon-log-in"></span></button>
   </div>

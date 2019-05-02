@@ -948,7 +948,22 @@ def cpo_quotation_no_search(request):
         type = u.profile.type
 
         if request.method == 'GET':
-                quotation_lineitem = QuotationLineitem.objects.all()
+                quotation_lineitem = QuotationLineitem.objects.all().values(
+                        'quotation__quotation_no',
+                        'quotation__quotation_date',
+                        'quotation__rfp__rfp_type',
+                        'product_title',
+                        'description',
+                        'model',
+                        'brand',
+                        'part_number',
+                        'product_code',
+                        'quantity',
+                        'uom',
+                        'hsn_code',
+                        'gst',
+                        'quotation__rfp__rfp_no'
+                )
                 context['quotation_lineitem'] = quotation_lineitem
                 return render(request,"CRM/PO/quotation_no_search.html",context)
 

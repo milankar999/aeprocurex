@@ -50,22 +50,33 @@
                                 <td>Order Releasing Pending</td>
                                 
                                 {% elif cpo.status == 'direct_processing' %}
-                                <td>Direct Processing</td>
+                                <td>
+                                  Direct Processing
+                                  <a 
+                                  data-toggle="tooltip"
+                                   data-placement="top"
+                                   title="Select this contact person"
+                                   onclick="window.open(
+                                  '/order_tracker/pending_customer_order_list/{{cpo.id}}/change_quantity/', 
+                                  'newwindow', 
+                                  'height=1600,width=1800,resizable=yes,scrollbars=yes,toolbar=yes,menubar=yes,location=yes'); 
+                                  return false;"><span class="glyphicon glyphicon-edit" style="color: blue"></span></a>
+                                </td>
                                 
                                 {% elif cpo.status == 'po_processed' %}
                                 <td>Vendor PO Released</td>   
                                 
                                 {% endif %}
                                 
-                                <td>{{cpo.customer.name}}</td>
-                                <td>{{cpo.customer.location}}</td>
-                                <td>{{cpo.customer_contact_person.name}}</td>
+                                <td>{{cpo.customer__name}}</td>
+                                <td>{{cpo.customer__location}}</td>
+                                <td>{{cpo.customer_contact_person__name}}</td>
                                 <td>{{cpo.po_type}}</td>
                                 <td>{{cpo.customer_po_no}}</td>
                                 <td>{{cpo.customer_po_date}}</td>
                                 <td>{{cpo.delivery_date}}</td>
                                 <td></td>
-                                <td>{{cpo.cpo_assign_detail.assign_to.first_name}}&nbsp{{cpo.cpo_assign_detail.assign_to.last_name}}</td>
+                                <td>{{cpo.cpo_assign_detail__assign_to__first_name}}&nbsp{{cpo.cpo_assign_detail__assign_to__last_name}}</td>
                                 <td>{{cpo.total_basic_value}}</td>
                                 <td>{{cpo.total_value}}</td>
                             </tr>

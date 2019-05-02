@@ -32,17 +32,32 @@ def pending_cpo_list(request):
     context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if request.method == "GET":
-        pending_cpo_list = CustomerPO.objects.filter(Q(status='Created') | Q(status='approved') | Q(status='direct_processing') | Q(status = 'po_processed'))
+        pending_cpo_list = CustomerPO.objects.filter(Q(status='Created') | Q(status='approved') | Q(status='direct_processing') | Q(status = 'po_processed')).values(
+            'id',
+            'status',
+            'customer__name',
+            'customer__location',
+            'customer_contact_person__name',
+            'po_type',
+            'customer_po_no',
+            'customer_po_date',
+            'delivery_date',
+            'cpo_assign_detail__assign_to__first_name',
+            'cpo_assign_detail__assign_to__last_name',
+            'total_basic_value',
+            'total_value'
+        )
         context['pending_cpo_list'] = pending_cpo_list
 
         total_basic_pending = 0
         total_pending = 0
         for item in pending_cpo_list:
-            total_basic_pending = total_basic_pending + item.total_basic_value
-            total_pending = total_pending + item.total_value
+            #print(item['total_value'])
+            total_basic_pending = total_basic_pending + float(item['total_basic_value'])
+            total_pending = total_pending + float(item['total_value'])
 
-            print(total_basic_pending)
-            print(total_pending)
+            #print(total_basic_pending)
+            #print(total_pending)
 
         context['total_basic_pending'] = format_currency(total_basic_pending, 'INR', locale='en_IN')
         context['total_pending'] = format_currency(total_pending, 'INR', locale='en_IN')

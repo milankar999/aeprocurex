@@ -114,6 +114,6 @@ urlpatterns = [
     path('approved_vendor_po/<po_number>/change_data/',VPOApprovedChangeData,name='vpo-approved-change-data'),
     path('approved_vendor_po/<po_number>/update_status/',VPOUpdateStatus,name='vpo-update-status'),
 
-    path('approved_vendor_po/<po_number>/new_payment_request/',VPONewPaymentRequest,name='vpo-new-payment-request'),
+    #path('approved_vendor_po/<po_number>/new_payment_request/',VPONewPaymentRequest,name='vpo-new-payment-request'),
 
 ]

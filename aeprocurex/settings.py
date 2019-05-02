@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'Invoice',
     'GRNIR',
     'OrderTracker',
+    'SupplierPayment',
 ]
 
 MIDDLEWARE = [

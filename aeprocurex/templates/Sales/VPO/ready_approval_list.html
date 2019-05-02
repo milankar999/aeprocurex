@@ -33,20 +33,20 @@
                                    <a href="/api/po_to_vendor/approved_vendor_po/{{item.po_number}}/lineitems/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
                                 </td>
                                 <td>{{forloop.counter}}</td>
-                                <td>{{item.vpo.vendor.name}}</td>
-                                <td>{{item.vpo.vendor.location}}</td>
+                                <td>{{item.vpo__vendor__name}}</td>
+                                <td>{{item.vpo__vendor__location}}</td>
                                 <td>{{item.po_number}}</td>
                                 <td>{{item.po_date}}</td>
-                                <td>{{item.vpo.cpo.customer.name}}</td>
+                                <td>{{item.vpo__cpo__customer__name}}</td>
                                 <td>{{item.basic_value}}</td>
                                 <td>{{item.total_value}}</td>
                                 <td>{{item.all_total_value}}</td>
                                 <td>{{item.vpo_type}}</td>
-                                <td>{{item.vpo.delivery_date}}</td>
+                                <td>{{item.vpo__delivery_date}}</td>
                                 <td>{{item.order_status}}</td>
                                 <td>{{item.remarks}}</td>
-                                <td>{{item.vpo.requester.first_name}}&nbsp;{{item.vpo.requester.last_name}}</td>
-                                <td>{{item.vpo.terms_of_payment}}</td>
+                                <td>{{item.vpo__requester__first_name}}&nbsp;{{item.vpo__requester__last_name}}</td>
+                                <td>{{item.vpo__terms_of_payment}}</td>
                             </tr>
                           {% empty %}
                             <p>No Vendor PO Found</p>

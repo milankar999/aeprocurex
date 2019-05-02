@@ -81,7 +81,8 @@ class VendorPOTracker(models.Model):
         all_total_value = models.FloatField(default =0)
         pending_payment_amount = models.FloatField(default = 0)
 
-        order_status = models.CharField(max_length = 100, default='Order Preparing')
+        order_status = models.CharField(max_length = 100, default = 'Order Preparing')
+        payment_status = models.CharField(max_length = 100, default = 'Pending')
         remarks = models.TextField(null=True, blank=True)
 
         def __str__(self):
@@ -132,16 +133,3 @@ class VPOStatus(models.Model):
 
         def __str__(self):
                 return self.vpo.po_number + ' - ' + self.order_status
-
-class VPOPaymentRequest(models.Model):
-        id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-        vpo = models.ForeignKey(VendorPOTracker,on_delete=models.CASCADE)
-
-        note = models.CharField(max_length = 200)
-        amount = models.FloatField(default=0)
-
-        status = models.CharField(max_length=20,default='requested')
-        date = models.DateTimeField(auto_now_add=True)
-
-        def __str__(self):
-                return self.vpo.po_number + ' ' + str(self.amount) + ' ' + self.status

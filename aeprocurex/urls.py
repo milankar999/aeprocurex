@@ -48,6 +48,8 @@ urlpatterns = [
     path('expences/',include('Expences.urls')),
     path('enquiry_tracker/',include('EnquiryTracker.urls')),
     path('order_tracker/',include('OrderTracker.urls')),
+
+    path('supplier_payment/',include('SupplierPayment.urls')),
 ]
 
 if settings.DEBUG:

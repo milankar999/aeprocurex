@@ -68,15 +68,15 @@
                                 
                                 {% endif %}
                                 
-                                <td>{{cpo.customer.name}}</td>
-                                <td>{{cpo.customer.location}}</td>
-                                <td>{{cpo.customer_contact_person.name}}</td>
+                                <td>{{cpo.customer__name}}</td>
+                                <td>{{cpo.customer__location}}</td>
+                                <td>{{cpo.customer_contact_person__name}}</td>
                                 <td>{{cpo.po_type}}</td>
                                 <td>{{cpo.customer_po_no}}</td>
                                 <td>{{cpo.customer_po_date}}</td>
                                 <td>{{cpo.delivery_date}}</td>
                                 <td></td>
-                                <td>{{cpo.cpo_assign_detail.assign_to.first_name}}&nbsp{{cpo.cpo_assign_detail.assign_to.last_name}}</td>
+                                <td>{{cpo.cpo_assign_detail__assign_to__first_name}}&nbsp{{cpo.cpo_assign_detail__assign_to__last_name}}</td>
                                 <td>{{cpo.total_basic_value}}</td>
                                 <td>{{cpo.total_value}}</td>
                             </tr>

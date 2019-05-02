@@ -28,17 +28,17 @@
                                <td>
                                    <a href="/api/po_to_vendor/vendor_po/pending_approval/{{item.po_number}}/lineitems/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
                                 </td>
-                                <td>{{item.vpo.vendor.name}}</td>
-                                <td>{{item.vpo.vendor.location}}</td>
+                                <td>{{item.vpo__vendor__name}}</td>
+                                <td>{{item.vpo__vendor__location}}</td>
                                 <td>{{item.po_number}}</td>
                                 <td>{{item.vpo_type}}</td>
                                 <td>{{item.po_date}}</td>
-                                <td>{{item.requester.first_name}}&nbsp;{{item.requester.last_name}}</td>
-                                <td>{{item.vpo.cpo.customer.name}}</td>
+                                <td>{{item.requester__first_name}}&nbsp;{{item.requester__last_name}}</td>
+                                <td>{{item.vpo__cpo__customer__name}}</td>
                                 <td>{{item.basic_value}}</td>
                                 <td>{{item.total_value}}</td>
                                 <td>{{item.all_total_value}}</td>
-                                <td>{{item.vpo.currency.currency_code}}</td>
+                                <td>{{item.vpo__currency__currency_code}}</td>
                             </tr>
                           {% empty %}
                             <p>No Vendor PO Found</p>

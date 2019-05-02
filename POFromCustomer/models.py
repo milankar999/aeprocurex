@@ -60,7 +60,7 @@ class CustomerPO(models.Model):
         lineitem_copy_status = models.BooleanField(default=False)
 
         def __str__(self):
-                return self.customer_po_no + ' ' + self.customer.name
+                return str(self.customer_po_no) + ' ' + str(self.customer.name)
 
 class CPOSelectedQuotation(models.Model):
         id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

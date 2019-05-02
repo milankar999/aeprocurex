@@ -8,6 +8,7 @@ class Profile(models.Model):
     type = models.CharField(max_length = 50, null=True,blank=True)
     hr_user_type = models.CharField(max_length = 50, null=True,blank=True)
     claim_user_type = models.CharField(max_length = 50, default = 'user')
+    supplier_payment_user_type = models.CharField(max_length = 50, default = 'user')
     designation = models.CharField(max_length=50, null = True, blank = True)
     personal_email = models.CharField(max_length=100, null = True, blank = True)
     office_email = models.CharField(max_length=100, null = True, blank = True)

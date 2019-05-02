@@ -1743,7 +1743,20 @@ def VPOPendingApprovalList(request):
         context['login_user_name'] = u.first_name + ' ' + u.last_name
         
         if request.method == 'GET':
-                vpo = VendorPOTracker.objects.filter(status = 'Requested')
+                vpo = VendorPOTracker.objects.filter(status = 'Requested').values(
+                        'vpo__vendor__name',
+                        'vpo__vendor__location',
+                        'po_number',
+                        'vpo_type',
+                        'po_date',
+                        'requester__first_name',
+                        'requester__last_name',
+                        'vpo__cpo__customer__name',
+                        'basic_value',
+                        'total_value',
+                        'all_total_value',
+                        'vpo__currency__currency_code'
+                )
                 context['vpo'] = vpo
 
                 if type == 'Sales':
@@ -2256,13 +2269,13 @@ def add_lineitem(pdf,y,i,po_number,product_title,description,model,brand,product
         pdf.drawString(230,y,str(quantity))
         pdf.drawString(283,y,uom.upper())
         if currency_code == 'INR':
-                pdf.drawString(330,y,currency_code + ' ' + currencyInIndiaFormat(unit_price))
+                pdf.drawString(330,y,currency_code + ' ' + currencyInIndiaFormat(str(unit_price)))
         else:
                 pdf.drawString(330,y,currency_code + ' ' + format_us_currency(unit_price))
         pdf.drawString(420,y,discount)
         
         if currency_code == 'INR':
-                pdf.drawString(480,y,currency_code + ' ' + currencyInIndiaFormat(discounted_price))
+                pdf.drawString(480,y,currency_code + ' ' + currencyInIndiaFormat(str(discounted_price)))
         else:
                 pdf.drawString(480,y,currency_code + ' ' + format_us_currency(discounted_price))
 
@@ -2403,7 +2416,7 @@ def add_lineitem(pdf,y,i,po_number,product_title,description,model,brand,product
         if currency_code == 'INR':
                 pdf.setFont('Helvetica-Bold', 8)
                 pdf.drawString(350,y,"Integrated GST "+ str(gst) + " %")
-                pdf.drawString(490,y,currency_code + ' ' +str(currencyInIndiaFormat(gst_value)))
+                pdf.drawString(490,y,currency_code + ' ' +str(currencyInIndiaFormat(str(gst_value))))
                 y = y - 10
 
                 #Page Break
@@ -2424,7 +2437,7 @@ def add_lineitem(pdf,y,i,po_number,product_title,description,model,brand,product
 
         if currency_code == 'INR':
                 pdf.drawString(350,y,"Total")
-                pdf.drawString(490,y,currency_code +' '+ str(currencyInIndiaFormat(total_value)))
+                pdf.drawString(490,y,currency_code +' '+ str(currencyInIndiaFormat(str(total_value))))
                 y = y - 5
         pdf.rect(10,y,568,0.1, stroke=1, fill=1)
         y = y - 10
@@ -2458,9 +2471,12 @@ def add_pricing_amount(pdf,po_number,state,y,total_basic_amount,total_gst,freigh
                                 y = add_new_page(pdf,po_number)
                                 pdf.setFont('Helvetica', 9)
                         pdf.setFont('Helvetica-Bold', 8)
+
+                        h_gst = float(total_gst)/2
+                        h_gst_str = '{0:.2f}'.format(h_gst)
                 
                         pdf.drawString(330,y,"Total Applicable CGST Value")
-                        pdf.drawString(490,y, currency_code + " " + str(currencyInIndiaFormat(str(float(total_gst)/2))))
+                        pdf.drawString(490,y, currency_code + " " + str(currencyInIndiaFormat(str(h_gst_str))))
                         y = y - 10
 
                         if y < 50:
@@ -2469,7 +2485,7 @@ def add_pricing_amount(pdf,po_number,state,y,total_basic_amount,total_gst,freigh
                         pdf.setFont('Helvetica-Bold', 8)
 
                         pdf.drawString(330,y,"Total Applicable SGST Value")
-                        pdf.drawString(490,y, currency_code + " " + str(currencyInIndiaFormat(str(float(total_gst)/2))))
+                        pdf.drawString(490,y, currency_code + " " + str(currencyInIndiaFormat(str(h_gst_str))))
                         y = y - 10
 
                 else:
@@ -2479,7 +2495,7 @@ def add_pricing_amount(pdf,po_number,state,y,total_basic_amount,total_gst,freigh
                         pdf.setFont('Helvetica-Bold', 8)
                 
                         pdf.drawString(330,y,"Total Applicable IGST Value")
-                        pdf.drawString(490,y, currency_code + " " + str(currencyInIndiaFormat((float(total_gst)))))
+                        pdf.drawString(490,y, currency_code + " " + str(currencyInIndiaFormat(str(total_gst))))
                         y = y - 10 
 
                 #Page Break
@@ -2490,7 +2506,7 @@ def add_pricing_amount(pdf,po_number,state,y,total_basic_amount,total_gst,freigh
 
                 if freight_charges != "0.00":
                         pdf.drawString(330,y,"Freight Charges")
-                        pdf.drawString(490,y,currency_code + " " + currencyInIndiaFormat(freight_charges))
+                        pdf.drawString(490,y,currency_code + " " + currencyInIndiaFormat(str(freight_charges)))
                         y = y - 10
 
                 #Page Break
@@ -2501,7 +2517,7 @@ def add_pricing_amount(pdf,po_number,state,y,total_basic_amount,total_gst,freigh
 
                 if pf != "0.00":
                         pdf.drawString(330,y,"Packaging and Forwarding Charges")
-                        pdf.drawString(490,y,currency_code+ " " + currencyInIndiaFormat(pf))
+                        pdf.drawString(490,y,currency_code+ " " + currencyInIndiaFormat(str(pf)))
                         y = y - 10
 
                 #Page Break
@@ -2512,7 +2528,7 @@ def add_pricing_amount(pdf,po_number,state,y,total_basic_amount,total_gst,freigh
 
                 if insurance != "0.00":
                         pdf.drawString(330,y,"Insurance")
-                        pdf.drawString(490,y,currency_code+" " + currencyInIndiaFormat(insurance))
+                        pdf.drawString(490,y,currency_code+" " + currencyInIndiaFormat(str(insurance)))
                         y = y - 10
 
                 y = y + 5
@@ -2526,7 +2542,7 @@ def add_pricing_amount(pdf,po_number,state,y,total_basic_amount,total_gst,freigh
                 pdf.setFont('Helvetica-Bold', 8)
 
                 pdf.drawString(330,y,"Grand Total")
-                pdf.drawString(490,y,currency_code + " " + currencyInIndiaFormat(grand_total))
+                pdf.drawString(490,y,currency_code + " " + currencyInIndiaFormat(str(grand_total)))
 
         else:
                 pdf.drawString(330,y,"Grand Total")
@@ -2968,12 +2984,42 @@ def VPOApprovedReadyList(request):
         
         if request.method == 'GET':
                 if type == 'Sourcing':
-                        vpo_list = VendorPOTracker.objects.filter(status='Approved',vpo__requester=u)
+                        vpo_list = VendorPOTracker.objects.filter(status='Approved',vpo__requester=u).values(
+                                'po_number',
+                                'vpo__vendor__name',
+                                'vpo__vendor__location',
+                                'po_number',
+                                'po_date',
+                                'vpo__cpo__customer__name',
+                                'basic_value',
+                                'total_value',
+                                'all_total_value',
+                                'vpo__currency__currency_code',
+                                'vpo_type',
+                                'order_status',
+                                'remarks'
+                        )
                         context['vpo_list'] = vpo_list
                         return render(request,"Sourcing/VPO/approval_list.html",context)
 
                 if type == 'Sales':
-                        vpo_list = VendorPOTracker.objects.filter(status='Approved')
+                        vpo_list = VendorPOTracker.objects.filter(status='Approved').values(
+                                'po_number',
+                                'vpo__vendor__name',
+                                'vpo__vendor__location',
+                                'po_date',
+                                'vpo__cpo__customer__name',
+                                'basic_value',
+                                'total_value',
+                                'all_total_value',
+                                'vpo_type',
+                                'vpo__delivery_date',
+                                'order_status',
+                                'remarks',
+                                'vpo__requester__first_name',
+                                'vpo__requester__last_name',
+                                'vpo__terms_of_payment'
+                        )
                         context['vpo_list'] = vpo_list
                         return render(request,"Sales/VPO/ready_approval_list.html",context)
 
@@ -2994,13 +3040,6 @@ def VPOApprovedReadyLineitems(request,po_number):
                 PO_Generator(po_number)
 
                 if type == 'Sourcing':
-
-                        payment_request = VPOPaymentRequest.objects.filter(vpo = vpo)
-                        
-                        payment_request_count = VPOPaymentRequest.objects.filter(vpo = vpo, status = 'requested').count()
-                        print(payment_request_count)
-                        context['payment_request'] = payment_request
-                        context['payment_request_count'] = payment_request_count
                         return render(request,"Sourcing/VPO/vpo_lineitem.html",context)   
 
                 if type == 'Sales':
@@ -3059,33 +3098,4 @@ def VPOUpdateStatus(request,po_number):
                 
                 if type == 'Sales':
                         return HttpResponseRedirect(reverse('vpo-approved-ready-lineitems',args=[po_number]))
-
-
-#VPO Approved payment request
-@login_required(login_url="/employee/login/")
-def VPONewPaymentRequest(request,po_number):
-        context={}
-        context['PO'] = 'active'
-        u = User.objects.get(username=request.user)
-        type = u.profile.type
-        context['login_user_name'] = u.first_name + ' ' + u.last_name
-
-        if request.method == 'POST':
-                data = request.POST
-                vpo_tracker = VendorPOTracker.objects.get(po_number = po_number)
-
-                if vpo_tracker.pending_payment_amount < float(data['amount']):
-                        return JsonResponse({'Message': 'Amount Should Be less Then Pending Amount'})
-
-                try:
-                        VPOPaymentRequest.objects.create(
-                                vpo = vpo_tracker,
-                                note = data['request_note'],
-                                amount = data['amount'],
-                        )
-
-                except:
-                        pass
-                
-                return HttpResponseRedirect(reverse('vpo-approved-ready-lineitems',args=[po_number]))
                                                 

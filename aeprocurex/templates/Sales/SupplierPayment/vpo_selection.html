@@ -14,35 +14,25 @@
                           <th>Location</th>
                           <th>PO No</th>
                           <th>PO Date</th>
-                          <th>PO For</th>
                           <th>Basic Amount ₹</th>
-                          <th>Total Basic Amount ₹</th>
-                          <th>All Total Amount ₹</th>
-                          <th>Currency</th>
-                          <th>PO Type</th>
-                          <th>Order Status</th>
-                          <th>Payment Status</th>
+                          <th>Total Amount ₹</th>
+                          <th>Pending Payment ₹</th>
                         </tr>
                       </thead>
                       <tbody>   
                           {% for item in vpo_list %}
                             <tr>
                                 <td>
-                                   <a href="/api/po_to_vendor/approved_vendor_po/{{item.po_number}}/lineitems/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                   <a href="/supplier_payment/make_new_request/{{item.po_number}}/request/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
                                 </td>
                                 <td>{{forloop.counter}}</td>
                                 <td>{{item.vpo__vendor__name}}</td>
                                 <td>{{item.vpo__vendor__location}}</td>
                                 <td>{{item.po_number}}</td>
                                 <td>{{item.po_date}}</td>
-                                <td>{{item.vpo__cpo__customer__name}}</td>
                                 <td>{{item.basic_value}}</td>
                                 <td>{{item.total_value}}</td>
-                                <td>{{item.all_total_value}}</td>
-                                <td>{{item.vpo__currency__currency_code}}</td>
-                                <td>{{item.vpo_type}}</td>
-                                <td>{{item.order_status}}</td>
-                                <td>{{item.remarks}}</td>
+                                <td>{{item.pending_payment_amount}}</td>
                             </tr>
                           {% empty %}
                             <p>No Vendor PO Found</p>

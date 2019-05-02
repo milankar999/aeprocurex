@@ -29,13 +29,13 @@
                           {% for item in item_list %}
                             <tr>
                                 <td>
-                                   <a href="/enquiry_tracker/rfp/{{item.rfp_no__rfp_no}}/lineitems/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                   <a href="#" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
                                 </td>
                                 <td>{{forloop.counter}}</td>
-                                <td>{{item.sourcing.supplier.name}}</td>
-                                <td>{{item.sourcing.offer_date}}</td>
-                                <td>{{item.sourcing.offer_reference}}</td>
-                                <td>{{item.sourcing.rfp.rfp_type}}</td>
+                                <td>{{item.sourcing__supplier__name}}</td>
+                                <td>{{item.sourcing__offer_date}}</td>
+                                <td>{{item.sourcing__offer_reference}}</td>
+                                <td>{{item.sourcing__rfp__rfp_type}}</td>
                                 <td>{{item.product_title}}</td>
                                 <td>{{item.description}}</td>
                                 <td>{{item.model}}</td>
@@ -44,7 +44,7 @@
                                 <td>{{item.mrp}}</td>
                                 <td>{{item.price1}}</td>
                                 <td>{{item.price2}}</td>
-                                <td>{{item.sourcing.rfp.rfp_sourcing_detail.sourcing_completed_by.first_name}}&nbsp;{{item.sourcing.rfp.rfp_sourcing_detail.sourcing_completed_by.last_name}}</td>
+                                <td>{{item.sourcing__rfp__rfp_sourcing_detail__sourcing_completed_by__first_name}}&nbsp;{{item.sourcing__rfp__rfp_sourcing_detail__sourcing_completed_by__last_name}}</td>
                             </tr>
                           {% empty %}
                             <p>No Lineitem Found</p>
