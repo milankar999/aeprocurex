@@ -31,7 +31,14 @@ def IntransitSupplierPOList(request):
         context['login_user_name'] = u.first_name + ' ' + u.last_name
     
         if request.method == 'GET':
-                vpo_list = VendorPOTracker.objects.filter(order_status='Intransit')
+                vpo_list = VendorPOTracker.objects.filter(order_status='Intransit', status='Approved').values(
+                        'po_number',
+                        'vpo__vendor__name',
+                        'vpo__vendor__location',
+                        'po_date',
+                        'vpo__requester__first_name',
+                        'vpo__requester__last_name'
+                )
                 context['vpo_list'] = vpo_list
 
                 if type == 'GRN':

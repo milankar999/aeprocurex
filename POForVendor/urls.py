@@ -116,4 +116,28 @@ urlpatterns = [
 
     #path('approved_vendor_po/<po_number>/new_payment_request/',VPONewPaymentRequest,name='vpo-new-payment-request'),
 
+
+    #Independent Vendor PO Creation
+    path('vendor_po_prepare/independent_po_generation/creation_in_progress_list/',IVPOCreationInProgressList,name='indepen-vpo-creation-in-progress-list'),
+    
+    path('vendor_po_prepare/independent_po_generation/vendor_selection/',IVPOVendorSelection,name='indepen-vpo-vendor-selection'),
+    path('vendor_po_prepare/independent_po_generation/vendor/<vendor_id>/contact_person_selection/',IVPOVendorContactPersonSelection,name='indepen-vpo-vendor-contact-person-selection'),
+    path('vendor_po_prepare/independent_po_generation/vendor/<vendor_id>/contact_person/<contact_person_id>/confirmation/',IVPOConfirmation,name='indepen-vpo-confirmation'),
+
+    path('vendor_po_prepare/independent_po_generation/<vpo_id>/product_selection/',IVPOProductSelection,name='indepen-vpo-product-selection'),
+
+    path('vendor_po_prepare/independent_po_generation/<vpo_id>/product_selection/<item_id>/edit/',IVPOProductEdit,name='indepen-vpo-product-edit'),
+    path('vendor_po_prepare/independent_po_generation/<vpo_id>/product_selection/<item_id>/delete/',IVPOProductdelete,name='indepen-vpo-product-delete'),
+
+    path('vendor_po_prepare/independent_po_generation/<vpo_id>/add_order_info/',IVPOAddOrderInformation,name='indepen-vpo-add-order-info'),
+    
+    path('vendor_po_prepare/independent_po_generation/<vpo_id>/add_order_info/vendor_info_change/',IVPOVendorInfoChange,name='indepen-vpo-vendor-info-change'),
+    path('vendor_po_prepare/independent_po_generation/<vpo_id>/add_order_info/vendor_contact_person_edit/',IVPOVendorContactPersonEdit,name='indepen-vpo-vendor-contact-person-edit'),
+    path('vendor_po_prepare/independent_po_generation/<vpo_id>/add_other_expences/',IVPOAddOtherExpences,name='indepen-vpo-add-other-expences'),
+    path('vendor_po_prepare/independent_po_generation/<vpo_id>/change_currency/',IVPOChangeCurrency,name='indepen-vpo-change-currency'),
+
+    path('vendor_po_prepare/independent_po_generation/<vpo_id>/approval_request/',IVPOApprovalRequest,name='indepen-vpo-approval-request'),
+    path('vendor_po_prepare/independent_po_generation/<vpo_id>/mark_as_regular/',IVPOMarkRegular,name='indepen-vpo-mark-as-regular-po'),
+    path('vendor_po_prepare/independent_po_generation/<vpo_id>/mark_direct_buying/',IVPOMarkDirectBuying,name='indepen-vpo-mark-as-regular-po'),
+    #path('vendor_po_prepare/independent_po_generation/<vpo_id>/delete_vpo/',IVPODelete,name='indepen-vpo-delete'),
 ]

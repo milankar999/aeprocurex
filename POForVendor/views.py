@@ -648,6 +648,11 @@ def VPOMarkRegular(request,cpo_id=None,vpo_id=None):
                         vpo = VendorPO.objects.get(id=vpo_id)
                         inr_index = vpo.inr_value
                         vpo_lineitem = VendorPOLineitems.objects.filter(vpo=vpo)
+
+                        vpo_lineitem_count = VendorPOLineitems.objects.filter(vpo = vpo).count()
+
+                        if vpo_lineitem_count == 0:
+                                return JsonResponse({'Message': 'No Lineitem Found'})
                         
                         if vpo.offer_reference == '' or vpo.offer_reference == 'None': 
                                 return JsonResponse({'Message': 'Offer Reference Not Found'})
@@ -775,6 +780,11 @@ def VPOMarkDirectBuying(request,cpo_id=None,vpo_id=None):
                         vpo = VendorPO.objects.get(id=vpo_id)
                         inr_index = vpo.inr_value
                         vpo_lineitem = VendorPOLineitems.objects.filter(vpo=vpo)
+
+                        vpo_lineitem_count = VendorPOLineitems.objects.filter(vpo = vpo).count()
+
+                        if vpo_lineitem_count == 0:
+                                return JsonResponse({'Message': 'No Lineitem Found'})
                         
                         if vpo.payment_term == 0 and vpo.advance_percentage == 0:
                                 return JsonResponse({'Message': 'Payment Terms and Advance Percentage are not Clear'})
@@ -1813,6 +1823,11 @@ def VPOApprove(request,po_number=None):
                 vpo_tracker.vpo.save()
                 vpo_tracker.save()
 
+                vpo_lineitem = VendorPOLineitems.objects.filter(vpo=vpo_tracker.vpo)
+                for item in vpo_lineitem:
+                        item.receivable_quantity = item.quantity
+                        item.save()
+
                 if type == 'Sales':
                         return HttpResponseRedirect(reverse('vpo-pending-approval-list'))
 
@@ -2030,7 +2045,7 @@ def Add_Header(pdf):
         pdf.drawString(10,741,"Hosapalya Main Road, Opp. To Om Shakti Temple")
         pdf.drawString(10,730,"HSR Layout Extension,Bangalore - 560068")
 
-        pdf.drawString(10,719,"Telephone: 080-43743314, +91 9964892600")
+        pdf.drawString(10,719,"Telephone: 080-43743-314 / 315")
         pdf.drawString(10,708,"E-mail: sales.p@aeprocurex.com")
         pdf.drawString(10,697,"GST No. 29AAQCA2809L1Z6")
         pdf.drawString(10,686,"PAN No. - AAQCA2809L")
@@ -2169,9 +2184,9 @@ def Add_grt(pdf,y,contact_person,mobile_no,email1):
         y = y - 8
         pdf.setFont('Helvetica-Bold', 9)
         cp = contact_person
-        if mobile_no != '':
+        if mobile_no != '' and mobile_no != 'None':
                 cp = cp + ', ' + mobile_no
-        if email1 != '':
+        if email1 != '' and email1 != 'None':
                 cp = cp + ', ' + email1
         pdf.drawString(10,y,"Kind Attention " + cp )
         y = y - 10
@@ -2849,12 +2864,27 @@ def PO_Generator(po_number):
                 vpo_object.receiver_phone2,
                 vpo_object.receiver_dept,
         )
+
+
+        email1 = ''
+        mobileNo1 = ''
+        
+        try:
+                email1 = vpo_object.vendor_contact_person.email1
+        except:
+                pass
+
+        try:
+                mobileNo1 = vpo_object.vendor_contact_person.mobileNo1
+        except:
+                pass
+
         y = Add_grt(
                 pdf,
                 y,
                 vpo_object.vendor_contact_person.name,
-                vpo_object.vendor_contact_person.mobileNo1,
-                vpo_object.vendor_contact_person.email1
+                mobileNo1,
+                email1
         )
         y = Add_Table_Header(pdf,y)
         i = 1
@@ -3061,8 +3091,12 @@ def VPOApprovedChangeData(request,po_number):
                 vpo_tracker = VendorPOTracker.objects.get(po_number=po_number)
                 vpo_tracker.status = 'Rejected' 
                 vpo_tracker.vpo.po_status = 'Rejected'
-                vpo_tracker.vpo.cpo.status = 'approved'
-                vpo_tracker.vpo.cpo.save()
+                
+                try:
+                        vpo_tracker.vpo.cpo.status = 'approved'
+                        vpo_tracker.vpo.cpo.save()
+                except:
+                        pass
                 vpo_tracker.vpo.save()
                 vpo_tracker.save()
 
@@ -3099,3 +3133,759 @@ def VPOUpdateStatus(request,po_number):
                 if type == 'Sales':
                         return HttpResponseRedirect(reverse('vpo-approved-ready-lineitems',args=[po_number]))
                                                 
+
+
+#-------------------------------    INDEPENDENT VENDOR PO CREATION     -------------------------------#
+
+#Creation in progress list
+@login_required(login_url="/employee/login/")
+def IVPOCreationInProgressList(request):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                ivpo_list = VendorPO.objects.filter(
+                        Q(creation_type='Independent', requester = u, po_status = 'Preparing') 
+                        | Q(creation_type='Independent', requester = u, po_status = 'Rejected')).values(
+                                'id',
+                                'vendor__name',
+                                'vendor__location',
+                                'vendor_contact_person__name',
+                                'creation_time',
+                                'po_status'
+                        )
+
+                context['ivpo_list'] = ivpo_list
+                if type == 'Sourcing':
+                        return render(request,"Sourcing/VPO/IndependentVPO/creation_in_progress_list.html",context)
+
+
+
+#Independent VPO Vendor Selection
+@login_required(login_url="/employee/login/")
+def IVPOVendorSelection(request):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+                supplier_list = SupplierProfile.objects.all().values(
+                        'id',
+                        'name',
+                        'location',
+                        'office_phone1',
+                        'office_email1',
+                        'city',
+                        'state',
+                        'country'
+                )
+                context['Supplier_list'] = supplier_list
+                state = StateList.objects.all()
+                context['StateList'] = state
+                #context['cpo_id'] = cpo_id
+
+                if type == 'Sourcing':
+                        return render(request,"Sourcing/VPO/IndependentVPO/vendor_selection.html",context)
+
+#Supplier Contact Person Selection
+@login_required(login_url="/employee/login/")
+def IVPOVendorContactPersonSelection(request,vendor_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        context['vendor_id'] = vendor_id
+        if request.method== 'GET':
+                ContactPerson = SupplierContactPerson.objects.filter(supplier_name__pk=vendor_id)
+                context['ContactPerson'] = ContactPerson
+
+                if type=='Sourcing':
+                        return render(request,"Sourcing/VPO/IndependentVPO/contact_person_selection.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+                supplier = SupplierProfile.objects.get(id=vendor_id)
+                contactperson_id =  vendor_id +'VP' + str(SupplierContactPerson.objects.count() + 1)
+                SupplierContactPerson.objects.create(id=contactperson_id,name=data['name'],mobileNo1=data['phone1'],mobileNo2=data['phone2'],email1=data['email1'],email2=data['email2'],supplier_name=supplier,created_by=u)
+
+                return HttpResponseRedirect(reverse('indepen-vpo-vendor-contact-person-selection',args=[vendor_id]))
+
+#Independent VPO Confirmation
+@login_required(login_url="/employee/login/")
+def IVPOConfirmation(request,vendor_id=None,contact_person_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        vendor = SupplierProfile.objects.get(id=vendor_id)
+        contact_person = SupplierContactPerson.objects.get(id=contact_person_id)
+
+        if request.method == 'GET':
+                context['vendor'] = vendor
+                context['contact_person'] = contact_person
+                context['vendor_id'] = vendor_id
+
+                if type == 'Sourcing':
+                        return render(request,"Sourcing/VPO/IndependentVPO/vendor_selection_confirmation.html",context)
+
+        if request.method == 'POST':
+                vendor = SupplierProfile.objects.get(id=vendor_id)
+                vendor_contact_person = SupplierContactPerson.objects.get(id=contact_person_id)
+
+                vpo = VendorPO.objects.create(
+                        vendor = vendor,
+                        vendor_contact_person = vendor_contact_person,
+                        requester = u,
+                        creation_type = 'Independent'
+                )
+                vpo_id = vpo.id
+
+                return HttpResponseRedirect(reverse('indepen-vpo-product-selection',args=[vpo_id]))
+
+#Independent VPO Confirmation
+@login_required(login_url="/employee/login/")
+def IVPOProductSelection(request,vpo_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                vpo = VendorPO.objects.get(id=vpo_id)
+                vpo_lineitem = VendorPOLineitems.objects.filter(vpo = vpo).values(
+                        'id',
+                        'product_title',
+                        'description',
+                        'model',
+                        'brand',
+                        'product_code',
+                        'hsn_code',
+                        'pack_size',
+                        'gst',
+                        'uom',
+                        'quantity',
+                        'unit_price',
+                        'discount',
+                        'actual_price',
+                        'total_basic_price',
+                        'total_price'
+                )
+                context['vpo_lineitem'] = vpo_lineitem
+                context['vpo'] = vpo
+
+                if type == 'Sourcing':
+                        return render(request,"Sourcing/VPO/IndependentVPO/product_selection.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+                vpo = VendorPO.objects.get(id=vpo_id)
+
+                unit_price = float(data['unit_price'])
+                discount = float(data['discount'])
+
+                actual_price = unit_price - (unit_price * discount / 100)
+                gst = float(data['gst'])
+                quantity = float(data['quantity'])
+                total_basic_price = round((actual_price * quantity),2)
+                total_price = round((total_basic_price + (total_basic_price * gst / 100)), 2)
+
+
+                VendorPOLineitems.objects.create(
+                        vpo = vpo,
+                        product_title = data['product_title'],
+                        description = data['description'],
+                        model = data['model'],
+                        brand = data['brand'],
+                        product_code = data['product_code'],
+                        hsn_code = data['hsn_code'],
+                        gst = data['gst'],
+                        uom = data['uom'],
+                        quantity = quantity,
+                        unit_price = unit_price,
+                        discount = discount,
+                        actual_price = actual_price,
+                        total_basic_price = total_basic_price,
+                        total_price = total_price
+                )
+                return HttpResponseRedirect(reverse('indepen-vpo-product-selection',args=[vpo_id]))
+
+@login_required(login_url="/employee/login/")
+def IVPOAddOrderInformation(request,vpo_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+                vendor_po = VendorPO.objects.get(id=vpo_id)
+                context['vendor_po'] = vendor_po
+                context['vpo_id'] = vpo_id
+        
+                if type == 'Sourcing':
+                        return render(request,"Sourcing/VPO/IndependentVPO/add_order_info.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+                vendor_po = VendorPO.objects.get(id=vpo_id)
+
+                vendor_po.shipping_address = data['shipping_address']
+                vendor_po.offer_reference = data['offer_reference']
+                
+                if data['offer_date'] != "":
+                        vendor_po.offer_date = data['offer_date']
+
+                if data['delivery_date'] != "":
+                        vendor_po.delivery_date = data['delivery_date']
+
+                vendor_po.receiver_name = data['receiver_name']
+                vendor_po.receiver_phone1 = data['receiver_phone1']
+                vendor_po.receiver_phone2 = data['receiver_phone2']
+                vendor_po.receiver_dept = data['receiver_dept']
+
+                vendor_po.mode_of_transport = data['mode_of_transport']
+                vendor_po.inco_terms = data['inco_terms']
+                vendor_po.installation = data['installation']
+                
+                vendor_po.terms_of_payment = data['terms_of_payment']
+                vendor_po.payment_term = data['payment_term']
+                vendor_po.advance_percentage = data['advance_percentage']
+
+                if vendor_po.di1 != 'None' or vendor_po.di1 != None:
+                        vendor_po.di1 = data['di1']
+
+                if vendor_po.di2 != 'None' or vendor_po.di2 != None:
+                        vendor_po.di2 = data['di2']
+
+                if vendor_po.di3 != 'None' or vendor_po.di3 != None:
+                        vendor_po.di3 = data['di3']
+
+                if vendor_po.di4 != 'None' or vendor_po.di4 != None:
+                        vendor_po.di4 = data['di4']
+
+                if vendor_po.di5 != 'None' or vendor_po.di5 != None:
+                        vendor_po.di5 = data['di5']
+
+                if vendor_po.di6 != 'None' or vendor_po.di6 != None:
+                        vendor_po.di6 = data['di6']
+
+                if vendor_po.di7 != 'None' or vendor_po.di7 != None:
+                        vendor_po.di7 = data['di7']
+
+                if vendor_po.di8 != 'None' or vendor_po.di8 != None:
+                        vendor_po.di8 = data['di8']
+
+                if vendor_po.di9 != 'None' or vendor_po.di9 != None:
+                        vendor_po.di9 = data['di9']
+
+                if vendor_po.di10 != 'None' or vendor_po.di10 != None:
+                        vendor_po.di10 = data['di10']
+
+                vendor_po.save()
+                return HttpResponseRedirect(reverse('indepen-vpo-product-selection',args=[vpo_id]))
+
+#Vendor info change
+@login_required(login_url="/employee/login/")
+def IVPOVendorInfoChange(request,vpo_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+                vpo = VendorPO.objects.get(id=vpo_id)
+                context['Supplier'] = vpo.vendor
+                state = StateList.objects.all()
+                context['StateList'] = state
+
+                context['vpo_id'] = vpo_id
+
+                if type == 'Sourcing':
+                        return render(request,"Sourcing/VPO/IndependentVPO/supplier_edit.html",context)
+
+        if request.method == 'POST':
+                vpo = VendorPO.objects.get(id=vpo_id)
+                suppData = vpo.vendor
+                data = request.POST
+
+                if data['PaymentTerm'] == '':
+                        pt = 0
+                else:
+                        pt=data['PaymentTerm']
+        
+                if data['advance'] == '':
+                        adv = 0
+                else:
+                        adv = data['advance']
+
+                suppData.name = data['name']
+                suppData.location = data['location']
+                suppData.address = data['address']
+                suppData.city = data['city']
+                suppData.state = data['state']
+                suppData.pin = data['pin']
+                suppData.country = data['country']
+                suppData.office_email1 = data['officeemail1']
+                suppData.office_email2 = data['officeemail2']
+                suppData.office_phone1 = data['officephone1']
+                suppData.office_phone2 = data['officephone2']
+                suppData.gst_number = data['GSTNo']
+                suppData.advance_persentage = adv
+                suppData.payment_term = pt
+                suppData.inco_term = data['IncoTerm']
+                suppData.save()
+
+                return HttpResponseRedirect(reverse('indepen-vpo-add-order-info',args=[vpo_id]))
+
+#Vendor COntact Info Change
+@login_required(login_url="/employee/login/")
+def IVPOVendorContactPersonEdit(request,vpo_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+                vpo = VendorPO.objects.get(id=vpo_id)
+                ContactPerson = vpo.vendor_contact_person
+                context['ContactPerson'] = ContactPerson
+
+                if type == 'Sourcing':
+                        return render(request,"Sourcing/VPO/IndependentVPO/contact_person_edit.html",context)
+
+        if request.method == 'POST':
+                vpo = VendorPO.objects.get(id=vpo_id)
+                spData = vpo.vendor_contact_person
+                data = request.POST
+                spData.name = data['name']
+                spData.mobileNo1 = data['phone1']
+                spData.mobileNo2 = data['phone2']
+                spData.email1 = data['email1']
+                spData.email2 = data['email2']
+                spData.save()
+
+                return HttpResponseRedirect(reverse('indepen-vpo-add-order-info',args=[vpo_id]))
+
+#add other expences
+@login_required(login_url="/employee/login/")
+def IVPOAddOtherExpences(request,vpo_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+                return render(request,"Sourcing/VPO/IndependentVPO/add_other_expences.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+
+                vpo = VendorPO.objects.get(id=vpo_id)
+                total_basic_price = round((float(data['quantity']) * float(data['unit_price'])),2)
+                total_price = round((total_basic_price + (total_basic_price * float(data['gst']) / 100)),2)
+
+                v = VendorPOLineitems.objects.create(
+                        vpo = vpo,
+                        product_title = "added_by_buyer",
+                        description = data['description'],
+                        hsn_code = data['hsn_code'],
+                        gst = data['gst'],
+                        uom = data['uom'],
+                        quantity = data['quantity'],
+                        unit_price = data['unit_price'],
+                        actual_price = data['unit_price'],
+                        total_basic_price = total_basic_price,
+                        total_price = total_price,
+                        receivable_quantity = data['quantity']
+                )
+                print(v)
+                return HttpResponseRedirect(reverse('indepen-vpo-product-selection',args=[vpo_id]))
+
+#independent VPO Change Currency
+@login_required(login_url="/employee/login/")
+def IVPOChangeCurrency(request,vpo_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+                vpo = VendorPO.objects.get(id=vpo_id)
+                currency = CurrencyIndex.objects.all()
+                context['currency'] = currency
+                try:
+                        context['current_currency'] = vpo.currency
+                except:
+                        pass
+
+                if type == 'Sourcing':
+                        return render(request,"Sourcing/VPO/IndependentVPO/change_currency.html",context)
+
+        if request.method == 'POST':
+                data=request.POST
+                currency = data['currency']
+                cl = currency.split("/")
+                currency_index = CurrencyIndex.objects.get(currency = cl[0].strip())
+
+                vpo = VendorPO.objects.get(id=vpo_id)
+                vpo.currency = currency_index
+                vpo.inr_value = data['inr_value']
+                vpo.save()
+
+                return HttpResponseRedirect(reverse('indepen-vpo-product-selection',args=[vpo_id]))
+
+#Independent VPO Lineitem Edit
+@login_required(login_url="/employee/login/")
+def IVPOProductEdit(request,vpo_id=None,item_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+                vpo_lineitem = VendorPOLineitems.objects.get(id = item_id)
+                context['vpo_lineitem'] = vpo_lineitem
+
+                if type == 'Sourcing':
+                        return render(request,"Sourcing/VPO/IndependentVPO/vpo_lineitem_edit.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+                vpo_lineitem = VendorPOLineitems.objects.get(id = item_id)
+
+                current_quantity = data['quantity']
+                old_quantity = vpo_lineitem.quantity
+
+                if vpo_lineitem.product_title != 'added_by_buyer':
+                        vpo_lineitem.product_title = data['product_title']
+                vpo_lineitem.description = data['description']
+                vpo_lineitem.model = data['model']
+                vpo_lineitem.brand = data['brand']
+                vpo_lineitem.product_code = data['product_code']
+                vpo_lineitem.hsn_code = data['hsn_code']
+                vpo_lineitem.gst = data['gst']
+                vpo_lineitem.uom = data['uom']
+                vpo_lineitem.quantity = data['quantity']
+                vpo_lineitem.unit_price = data['unit_price']
+                vpo_lineitem.discount = data['discount']
+                vpo_lineitem.actual_price = round((float(data['unit_price']) - (float(data['unit_price']) * float(data['discount']) / 100)),2)
+                vpo_lineitem.total_basic_price = round((float(vpo_lineitem.actual_price) * float(vpo_lineitem.quantity)),2)
+                vpo_lineitem.total_price = round((float(vpo_lineitem.total_basic_price) + (float(vpo_lineitem.total_basic_price) * float(vpo_lineitem.gst) / 100)), 2)
+
+                vpo_lineitem.save()
+
+                try:
+                        vpo_lineitem.cpo_lineitem.pending_po_releasing_quantity = float(vpo_lineitem.cpo_lineitem.pending_po_releasing_quantity) - (float(current_quantity) - float(old_quantity))
+                        vpo_lineitem.cpo_lineitem.save()
+                except:
+                        pass
+
+                return HttpResponseRedirect(reverse('indepen-vpo-product-selection',args=[vpo_id]))
+
+#Independent VPO Lineitem Delete
+@login_required(login_url="/employee/login/")
+def IVPOProductdelete(request,vpo_id=None,item_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+                vpo_lineitem = VendorPOLineitems.objects.get(id = item_id)
+                context['vpo_lineitem'] = vpo_lineitem
+
+                if type == 'Sourcing':
+                        return render(request,"Sourcing/VPO/IndependentVPO/vpo_lineitem_delete.html",context)
+
+        if request.method == 'POST':
+                vpo_lineitem = VendorPOLineitems.objects.get(id = item_id)
+
+                try:
+                        vpo_lineitem.cpo_lineitem.pending_po_releasing_quantity = vpo_lineitem.cpo_lineitem.pending_po_releasing_quantity + vpo_lineitem.quantity
+                        vpo_lineitem.cpo_lineitem.save()
+                except:
+                        pass
+                vpo_lineitem.delete()
+
+                return HttpResponseRedirect(reverse('indepen-vpo-product-selection',args=[vpo_id]))
+
+
+#VPO Approval_request
+@login_required(login_url="/employee/login/")
+def IVPOApprovalRequest(request,vpo_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+
+                if type == 'Sourcing':
+                        context['vpo_id'] = vpo_id
+                        return render(request,"Sourcing/VPO/IndependentVPO/approval_request.html",context)
+
+
+#Independent VPO Mark as Regular
+@login_required(login_url="/employee/login/")
+def IVPOMarkRegular(request,vpo_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                #if 1<2:
+                try :
+
+                        vpo = VendorPO.objects.get(id=vpo_id)
+                        inr_index = vpo.inr_value
+                        vpo_lineitem = VendorPOLineitems.objects.filter(vpo=vpo)
+
+                        vpo_lineitem_count = VendorPOLineitems.objects.filter(vpo = vpo).count()
+
+                        if vpo_lineitem_count == 0:
+                                return JsonResponse({'Message': 'No Lineitem Found'})
+                        
+                        if vpo.offer_reference == '' or vpo.offer_reference == 'None': 
+                                return JsonResponse({'Message': 'Offer Reference Not Found'})
+
+                        if vpo.offer_date == '' or vpo.offer_date == None:
+                                return JsonResponse({'Message': 'Undefined Offer Date Found'})
+
+                        if vpo.delivery_date == '' or vpo.delivery_date == None:
+                                return JsonResponse({'Message': 'Delivery Date Not Found'})
+
+                        if vpo.billing_address == '' or vpo.billing_address == 'None' or vpo.billing_address == None:
+                                return JsonResponse({'Message': 'Billing Addresss Not Found'})
+
+                        if vpo.payment_term == 0 and vpo.advance_percentage == 0:
+                                return JsonResponse({'Message': 'Payment Terms and Advance Percentage are not Clear'})
+
+                        if vpo.inco_terms == '' or vpo.inco_terms == 'None' or vpo.inco_terms == None:
+                                return JsonResponse({'Message': 'Inco Terms Not Found'})
+
+                        if vpo.terms_of_payment == '' or vpo.terms_of_payment == None or vpo.terms_of_payment == 'None':
+                                return JsonResponse({'Message': 'Terms of Payment Not Found'})
+
+
+                        basic_value = 0
+                        total_value = 0
+                        for item in vpo_lineitem:
+                                if item.product_title == '' or item.product_title == 'None':
+                                        return JsonResponse({'Message': 'Undefined Product Title Found'})
+                                
+                                if item.description == '' or item.description == 'None':
+                                        return JsonResponse({'Message': 'Undefined Product Description Found'})
+
+                                if item.gst == '':
+                                        return JsonResponse({'Message': 'Undefined GST Found'})
+
+                                if item.uom == '':
+                                        return JsonResponse({'Message': 'Undefined UOM Found'})
+
+                                if item.quantity == '' or item.quantity == 0:
+                                        return JsonResponse({'Message': 'Undefined Quantity Found'})
+
+                                if item.unit_price == '':
+                                        return JsonResponse({'Message': 'Undefined Unit Price Found'})
+                        
+                                basic_value = round((basic_value + item.total_basic_price),2)
+                                total_value = round((total_value + item.total_price),2)
+                        
+                        all_total_value = total_value
+
+                        try:
+                                all_total_value = all_total_value + vpo.freight_charges
+                        except:
+                                pass
+
+                        try:
+                                all_total_value = all_total_value + vpo.custom_duties
+                        except:
+                                pass
+
+                        try:
+                                all_total_value = all_total_value + vpo.pf
+                        except:
+                                pass
+
+                        try:
+                                all_total_value = all_total_value + vpo.insurance
+                        except:
+                                pass
+
+                        print(vpo.po_status)        
+                        if vpo.po_status == 'Preparing': 
+                                vpo_count = VendorPOTracker.objects.count() + 1
+                                requester_name = VendorPO.objects.get(id=vpo_id).requester.first_name
+                                po_number = 'ASPL-' + requester_name[0] + '-' + get_financial_year(datetime.datetime.today().strftime('%Y-%m-%d')) + "{:04d}".format(vpo_count)
+                                print(po_number)
+                                VendorPOTracker.objects.create(
+                                        po_number = po_number,
+                                        vpo = vpo,
+                                        requester = u,
+                                        non_inr_value = basic_value,
+                                        basic_value = basic_value * inr_index,
+                                        total_value = total_value * inr_index,
+                                        all_total_value = all_total_value * inr_index)
+                                vpo.po_status = 'Requested'
+                                vpo.save()
+
+                                gstRemover(vpo_id)
+                                return JsonResponse({'Message': 'Success'})
+
+                        if vpo.po_status == 'Rejected':
+                                vpo_tracker = VendorPOTracker.objects.get(vpo = vpo)
+                                vpo_tracker.status = 'Requested'
+                                vpo_tracker.non_inr_value = basic_value
+                                vpo_tracker.basic_value = basic_value * inr_index
+                                vpo_tracker.total_value = total_value * inr_index
+                                vpo_tracker.all_total_value = all_total_value * inr_index
+                                vpo_tracker.save()
+                                
+                                vpo.po_status = 'Requested'
+                                vpo.vpo_type = 'Regular'
+                                vpo.save()
+
+                                gstRemover(vpo_id)
+                                return JsonResponse({'Message': 'Success'})
+
+                        
+
+                except:
+                        return JsonResponse({'Message': 'Error Occured'})
+
+
+#Independent VPO Mark as Direct Buying
+@login_required(login_url="/employee/login/")
+def IVPOMarkDirectBuying(request, vpo_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                #if 1<2:
+                try :
+                        vpo = VendorPO.objects.get(id=vpo_id)
+                        inr_index = vpo.inr_value
+                        vpo_lineitem = VendorPOLineitems.objects.filter(vpo=vpo)
+                        
+        
+                        vpo_lineitem_count = VendorPOLineitems.objects.filter(vpo = vpo).count()
+
+                        if vpo_lineitem_count == 0:
+                                return JsonResponse({'Message': 'No Lineitem Found'})
+                        
+                        if vpo.payment_term == 0 and vpo.advance_percentage == 0:
+                                return JsonResponse({'Message': 'Payment Terms and Advance Percentage are not Clear'})
+
+                        if vpo.inco_terms == '' or vpo.inco_terms == 'None' or vpo.inco_terms == None:
+                                return JsonResponse({'Message': 'Inco Terms Not Found'})
+
+                        if vpo.terms_of_payment == '' or vpo.terms_of_payment == None or vpo.terms_of_payment == 'None':
+                                return JsonResponse({'Message': 'Terms of Payment Not Found'})
+
+
+                        basic_value = 0
+                        total_value = 0
+                        for item in vpo_lineitem:
+                                if item.product_title == '' or item.product_title == 'None':
+                                        return JsonResponse({'Message': 'Undefined Product Title Found'})
+                                
+                                if item.description == '' or item.description == 'None':
+                                        return JsonResponse({'Message': 'Undefined Product Description Found'})
+
+                                if item.gst == '':
+                                        return JsonResponse({'Message': 'Undefined GST Found'})
+
+                                if item.uom == '':
+                                        return JsonResponse({'Message': 'Undefined UOM Found'})
+
+                                if item.quantity == '' or item.quantity == 0:
+                                        return JsonResponse({'Message': 'Undefined Quantity Found'})
+
+                                if item.unit_price == '':
+                                        return JsonResponse({'Message': 'Undefined Unit Price Found'})
+                        
+                                basic_value = round((basic_value + item.total_basic_price),2)
+                                total_value = round((total_value + item.total_price),2)
+                        
+                        all_total_value = total_value
+
+                        try:
+                                all_total_value = all_total_value + vpo.freight_charges
+                        except:
+                                pass
+
+                        try:
+                                all_total_value = all_total_value + vpo.custom_duties
+                        except:
+                                pass
+
+                        try:
+                                all_total_value = all_total_value + vpo.pf
+                        except:
+                                pass
+
+                        try:
+                                all_total_value = all_total_value + vpo.insurance
+                        except:
+                                pass
+
+                        print(vpo.po_status)        
+                        if vpo.po_status == 'Preparing': 
+                                vpo_count = VendorPOTracker.objects.count() + 1
+                                requester_name = VendorPO.objects.get(id=vpo_id).requester.first_name
+                                po_number = 'ASPL-' + requester_name[0] + '-' + get_financial_year(datetime.datetime.today().strftime('%Y-%m-%d')) + "{:04d}".format(vpo_count)
+                                print(po_number)
+                                VendorPOTracker.objects.create(
+                                        po_number = po_number,
+                                        vpo = vpo,
+                                        requester = u,
+                                        vpo_type = 'Direct Buying',
+                                        non_inr_value = basic_value,
+                                        basic_value = basic_value * inr_index,
+                                        total_value = total_value * inr_index,
+                                        all_total_value = all_total_value * inr_index)
+                                vpo.po_status = 'Requested'
+                                vpo.save()
+                                gstRemover(vpo_id)
+                                return JsonResponse({'Message': 'Success'})
+
+                        if vpo.po_status == 'Rejected':
+                                vpo_tracker = VendorPOTracker.objects.get(vpo = vpo)
+                                vpo_tracker.status = 'Requested'
+                                vpo_tracker.non_inr_value = basic_value
+                                vpo_tracker.basic_value = basic_value * inr_index
+                                vpo_tracker.total_value = total_value * inr_index
+                                vpo_tracker.all_total_value = all_total_value * inr_index
+                                vpo_tracker.save()
+                                
+                                vpo.po_status = 'Requested'
+                                vpo.vpo_type = 'Direct Buying'
+                                vpo.save()
+                                gstRemover(vpo_id)
+                                return JsonResponse({'Message': 'Success'})
+
+                except:
+                        return JsonResponse({'Message': 'Error Occured'})

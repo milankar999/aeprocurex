@@ -1,0 +1,47 @@
+{% extends '../../base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <a href="/api/po_to_vendor/vendor_po_prepare/independent_po_generation/vendor_selection/" type="button" class="btn btn-success pull-right">New Vendor Selection</a>
+        <h2>Independent Vendor PO - Creation in Progress List</h2>
+        
+            <div class="table-responsive">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th></th>
+                          <th>Vendor Name</th>
+                          <th>Location</th>
+                          <th>Contact Person</th>
+                          <th>Creation Date</th>
+                          <th>Current Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for item in ivpo_list %}
+                            <tr>
+                                <td>
+                                   <a href="/api/po_to_vendor/vendor_po_prepare/independent_po_generation/{{item.id}}/product_selection/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td>{{forloop.counter}}</td>
+                                <td>{{item.vendor__name}}</td>
+                                <td>{{item.vendor__location}}</td>
+                                <td>{{item.vendor_contact_person__name}}</td>
+                                <td>{{item.creation_time}}</td>
+                                <td>{{item.po_status}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Vendor PO Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable();
+            } );
+            </script>     
+{% endblock content %}

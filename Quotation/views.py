@@ -685,7 +685,36 @@ def generate_quotation_column_selection(request,rfp_no=None,quotation_no=None):
 
 
             #return FileResponse('static/doc/quotation/'+quotation_no+'.pdf', as_attachment=True, filename= quotation_no + '.pdf')
-            
+
+def currencyInIndiaFormat(n):
+        s = n
+        l = len(s)
+        i = l-1
+        res = ''
+        flag = 0
+        k = 0
+        while i>=0:
+                if flag==0:
+                        res = res + s[i]
+                        if s[i]=='.':
+                                flag = 1
+                elif flag==1:
+                        k = k + 1
+                        res = res + s[i]
+                        if k==3 and i-1>=0:
+                                res = res + ','
+                                flag = 2
+                                k = 0
+                else:
+                        k = k + 1
+                        res = res + s[i]
+                        if k==2 and i-1>=0:
+                                res = res + ','
+                                flag = 2
+                                k = 0
+                i = i - 1
+
+        return res[::-1]            
 
 def Add_Header(pdf):
     pdf.drawInlineImage("static/image/aeprocurex.jpg",360,750,220,70)
@@ -805,9 +834,11 @@ def add_lineitem(pdf,sl_no,product_title,description,model,brand,part_number,pro
     pdf.drawString(12,y-10,str(sl_no))
     pdf.drawString(230,y-10,'{0:.2f}'.format(quantity))
     pdf.drawString(283,y-10,uom.upper())
-    pdf.drawString(330,y-10,unit_price)
+
+    pdf.drawString(330,y-10,currencyInIndiaFormat(str(unit_price)))
+    
     total_basic_price = '{0:.2f}'.format(float(unit_price)*quantity)
-    pdf.drawString(420,y-10,total_basic_price)
+    pdf.drawString(420,y-10,currencyInIndiaFormat(total_basic_price))
     pdf.drawString(520,y-10,lead_time)
 
     #Product title
@@ -999,7 +1030,7 @@ def add_lineitem(pdf,sl_no,product_title,description,model,brand,part_number,pro
             if state == 'Karnataka':
                 pdf.drawString(330,y-10,'CGST  :    ' + '{0:.2f}'.format(gst/2) + ' %')
                 if gst_price == 'Yes':
-                    pdf.drawString(450,y-10, '{0:.2f}'.format(gst_value/2) + ' INR')
+                    pdf.drawString(450,y-10, currencyInIndiaFormat('{0:.2f}'.format(gst_value/2)) + ' INR')
                 y = y - 11
                 #Page Break
                 if y < 50:
@@ -1008,7 +1039,7 @@ def add_lineitem(pdf,sl_no,product_title,description,model,brand,part_number,pro
                     pdf.setFont('Helvetica', 8)
                 pdf.drawString(330,y-10,'SGST  :    ' + '{0:.2f}'.format(gst/2) + ' %')
                 if gst_price == 'Yes':
-                    pdf.drawString(450,y-10, '{0:.2f}'.format(gst_value/2) + ' INR')
+                    pdf.drawString(450,y-10, currencyInIndiaFormat('{0:.2f}'.format(gst_value/2)) + ' INR')
                 y = y - 11
                 #Page Break
                 if y < 50:
@@ -1018,7 +1049,7 @@ def add_lineitem(pdf,sl_no,product_title,description,model,brand,part_number,pro
             else:
                 pdf.drawString(330,y-10,'IGST  :    ' + '{0:.2f}'.format(gst) + ' %')
                 if gst_price == 'Yes':
-                    pdf.drawString(450,y-10, '{0:.2f}'.format(gst_value) + ' INR')
+                    pdf.drawString(450,y-10, currencyInIndiaFormat('{0:.2f}'.format(gst_value)) + ' INR')
                 y = y - 11
                 #Page Break
                 if y < 50:
@@ -1035,7 +1066,7 @@ def add_lineitem(pdf,sl_no,product_title,description,model,brand,part_number,pro
         pdf.setFont('Helvetica', 9)
         total_amount = float(total_basic_price) + float(gst_value)
         pdf.drawString(330,y-10,'Amount with Tax')
-        pdf.drawString(450,y-10,'{0:.2f}'.format(total_amount) + ' INR')
+        pdf.drawString(450,y-10,currencyInIndiaFormat('{0:.2f}'.format(total_amount)) + ' INR')
         y = y - 11
         #Page Break
         if y < 50:
@@ -1059,7 +1090,7 @@ def add_total_basic(pdf,amount,quotation_no,y):
         y = add_new_page(pdf,quotation_no)
     pdf.setFont('Helvetica', 9)
     pdf.drawString(330,y,'Total Basic Amount')
-    pdf.drawString(450,y,'{0:.2f}'.format(amount) + ' INR')
+    pdf.drawString(450,y,currencyInIndiaFormat('{0:.2f}'.format(amount)) + ' INR')
     y = y -15
     if y < 50:
         y = add_new_page(pdf,quotation_no)
@@ -1068,13 +1099,13 @@ def add_total_basic(pdf,amount,quotation_no,y):
 def add_total_with_gst(pdf,basic_amount,gst_amount,quotation_no,y):
     pdf.setFont('Helvetica', 8)
     pdf.drawString(330,y-12,'Total Basic Amount')
-    pdf.drawString(450,y-12,'{0:.2f}'.format(basic_amount) + ' INR')
+    pdf.drawString(450,y-12,currencyInIndiaFormat('{0:.2f}'.format(basic_amount)) + ' INR')
     y = y - 15
     if y < 50:
         y = add_new_page(pdf,quotation_no)
         pdf.setFont('Helvetica', 8)
     pdf.drawString(330,y-12,'Total Taxable Amount')
-    pdf.drawString(450,y-12,'{0:.2f}'.format(gst_amount) + ' INR')
+    pdf.drawString(450,y-12,currencyInIndiaFormat('{0:.2f}'.format(gst_amount)) + ' INR')
     y = y - 17
     if y < 50:
         y = add_new_page(pdf,quotation_no)
@@ -1082,7 +1113,7 @@ def add_total_with_gst(pdf,basic_amount,gst_amount,quotation_no,y):
     pdf.rect(330,y,250,0.1, stroke=1, fill=1)
     pdf.setFont('Helvetica-Bold', 8)
     pdf.drawString(330,y-12,'All Total')
-    pdf.drawString(450,y-12,'{0:.2f}'.format(basic_amount + gst_amount) + ' INR')
+    pdf.drawString(450,y-12,currencyInIndiaFormat('{0:.2f}'.format(basic_amount + gst_amount)) + ' INR')
     y =y -15
     if y < 50:
         y = add_new_page(pdf,quotation_no)

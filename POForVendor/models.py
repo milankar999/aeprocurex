@@ -14,7 +14,7 @@ class CurrencyIndex(models.Model):
 
 class VendorPO(models.Model):
         id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-        cpo = models.ForeignKey(CustomerPO,on_delete=models.CASCADE)
+        cpo = models.ForeignKey(CustomerPO,on_delete=models.CASCADE,null=True, blank=True)
         vendor = models.ForeignKey(SupplierProfile,on_delete=models.CASCADE)
         vendor_contact_person = models.ForeignKey(SupplierContactPerson,on_delete=models.CASCADE)
 
@@ -51,6 +51,7 @@ class VendorPO(models.Model):
         comments = models.TextField(null=True,blank=True)
 
         po_status = models.CharField(max_length = 50, default='Preparing')
+        creation_type = models.CharField(max_length = 50, null=True, blank=True)
 
         di1 = models.TextField(default = '1.Original Invoice & Delivery Challans Four (4) copies each must be submitted at the time of delivery of goods')
         di2 = models.TextField(default = '2.Entire Goods must be delivered in Single Lot if not specified otherwise. For any changes, must inform IMMEDIATELY.')
@@ -62,6 +63,8 @@ class VendorPO(models.Model):
         di8 = models.TextField(null=True,blank=True)
         di9 = models.TextField(null=True,blank=True)
         di10 = models.TextField(null=True,blank=True)
+
+        creation_time = models.DateTimeField(auto_now_add=True,null=True,blank=True)
 
         def __str__(self):
                 return self.vendor.name + ' - ' + self.vendor_contact_person.name 

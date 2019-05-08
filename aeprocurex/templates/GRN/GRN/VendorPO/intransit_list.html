@@ -3,7 +3,7 @@
 
 {% block content %}
     <div class="container">
-        <h2>Direct Processing Customer PO List</h2>
+        <h2>Intransit Vendor PO List</h2>
             <div class="table-responsive">          
                     <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
                       <thead>
@@ -22,11 +22,11 @@
                                <td>
                                    <a href="/grnir/supplier_po/{{vpo.po_number}}/lineitem/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
                                 </td>
-                                <td>{{vpo.vpo.vendor.name}}</td>
-                                <td>{{vpo.vpo.vendor.location}}</td>
+                                <td>{{vpo.vpo__vendor__name}}</td>
+                                <td>{{vpo.vpo__vendor__location}}</td>
                                 <td>{{vpo.po_number}}</td>
                                 <td>{{vpo.po_date}}</td>
-                                <td>{{vpo.vpo.requester.first_name}}&nbsp;{{vpo.vpo.requester.last_name}}</td>
+                                <td>{{vpo.vpo__requester__first_name}}&nbsp;{{vpo.vpo__requester__last_name}}</td>
                             </tr>
                           {% empty %}
                             <p>No CPO Found</p>

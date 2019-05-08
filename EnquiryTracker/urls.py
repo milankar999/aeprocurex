@@ -9,4 +9,9 @@ urlpatterns = [
     path('rfp/<rfp_no>/mark_duplicate/',rfp_mark_duplicate,name='rfp_mark_duplicate'),
     path('rfp/<rfp_no>/mark_closed/',rfp_mark_closed,name='rfp_mark_closed'),
     path('rfp/<rfp_no>/reassign/',rfp_reassign,name='rfp_reassign'),
+
+
+
+    #Pending Slider
+    path('pending_enquiry_slider/',pending_enquiry_slider,name='pending_enquiry_slider'),
 ]   

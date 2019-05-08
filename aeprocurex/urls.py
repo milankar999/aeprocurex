@@ -39,7 +39,7 @@ urlpatterns = [
     path('invoice/',include('Invoice.urls')),
     path('grnir/',include('GRNIR.urls')),
 
-    path('api/po_8_vendor/',include('POToVendor.urls')),
+    #path('api/po_8_vendor/',include('POToVendor.urls')),
     path('api/po_to_vendor/',include('POForVendor.urls')),
 
 

@@ -1,0 +1,108 @@
+{% extends 'Sourcing/base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="container">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+            
+            <div class="card border-primary rounded-0">
+                <div class="card-header p-0">
+                    <div class="bg-info text-white text-center py-2">
+                        <h3>Complete This PO</h3>
+                    </div>
+                </div>
+                <div class="card-body p-3">
+
+                    <div class="text-center">
+                        <button type="button" class="btn btn-info btn-block rounded-0 py-2" id="btnRegular" onclick="MarkRegularPO()"> Mark As Ready For Releasing PO</button>
+                        <button type="button" class="btn btn-info btn-block rounded-0 py-2" id="btnDirect" onclick="MarkDirectBuyPO()"> Mark as Direct Buy from Market</button>
+                    </div>
+                
+                </div><br> 
+            </div>
+        </div>
+</div>
+<script type="text/javascript">
+    function redirect1(){
+        window.location.href = "/api/po_to_vendor/vendor_po_prepare/independent_po_generation/{{vpo_id}}/product_selection/";
+     }
+     function redirect2(){
+        window.location.href = "/api/po_to_vendor/vendor_po_prepare/pending_list/";
+     }
+    function MarkRegularPO(checkboxName,vpo_id) {
+        $('body').append('<div id="requestOverlay" class="request-overlay"></div>'); /*Create overlay on demand*/
+        
+        $("#requestOverlay").show();
+         data = {
+             'csrfmiddlewaretoken': '{{ csrf_token }}'
+             }
+             $.ajax({
+               type: "POST",
+               url: "/api/po_to_vendor/vendor_po_prepare/independent_po_generation/{{vpo_id}}/mark_as_regular/",
+               data: data,
+               success: function(data) {
+                  window.alert(data.Message);
+                  //window.alert(data.status);
+                  if(data.Message == 'Success')
+                    redirect2();
+                  else
+                    redirect1();
+               },
+               failure: function(){
+                 window.alert('Some Error Occurred, Please Try Again');
+                 document.getElementById("btnAbsorve").disabled = false;
+               }
+           }
+         );
+       }
+
+       function MarkDirectBuyPO(checkboxName,vpo_id) {
+        $('body').append('<div id="requestOverlay" class="request-overlay"></div>'); /*Create overlay on demand*/
+        
+        $("#requestOverlay").show();
+         data = {
+             'csrfmiddlewaretoken': '{{ csrf_token }}'
+             }
+             $.ajax({
+               type: "POST",
+               url: "/api/po_to_vendor/vendor_po_prepare/independent_po_generation/{{vpo_id}}/mark_direct_buying/",
+               data: data,
+               success: function(data) {
+                 window.alert(data.Message);
+                 //window.alert(data.status);
+                 if(data.Message == 'Success')
+                    redirect2();
+                  else
+                    redirect1();
+               },
+               failure: function(){
+                 window.alert('Some Error Occurred, Please Try Again');
+                 document.getElementById("btnAbsorve").disabled = false;
+               }
+           }
+         );
+       }
+     
+</script> 
+<style>
+    .request-overlay {
+      z-index: 9999;
+      position: fixed; /*Important to cover the screen in case of scolling content*/
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      text-align: center;
+      background: rgba(200,200,200,0.5) url('/api/media/media/ldm.gif') no-repeat center; /*.gif file or just div with message etc. however you like*/
+  }
+</style>
+{% endblock content %}

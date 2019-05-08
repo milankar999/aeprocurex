@@ -20,6 +20,7 @@ from django.db.models import Q
 from django.core.mail import send_mail, EmailMessage
 from django.core import mail
 from django.conf import settings
+from django.db.models import Count
 
 
 @login_required(login_url="/employee/login/")
@@ -332,3 +333,54 @@ def rfp_reassign(request,rfp_no=None):
             pass
 
         return HttpResponseRedirect(reverse('pending_enquiry_list'))
+
+#Pending Enquiry Slider
+@login_required(login_url="/employee/login/")
+def pending_enquiry_slider(request):
+    context={}
+    context['enquiry_tracker'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+    if request.method == "GET":
+        enquiry = RFP.objects.filter(Q(enquiry_status='Approved') | Q(enquiry_status='Sourcing_Completed') | Q(enquiry_status='COQ Done')).values(
+            'rfp_no',
+            'rfp_creation_details__creation_date',
+            'customer__name',
+            'customer__location',
+            'customer_contact_person__name',
+            'rfp_type',
+            'rfp_creation_details__created_by__username',
+            'rfp_assign1__assign_to1__username',
+            'opportunity_status',
+            'enquiry_status',
+            'current_sourcing_status').order_by('-rfp_creation_details__creation_date')
+
+        enquiry_counter = RFP.objects.filter(Q(enquiry_status='Approved') | Q(enquiry_status='Sourcing_Completed') | Q(enquiry_status='COQ Done')).values(
+            'rfp_assign1__assign_to1__first_name',
+            'rfp_assign1__assign_to1__last_name',
+            'rfp_assign1__assign_to1__username').annotate(count=Count('rfp_assign1__assign_to1__username'))
+        
+        pending_enquiry = RFP.objects.filter(Q(enquiry_status='Approved') | Q(enquiry_status='Sourcing_Completed') | Q(enquiry_status='COQ Done')).values(
+            'rfp_assign1__assign_to1__username',
+            'rfp_no',
+            'rfp_creation_details__creation_date'       
+        )
+        pending_lineitem = RFPLineitem.objects.filter(Q(rfp_no__enquiry_status='Approved') | Q(rfp_no__enquiry_status='Sourcing_Completed') | Q(rfp_no__enquiry_status='COQ Done')).values(
+            'rfp_no__rfp_no',
+            'product_title',
+            'rfp_no__rfp_assign1__assign_to1__username'
+        )
+
+        time = RFP.objects.filter(Q(enquiry_status='Approved') | Q(enquiry_status='Sourcing_Completed') | Q(enquiry_status='COQ Done')).count()
+        total_time = (time * 4000) + 4000
+
+        context['total_time'] = total_time
+        context['enquiry_list'] = enquiry
+        context['enquiry_counter'] = enquiry_counter
+        context['pending_enquiry'] = pending_enquiry
+        context['pending_lineitem'] = pending_lineitem
+
+        if type == 'Sales':
+            return render(request,"Sales/EnquiryTracker/pending_enquiry_slider.html",context)

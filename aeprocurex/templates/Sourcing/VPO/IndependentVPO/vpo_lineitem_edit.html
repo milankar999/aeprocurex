@@ -1,0 +1,73 @@
+{% extends 'Sourcing/base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="container">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+    
+    
+                        <!--Form with header-->
+    
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="card border-primary rounded-0">
+                                <div class="card-header p-0">
+                                    <div class="bg-info text-white text-center py-2">
+                                        <h3>Edit Vendor PO Lineitem</h3>
+                                    </div>
+                                </div>
+                                <div class="card-body p-3">
+    
+                           <label class="form-input" for="product_title">Product Title <a style="color: red">*</a></label>
+                           <input type="text" class="form-control" id="product_title" name="product_title" required value="{{vpo_lineitem.product_title}}">
+
+                           <label class="form-input" for="description">Product Description <a style="color: red">*</a></label>
+                           <textarea type="text" class="form-control" id="description" name="description" required>{{vpo_lineitem.description}}</textarea>
+   
+                           <label class="form-input" for="model">Model </label>
+                           <input type="text" class="form-control" id="model" name="model" value="{{vpo_lineitem.model}}">
+   
+                           <label class="form-input" for="brand">Brand</label>
+                           <input type="text" class="form-control" id="brand" name="brand" value="{{vpo_lineitem.brand}}">
+
+                           <label class="form-input" for="product_code">Product Code (Manufacturer Part No)</label>
+                           <input type="text" class="form-control" id="product_code" name="product_code" value="{{vpo_lineitem.product_code}}">
+   
+                           <label class="form-input" for="hsn_code">HSN Code</label>
+                           <input type="text" class="form-control" id="hsn_code" name="hsn_code" value="{{vpo_lineitem.hsn_code}}">
+
+                           <label class="form-input" for="gst">GST %</label>
+                           <input type="number" class="form-control" id="gst" step="0.01" name="gst" value={{vpo_lineitem.gst}}>
+
+                           <label class="form-input" for="uom">UOM <a style="color: red">*</a></label>
+                           <input type="text" class="form-control" id="uom" name="uom" required value={{vpo_lineitem.uom}}>
+
+                           <label class="form-input" for="quantity">Quantity <a style="color: red">*</a></label>
+                           <input type="number" class="form-control" step="0.01" id="quantity" name="quantity" required value={{vpo_lineitem.quantity}}>
+
+                           <label class="form-input" for="unit_price">Unit Price<a style="color: red">*</a> </label>
+                           <input type="number" class="form-control" id="unit_price" step="0.01" name="unit_price" required value={{vpo_lineitem.unit_price}}>  <br>                                 
+    
+                           <label class="form-input" for="unit_price">Discount %<a style="color: red">*</a> </label>
+                           <input type="number" class="form-control" id="discount" step="0.01" name="discount" required value={{vpo_lineitem.discount}}>  <br>                                 
+    
+                                    <div class="text-center">
+                                        <input type="submit" value="Save Changes" class="btn btn-info btn-block rounded-0 py-2">
+                                    </div>
+                                </div><br>
+    
+                            </div>
+                        </form>
+                        <!--Form with header-->
+        </div>
+</div>
+
+{% endblock content %}
