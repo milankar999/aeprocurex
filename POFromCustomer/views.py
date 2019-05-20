@@ -1201,7 +1201,17 @@ def cpo_approval_list(request):
         context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if request.method == 'GET':
-                cpo_list = CustomerPO.objects.filter(status='Created')
+                cpo_list = CustomerPO.objects.filter(status='Created').values(
+                        'id',
+                        'customer__name',
+                        'customer__location',
+                        'customer_po_no',
+                        'customer_po_date',
+                        'customer_contact_person__name',
+                        'cpo_creation_detail__creation_date',
+                        'total_basic_value',
+                        'total_value'
+                )
                 context['cpo_list'] = cpo_list
 
                 if type == 'Sales':
@@ -1290,6 +1300,12 @@ def mark_direct_processing(request,cpo_id=None):
                 cpo.status = 'direct_processing'
                 cpo.cpo_assign_detail = assign
                 cpo.save()
+
+                cpo_lineitem = CPOLineitem.objects.filter(cpo = cpo)
+                for item in cpo_lineitem:
+                        item.direct_receivable_quantity = item.quantity
+                        item.save()
+
                 return HttpResponseRedirect(reverse('cpo-approval-list'))
 
 #Vendor Product Segmentation

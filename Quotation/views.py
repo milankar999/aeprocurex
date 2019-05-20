@@ -1104,7 +1104,7 @@ def add_total_with_gst(pdf,basic_amount,gst_amount,quotation_no,y):
     if y < 50:
         y = add_new_page(pdf,quotation_no)
         pdf.setFont('Helvetica', 8)
-    pdf.drawString(330,y-12,'Total Taxable Amount')
+    pdf.drawString(330,y-12,'Total Tax')
     pdf.drawString(450,y-12,currencyInIndiaFormat('{0:.2f}'.format(gst_amount)) + ' INR')
     y = y - 17
     if y < 50:

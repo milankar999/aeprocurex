@@ -8,6 +8,7 @@
             <strong>{{message}}</strong>
         </div>
         {% endif %}
+        <label>Received Product From :: {{vendor}} // Location :: {{location}}</label>
         <h2>Selected Lineitem For GRN No : {{grn_no}}</h2>        
        <div class="table-responsive">          
                <table id="product" class="table table-hover table-bordered table-sm" width="100%">
@@ -25,11 +26,6 @@
                      <th>HSN Code</th>
                      <th>UOM</th>
                      <th>Quantity</th>
-                     <th>Unit Price</th>
-                     <th>Total Basic Value</th>
-                     <th>GST (%)</th>
-                     <th>Including GST Value</th>
-                     <th>Receivable Quantity</th>
                    </tr>
                  </thead>
                  <tbody>
@@ -37,9 +33,9 @@
                      {% for item in grn_lineitem %}
                        <tr>
                            <td>
-                            <a href="/grnir/supplier_po/<grn_no>/{{item.id}}/edit/"><span class="glyphicon glyphicon-edit" style="color: blue"></span></a>
+                            <a href="/grnir/supplier_po/{{grn_no}}/{{item.id}}/chnage_quantity/"><span class="glyphicon glyphicon-edit" style="color: blue"></span></a>
                             &nbsp;&nbsp;
-                            <a><span class="glyphicon glyphicon-trash" style="color: red"></span></a>  
+                            <a href="/grnir/supplier_po/{{grn_no}}/{{item.id}}/remove/"><span class="glyphicon glyphicon-trash" style="color: red"></span></a>  
                            </td>
                            <td>{{forloop.counter}}</td>
                            <td>{{item.product_title}}</td>
@@ -52,11 +48,6 @@
                            <td>{{item.hsn_code}}</td>
                            <td>{{item.uom}}</td>
                            <td>{{item.quantity}}</td>
-                           <td>{{item.unit_price}}</td>
-                           <td>{{item.total_basic_price}}</td>
-                           <td>{{item.gst}}</td>
-                           <td>{{item.total_price}}</td>
-                           <td>{{item.receivable_quantity}}</td>
                        </tr>
                      {% empty %}
                        <p>No Lineitem Found</p>
@@ -65,39 +56,41 @@
                </table>
        </div><br>
        <div class="container">
-          <button class="btn btn-success pull-right" id='preceed' type="button" onclick="getCheckedCheckboxesFor('vpo_lineitem');" value="Get Values">Go with Selected Items</button>
+          <button class="btn btn-danger pull-left" id='delete_grn' type="button" data-toggle="modal" data-target="#DeleteModal">Delete This GRN</button>
+          <a href="/grnir/supplier_po/{{grn_no}}/grn_process_further/" class="btn btn-success pull-right">Proceed Further</a>
        </div>
+
+
+<!--Delete Modal-->
+<!-- Modal -->
+<div class="modal fade" id="DeleteModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Warning  <span class="glyphicon glyphicon-fire"></span></h4>
+        </div>
+        <div class="modal-body">
+          <p>Do you really want to delete this GRN ?</p>
+        </div>
+        <div class="modal-footer">
+          <form method="POST" action="/grnir/supplier_po/{{grn_no}}/delete/">
+            {% csrf_token %}
+            <input type="button" class="btn btn-success" data-dismiss="modal" value="Cancel">
+                <input type="submit" class="btn btn-danger" value="Confirm">
+          </form>
+        </div>
+      </div>
+      
+    </div>
+</div>
+<!--End of delete Modal-->
+
+
+
+
+
 </div>   
-<script type="text/javascript">
-  function getCheckedCheckboxesFor(checkboxName) {
-       var checkboxes = document.querySelectorAll('input[name="' + checkboxName + '"]:checked'), values = [];
-       Array.prototype.forEach.call(checkboxes, function(el) {
-         values = values + ',' + el.value;
-     });
-     if(values.length==0){
-       alert('Minimum one item you have To Select');
-     }
-     else{
-       document.getElementById("preceed").disabled = true;
-         data = {
-           'item_list' : values,
-           'csrfmiddlewaretoken': '{{ csrf_token }}'
-           }
-           $.ajax({
-             type: "POST",
-             url: "",
-             data: data,
-             success: function(data) {
-               console.log(data.invoice_no);
-               window.location.href ="/invoice/new_creation/" + data.invoice_no + "/selected_items/";
-             },
-             failure: function(){
-               window.alert('Some Error Occurred, Please Try Again');
-               document.getElementById("preceed").disabled = false;
-             }
-         }
-       );
-     }
-   }
-</script>
 {% endblock content %}

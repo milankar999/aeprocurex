@@ -1,11 +1,13 @@
 from django.db import models
 from POForVendor.models import *
 from Supplier.models import *
+from POFromCustomer.models import *
 import uuid
 
 class GRNTracker(models.Model):
         grn_no = models.CharField(max_length=50,primary_key=True)
         vpo = models.ForeignKey(VendorPOTracker,null=True,blank=True,on_delete=models.CASCADE)
+        cpo = models.ForeignKey(CustomerPO,null=True,blank=True,on_delete=models.CASCADE)
         vendor = models.ForeignKey(SupplierProfile,on_delete=models.CASCADE)
 
         date = models.DateTimeField(auto_now_add=True)
@@ -14,6 +16,7 @@ class GRNTracker(models.Model):
         financial_year = models.CharField(max_length=50,null=True,blank=True)
 
         status = models.CharField(max_length=50,null=True,blank=True,default = 'creation_in_progress')
+        ir_status = models.CharField(max_length=50,null=True,blank=True,default = 'incomplete')
 
         def __str__(self):
                 return self.vendor.name + ' ' + str(self.date)
@@ -23,6 +26,7 @@ class GRNLineitem(models.Model):
         grn = models.ForeignKey(GRNTracker,on_delete=models.CASCADE)
 
         vpo_lineitem = models.ForeignKey(VendorPOLineitems,null=True,blank=True,on_delete=models.CASCADE)
+        cpo_lineitem = models.ForeignKey(CPOLineitem,null=True,blank=True,on_delete=models.CASCADE)
 
         product_title = models.CharField(max_length=200,null = False, blank = False)
         description = models.TextField(null=False, blank=False)
@@ -44,5 +48,16 @@ class GRNLineitem(models.Model):
         def __str__(self):
                 return self.grn.grn_no + self.product_title
         
+class GRNAttachment(models.Model):
+        id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-        
+        grn = models.ForeignKey(GRNTracker,on_delete=models.CASCADE)
+
+        description = models.CharField(max_length=100, null = True, blank = True)
+        document_no = models.CharField(max_length=100, null = True, blank = True)
+        document_date = models.DateField()
+
+        attachment = models.FileField(upload_to='grn_document/')
+
+        def __str__(self):
+                return self.document_no + str(self.document_date)
