@@ -1,0 +1,75 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="container">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+    
+    
+                        <!--Form with header-->
+    
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="card border-primary rounded-0">
+                                <div class="card-header p-0">
+                                    <div class="bg-info text-white text-center py-2">
+                                        <h3>Edit the Received Item Description and Quantity</h3>
+                                    </div>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="row">
+                                        <div class="col-sm-3"></div>
+                                        <div class="col-sm-6">
+                                                <label class="form-input" for="product_title">Product Title <a style="color: red">*</a></label>
+                                                <input type="text" class="form-control" id="product_title" name="product_title" value="{{grn_lineitem.product_title}}" required>
+                        
+                                                <label class="form-input" for="description">Product Description <a style="color: red">*</a></label>
+                                                <textarea type="text" class="form-control" id="description" name="description" required>{{grn_lineitem.description}}</textarea>
+                        
+                                                <label class="form-input" for="model">Model </label>
+                                                <input type="text" class="form-control" id="model" name="model" value="{{grn_lineitem.model}}">
+                        
+                                                <label class="form-input" for="brand">Brand</label>
+                                                <input type="text" class="form-control" id="brand" name="brand" value="{{grn_lineitem.brand}}">
+                        
+                                                <label class="form-input" for="product_code">Product Code (Manufacturer Part No)</label>
+                                                <input type="text" class="form-control" id="product_code" name="product_code" value="{{grn_lineitem.product_code}}">
+                        
+                                                <label class="form-input" for="pack_size">Pack Size</label>
+                                                <input type="text" class="form-control" id="pack_size" name="pack_size" value="{{grn_lineitem.pack_size}}">
+                        
+                                                <label class="form-input" for="quantity">Quantity <a style="color: red">*</a></label>
+                                                <input type="number" class="form-control" step="0.01" id="quantity" name="quantity" required value="{{grn_lineitem.quantity}}">
+                        
+                                                <label class="form-input" for="uom">UOM <a style="color: red">*</a></label>
+                                                <input type="text" class="form-control" id="uom" name="uom" required value="{{grn_lineitem.uom}}">
+                        
+                                                <label class="form-input" for="unit_price">Unit Price </label>
+                                                <input type="number" class="form-control" id="unit_price" step="0.01" name="unit_price" value="{{grn_lineitem.unit_price}}">
+                        
+                                                <label class="form-input" for="hsn_code">HSN Code</label>
+                                                <input type="text" class="form-control" id="hsn_code" name="hsn_code" value="{{grn_lineitem.hsn_code}}">
+                        
+                                                <label class="form-input" for="gst">GST %</label>
+                                                <input type="number" class="form-control" step="0.01" id="gst" name="gst" value="{{grn_lineitem.gst}}"> 
+                                            <br>
+                                            <input type="submit" value="Save Changes" class="btn btn-info pull-right">
+                                        </div>
+                                    </div>
+                                </div><br>
+    
+                            </div>
+                        </form>
+                        <!--Form with header-->
+        </div>
+</div>
+
+{% endblock content %}

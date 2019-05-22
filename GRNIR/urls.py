@@ -23,4 +23,16 @@ urlpatterns = [
     path('direct_processing_customer_po/<cpo_no>/lineitem/',DirectProcessingCustomerPOLineitems,name='direct-processing-customer-po-lineitem'),
     path('direct_processing_customer_po/<cpo_no>/vendor_selection/',DirectProcessingCustomerPOVendorSelection,name='direct-processing-customer-po-vendor-selection'),
     path('direct_processing_customer_po/<cpo_no>/vendor/<vendor_id>/product_selection/',DirectProcessingCustomerPOProductSelection,name='direct-processing-customer-po-product-selection'),
+
+    #Direct GRN
+    path('direct_grn/vendor_selection/',DirectGRNVendorSelection,name='direct-grn-vendor-selection'),
+    path('direct_grn/<grn_no>/product_entry/',DirectGRNProductEntry,name='direct-grn-product-entry'),
+    path('direct_grn/<grn_no>/product_entry/<lineitem_id>/edit/',DirectGRNProductEdit,name='direct-grn-product-edit'),
+    path('direct_grn/<grn_no>/product_entry/<lineitem_id>/delete/',DirectGRNProductDelete,name='direct-grn-product-delete'),
+
+
+
+    ##--------------------Invoice Received-------------------------------
+    path('invoice_received/pending_list/',IRPendingList,name='invoice-received-pending-list'),
+    path('invoice_received/<grn_no>/details/',IRPendingGRNLineitem,name='invoice-received-pending-grn-lineitem'),
 ]   

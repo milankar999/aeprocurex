@@ -92,7 +92,7 @@ def SelectGRNLineitem(request,vpo_no=None):
                         grnt = GRNTracker.objects.filter(vpo = vpo, status = 'creation_in_progress')[0]
                         return HttpResponseRedirect(reverse('grn-selected-lineitem',args=[grnt.grn_no]))
 
-                vpo_lineitem = VendorPOLineitems.objects.filter(vpo = vpo.vpo, receivable_quantity__gte = 0)
+                vpo_lineitem = VendorPOLineitems.objects.filter(vpo = vpo.vpo, receivable_quantity__gt = 0)
                 context['vpo_lineitem'] = vpo_lineitem
                 context['vpo_no'] = vpo_no
 
@@ -331,14 +331,20 @@ def CompleteGRN(request,grn_no=None):
                 if lineitem_count == 0:
                         return JsonResponse({"Message" : "No Lineitem Found"})
 
+
                 try:
                         for item in grn_lineitem:
                                 item.vpo_lineitem.receivable_quantity = item.vpo_lineitem.receivable_quantity - item.quantity
                                 item.vpo_lineitem.save()
+                                
                 except:
-                        for item in grn_lineitem:
-                                item.cpo_lineitem.direct_receivable_quantity = item.cpo_lineitem.direct_receivable_quantity - item.quantity
-                                item.cpo_lineitem.save()
+                        try:
+                                for item in grn_lineitem:
+                                        item.cpo_lineitem.direct_receivable_quantity = item.cpo_lineitem.direct_receivable_quantity - item.quantity
+                                        item.cpo_lineitem.save()
+                        except:
+                                pass
+
 
                 grn.status = 'completed'
                 grn.save()
@@ -346,7 +352,10 @@ def CompleteGRN(request,grn_no=None):
                 try:
                         vpo_status_changer(grn.vpo.po_number)
                 except:
-                        cpo_status_changer(grn.cpo.id)
+                        try:
+                                cpo_status_changer(grn.cpo.id)
+                        except:
+                                pass
 
                 return JsonResponse({'Message': 'Success'})
 
@@ -489,3 +498,248 @@ def DirectProcessingCustomerPOProductSelection(request, cpo_no=None, vendor_id=N
                                 )
                 
                 return JsonResponse({"grn_no" : grn_no})
+
+
+##-----------------------------------------------------Direct GRN------------------------------------------------
+
+#Direct GRN Vendor Selection
+@login_required(login_url="/employee/login/")
+def DirectGRNVendorSelection(request):
+        context={}
+        context['grn'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                vendor_list = SupplierProfile.objects.all()
+                context['vendor_list'] = vendor_list
+
+                if type == 'GRN':
+                        return render(request,"GRN/GRN/DirectGRN/vendor_selection.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+                vendor_id = data['vendor_id']
+                print(vendor_id)
+
+                vendor = SupplierProfile.objects.get(id = vendor_id)
+
+                financial_year = get_financial_year(datetime.datetime.today().strftime('%Y-%m-%d'))
+                grn_count = (GRNTracker.objects.filter(financial_year = financial_year).count()) + 1
+                grn_no = 'AG' +  financial_year + "{:04d}".format(grn_count)
+
+                GRNTracker.objects.create(
+                        grn_no = grn_no,
+                        vendor = vendor,
+                        grn_by = u,
+                        financial_year = financial_year
+                )
+                return JsonResponse({'Message' : 'Success','grn_no' : grn_no})
+
+
+#Deirect GRN Product Selection
+@login_required(login_url="/employee/login/")
+def DirectGRNProductEntry(request, grn_no=None):
+        context={}
+        context['grn'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                grn = GRNTracker.objects.get(grn_no = grn_no)
+                grn_lineitem = GRNLineitem.objects.filter(grn = grn)
+
+                context['grn_lineitem'] = grn_lineitem
+                context['vendor_name'] = grn.vendor.name
+                context['vendor_location'] = grn.vendor.location
+                context['grn_no'] = grn_no
+
+                if type == 'GRN':
+                        return render(request,"GRN/GRN/DirectGRN/grn_lineitem.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+
+                grn = GRNTracker.objects.get(grn_no=grn_no)
+
+                total_basic_price = 0
+                try:
+                        total_basic_price = round((float(data['unit_price']) * float(data['quantity'])),2)
+                except:
+                        pass
+                
+                total_price = 0
+                try:
+                        total_price = round((total_basic_price + round((total_basic_price * float(data['gst']) / 100),2)), 2)
+                except:
+                        pass
+
+
+                g = GRNLineitem.objects.create(
+                        grn = grn,
+                        product_title = data['product_title'],
+                        description = data['description'],
+                        model = data['model'],
+                        brand = data['brand'],
+                        product_code = data['product_code'],
+                        hsn_code = data['hsn_code'],
+                        pack_size = data['pack_size'],
+                        uom = data['uom'],
+                        quantity = data['quantity'],
+                        unit_price = data['unit_price'],
+                        gst = data['gst'],
+                        total_basic_price = total_basic_price,
+                        total_price = total_price
+                )
+
+                print(g.grn.grn_no)
+                return HttpResponseRedirect(reverse('direct-grn-product-entry',args=[grn_no]))
+
+
+#Deirect GRN Product edit
+@login_required(login_url="/employee/login/")
+def DirectGRNProductEdit(request, grn_no=None, lineitem_id=None):
+        context={}
+        context['grn'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                grn_lineitem = GRNLineitem.objects.get(id=lineitem_id)
+
+                context['grn_lineitem'] = grn_lineitem
+
+                if type == 'GRN':
+                        return render(request,"GRN/GRN/DirectGRN/grn_lineitem_edit.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+                grn_lineitem = GRNLineitem.objects.get(id=lineitem_id)
+
+                print(grn_lineitem.product_title)
+                grn_lineitem.product_title = data['product_title']
+                grn_lineitem.description = data['description']
+                grn_lineitem.model = data['model']
+                grn_lineitem.brand = data['brand']
+                grn_lineitem.product_code = data['product_code']
+                grn_lineitem.pack_size = data['pack_size']
+                grn_lineitem.uom = data['uom']
+                grn_lineitem.quantity = data['quantity']
+                grn_lineitem.unit_price = data['unit_price']
+                grn_lineitem.gst = data['gst']
+
+                total_basic_price = 0
+                try:
+                        total_basic_price = round((float(data['unit_price']) * float(data['quantity'])),2)
+                except:
+                        pass
+                
+                total_price = 0
+                try:
+                        total_price = round((total_basic_price + round((total_basic_price * float(data['gst']) / 100),2)), 2)
+                except:
+                        pass
+
+                grn_lineitem.total_basic_price = total_basic_price
+                grn_lineitem.total_price = total_price
+
+                grn_lineitem.save()
+                return HttpResponseRedirect(reverse('direct-grn-product-entry',args=[grn_no]))
+
+#Deirect GRN Product delete
+@login_required(login_url="/employee/login/")
+def DirectGRNProductDelete(request, grn_no=None, lineitem_id=None):
+        context={}
+        context['grn'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                grn_lineitem = GRNLineitem.objects.get(id=lineitem_id)
+
+                context['grn_lineitem'] = grn_lineitem
+
+                if type == 'GRN':
+                        return render(request,"GRN/GRN/DirectGRN/grn_lineitem_delete.html",context)
+
+        if request.method == 'POST':
+                grn_lineitem = GRNLineitem.objects.get(id=lineitem_id)
+                grn_lineitem.delete()
+
+                return HttpResponseRedirect(reverse('direct-grn-product-entry',args=[grn_no]))
+
+
+
+
+
+##----------------------------------------------------------------------Invoice Receive---------------------------------------------------------------------------------------------
+
+#Pending List
+@login_required(login_url="/employee/login/")
+def IRPendingList(request):
+        context={}
+        context['ir'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                grn_list = GRNTracker.objects.filter(status = 'completed').values(
+                        'grn_no',
+                        'vendor__name',
+                        'vendor__location',
+                        'date'
+                )
+                context['grn_list'] = grn_list
+
+                if type == 'GRN':
+                        return render(request,"GRN/IR/pending_list.html",context)
+
+
+#Pending Lineitem
+@login_required(login_url="/employee/login/")
+def IRPendingGRNLineitem(request, grn_no=None):
+        context={}
+        context['ir'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                grn = GRNTracker.objects.get(grn_no = grn_no)
+                grn_lineitem = GRNLineitem.objects.filter(grn = grn).values(
+                        'id',
+                        'product_title',
+                        'description',
+                        'model',
+                        'brand',
+                        'product_code',
+                        'hsn_code',
+                        'uom',
+                        'quantity',
+                        'unit_price',
+                        'total_basic_price',
+                        'gst',
+                        'total_price'
+                )
+
+                total_basic_value = 0
+                total_value = 0
+
+                for item in grn_lineitem:
+                        total_basic_value = total_basic_value + item['total_basic_price']
+                        total_value = total_value + item['total_price']
+
+                context['total_basic_value'] = total_basic_value
+                context['total_value'] = total_value
+                context['vendor_name'] = grn.vendor.name
+                context['vendor_location'] = grn.vendor.location
+                context['grn_no'] = grn_no
+                context['grn_date'] = grn.date
+
+                if type == 'GRN':
+                        return render(request,"GRN/IR/pending_grn_lineitems.html",context)
