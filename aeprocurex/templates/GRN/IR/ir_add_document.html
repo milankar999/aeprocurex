@@ -1,0 +1,186 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="container">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+    
+    
+                        <!--Form with header-->
+    
+                        
+                        
+                            <div class="card border-primary rounded-0">
+                                <div class="card-header p-0">
+                                    <div class="bg-info text-white text-center py-2">
+                                        <h3>Please Press The Add Button to Attach Corrosponding Document</h3>
+                                    </div>
+                                </div>
+                                
+                                <button class="btn btn-info" data-toggle="modal" data-target="#ADDDocument">ADD New Document &nbsp;<span class="glyphicon glyphicon-plus"></span></button>
+                                <hr>
+                                {% for item in ir_attachment %}
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label>{{item.document_no}}</label>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label>{{item.document_date}}</label>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>{{item.description}}</label>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label>Attachment : &nbsp;</label><a href="/api/media/{{item.attachment}}" target="-blank">Click Here</a>
+                                    </div>
+                                </div>
+                                <hr>
+                                {% endfor %}
+
+                                <button class="btn btn-success pull-right" data-toggle="modal" data-target="#CompleteGRN">Complete Invoice Receive &nbsp;<span class="glyphicon glyphicon-forward"></span></button>
+                                
+    
+                            </div>
+                        <!--Form with header-->
+        </div>
+</div>
+
+
+
+
+<!--Add Document Modal-->
+
+<div class="modal fade" id="ADDDocument" role="dialog">
+<form method="POST" enctype="multipart/form-data">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Please Add the Document Details <span class="glyphicon glyphicon-fire"></span></h4>
+        </div>
+        <div class="modal-body">
+            <label class="form-input" for="document_no">Document No <a style="color: red">*</a></label>
+            <input type="text" class="form-control" id="document_no" name="document_no" required>
+
+            <label class="form-input" for="document_date">Document Date <a style="color: red">*</a></label>
+            <input type="date" class="form-control" id="document_date" name="document_date" required>
+
+            <label class="form-input" for="document_description">Document Description <a style="color: red">*</a></label>
+            <input type="text" class="form-control" id="document_description" name="document_description" required>
+
+            <hr>
+
+            <label class="form-input" for="attachment">Attachment<a style="color: red">*</a></label>
+            <input type="file" id="attachment" name="attachment" required>
+
+        </div>
+        <div class="modal-footer">
+          
+            {% csrf_token %}
+            <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+            <input type="submit" class="btn btn-success" value="Save">
+          
+        </div>
+      </div>
+      
+    </div>
+</form>
+</div>
+
+<!--End of Add Document Modal-->
+
+
+<!-- GRN Complete Modal-->
+
+<div class="modal fade" id="CompleteGRN" role="dialog">
+        <div class="modal-dialog">
+        
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Warning  <span class="glyphicon glyphicon-fire"></span></h4>
+            </div>
+            <div class="modal-body">
+              <p>Do you really want to finish GRN? It Will Effect in Inventory.</p>
+            </div>
+            <div class="modal-footer">
+                <input type="button" class="btn btn-danger pull-left" data-dismiss="modal" value="Cancel">
+                <button type="button" class="btn btn-success pull-right" id="btnConfirm" onclick="GRNComplete()"> Confirm</button>
+              
+            </div>
+          </div>
+          
+        </div>
+</div>
+<!--End of Complet GRN Modal-->
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+
+     function redirect(){
+        window.location.href = "/grnir/invoice_received/pending_list/";
+     }
+    function GRNComplete() {
+        $('body').append('<div id="requestOverlay" class="request-overlay"></div>'); /*Create overlay on demand*/
+        
+        $("#requestOverlay").show();
+         data = {
+             'csrfmiddlewaretoken': '{{ csrf_token }}'
+             }
+             $.ajax({
+               type: "POST",
+               url: "/grnir/invoice_received/{{grn_no}}/{{ir_id}}/complete_invoice_receive/",
+               data: data,
+               success: function(data) {
+                  window.alert(data.Message);
+                  //window.alert(data.status);
+                  if(data.Message == 'Success')
+                    redirect();
+                  else
+                    $("#requestOverlay").hide();
+               },
+               failure: function(){
+                 window.alert('Some Error Occurred, Please Try Again');
+                 document.getElementById("btnAbsorve").disabled = false;
+               }
+           }
+         );
+       }
+
+</script> 
+
+
+<style>
+        .request-overlay {
+          z-index: 9999;
+          position: fixed; /*Important to cover the screen in case of scolling content*/
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          display: block;
+          text-align: center;
+          background: rgba(200,200,200,0.5) url('/api/media/media/ldm.gif') no-repeat center; /*.gif file or just div with message etc. however you like*/
+      }
+</style>
+
+{% endblock content %}

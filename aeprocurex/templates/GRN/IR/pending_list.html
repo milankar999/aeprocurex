@@ -19,7 +19,7 @@
                           {% for item in grn_list %}
                             <tr>
                                <td>
-                                   <a href="/grnir/invoice_received/{{item}}/details/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                   <a href="/grnir/invoice_received/{{item.grn_no}}/details/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
                                 </td>
                                 <td>{{item.grn_no}}</td>
                                 <td>{{item.vendor__name}}</td>

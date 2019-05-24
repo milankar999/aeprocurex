@@ -61,3 +61,36 @@ class GRNAttachment(models.Model):
 
         def __str__(self):
                 return self.document_no + str(self.document_date)
+
+class IRTracker(models.Model):
+        id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+        grn = models.ForeignKey(GRNTracker,on_delete=models.CASCADE)
+        invoice_no = models.CharField(max_length = 200)
+        invoice_date = models.DateTimeField()
+
+        total_basic_price = models.FloatField()
+        total_price = models.FloatField()
+
+        received_currency = models.ForeignKey(CurrencyIndex, on_delete = models.CASCADE, default=CurrencyIndex.DEFAULT_PK)
+        inr_value = models.FloatField(default=1)
+
+        converted_total_basic_price = models.FloatField()
+        converted_total_price = models.FloatField()
+
+        def __str__(self):
+                return self.grn.grn_no + self.invoice_no
+
+class IRAttachment(models.Model):
+        id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+        ir= models.ForeignKey(IRTracker,on_delete=models.CASCADE)
+
+        description = models.CharField(max_length=100, null = True, blank = True)
+        document_no = models.CharField(max_length=100, null = True, blank = True)
+        document_date = models.DateField()
+
+        attachment = models.FileField(upload_to='ir_document/')
+
+        def __str__(self):
+                return self.document_no + str(self.document_date)

@@ -1,0 +1,52 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="container">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+    
+    
+                        <!--Form with header-->
+    
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="card border-primary rounded-0">
+                                <div class="card-header p-0">
+                                    <div class="bg-info text-white text-center py-2">
+                                        <h3>Please Mention The Received Quantity // It Should be less then Pending Receivable Quantity</h3>
+                                    </div>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="row">
+                                        <div class="col-sm-3"></div>
+                                        <div class="col-sm-6">
+                                            <label class="form-input" for="hsn_code">HSN Code <a style="color: red">*</a></label>
+                                            <input type="number" class="form-control" id="hsn_code" name="hsn_code" required value={{grn_lineitem.hsn_code}}>
+                                                
+                                            <label class="form-input" for="unit_price">Unit Price<a style="color: red">*</a></label>
+                                            <input type="number" class="form-control" step="0.01" id="unit_price" name="unit_price" required value={{grn_lineitem.unit_price}}>
+
+                                            <label class="form-input" for="gst">GST (%)<a style="color: red">*</a></label>
+                                            <input type="number" class="form-control" step="0.01" id="gst" name="gst" required value={{grn_lineitem.gst}}>
+
+                                            <br>
+                                            <input type="submit" value="Save Changes" class="btn btn-info pull-right">
+                                        </div>
+                                    </div>
+                                </div><br>
+    
+                            </div>
+                        </form>
+                        <!--Form with header-->
+        </div>
+</div>
+
+{% endblock content %}

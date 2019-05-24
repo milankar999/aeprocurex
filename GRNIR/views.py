@@ -740,6 +740,182 @@ def IRPendingGRNLineitem(request, grn_no=None):
                 context['vendor_location'] = grn.vendor.location
                 context['grn_no'] = grn_no
                 context['grn_date'] = grn.date
+                context['grn_lineitem'] = grn_lineitem
+                try:
+                        context['currency'] = grn.vpo.vpo.currency.currency_code
+                except:
+                        context['currency'] = 'INR'
+
+                
+                
+                currency_list = CurrencyIndex.objects.all()
+                context['currency_list'] = currency_list
+
+                try:
+                        context['current_currency'] = grn.vpo.vpo.currency
+                        context['conversion_rate'] = grn.vpo.vpo.inr_value
+
+                except:
+                        context['current_currency'] = CurrencyIndex.DEFAULT_PK
+                        context['conversion_rate'] = 1
 
                 if type == 'GRN':
                         return render(request,"GRN/IR/pending_grn_lineitems.html",context)
+
+        if request.method == 'POST':
+
+                grn = GRNTracker.objects.get(grn_no = grn_no)
+                grn_lineitem_count = GRNLineitem.objects.filter(grn=grn).count()
+
+                if grn_lineitem_count < 1 :
+                        return JsonResponse({'Message' : 'No Lineitem Found'})
+
+                grn_lineitem = GRNLineitem.objects.filter(grn = grn)
+
+                for item in grn_lineitem:
+                        if item.unit_price < 0.01:
+                                return JsonResponse({'Message' : 'Lineitem Price Missing'})
+
+                        if item.gst < 0.01:
+                                return JsonResponse({'Message' : 'GST % Not Found'})
+
+                total_basic_value = 0
+                total_value = 0
+                actual_total_basic_value = 0
+                actual_total_value = 0
+
+                for item in grn_lineitem:
+                        total_basic_value = total_basic_value + item.total_basic_price
+                        total_value = total_value + item.total_price
+
+                total_basic_value = round(total_basic_value, 2)
+                total_value = round(total_value , 2)
+
+                data = request.POST
+                
+                actual_total_basic_value = round((total_basic_value * float(data['conversion_rate'])), 2)
+                actual_total_value = round((total_value * float(data['conversion_rate'])), 2)
+
+                currency = data['currency']
+                cl = currency.split("/")
+                currency_index = CurrencyIndex.objects.get(currency = cl[0].strip())
+
+                ir_count = IRTracker.objects.filter(grn = grn).count()
+
+                if ir_count > 0:
+                        ir_list = IRTracker.objects.filter(grn = grn)
+                        ir = ir_list[0]
+                        
+                        ir.invoice_no = data['invoice_no']
+                        ir.invoice_date = data['invoice_date']
+                        ir.total_basic_price = total_basic_value
+                        ir.total_price = total_value
+                        ir.received_currency = currency_index
+                        ir.inr_value = data['conversion_rate']
+                        ir.converted_total_basic_price = actual_total_basic_value
+                        ir.converted_total_price = actual_total_value
+                        ir.save()
+                        ir_id = ir.id
+                    
+                else:
+                        ir = IRTracker.objects.create(
+                                grn = grn,
+                                invoice_no = data['invoice_no'],
+                                invoice_date = data['invoice_date'],
+                                total_basic_price = total_basic_value,
+                                total_price = total_value,
+                                received_currency = currency_index,
+                                inr_value = data['conversion_rate'],
+                                converted_total_basic_price = actual_total_basic_value,
+                                converted_total_price = actual_total_value
+                        )
+                        ir_id = ir.id
+                return HttpResponseRedirect(reverse('invoice-received-add-invoice',args=[grn_no,ir_id]))
+
+#Lineitem Change Price
+@login_required(login_url="/employee/login/")
+def IRLineitemPriceChange(request, grn_no=None, lineitem_id = None):
+        context={}
+        context['ir'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                lineitem = GRNLineitem.objects.get(id = lineitem_id)
+                context['grn_lineitem'] = lineitem
+
+                if type == 'GRN':
+                        return render(request,"GRN/IR/ir_change_price.html",context)
+
+        if request.method == 'POST':
+                lineitem = GRNLineitem.objects.get(id = lineitem_id)
+                data = request.POST
+
+                lineitem.hsn_code = data['hsn_code']
+                lineitem.unit_price = data['unit_price']
+                lineitem.gst = data['gst']
+
+                total_basic_price = round((lineitem.quantity * float(lineitem.unit_price)),2) 
+                lineitem.total_basic_price = total_basic_price
+
+                total_price = round((total_basic_price + (total_basic_price * float(lineitem.gst) / 100)),2)
+                lineitem.total_price = total_price
+                lineitem.save()
+
+                return HttpResponseRedirect(reverse('invoice-received-pending-grn-lineitem',args=[grn_no]))
+
+
+#Add Supplier Invoice 
+@login_required(login_url="/employee/login/")
+def IRPendingGRNAddInvoice(request, grn_no=None, ir_id = None):
+        context={}
+        context['ir'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                ir = IRTracker.objects.get(id = ir_id)
+                ir_attachment = IRAttachment.objects.filter(ir = ir)
+
+                context['ir_attachment'] = ir_attachment
+                context['grn_no'] = grn_no
+                context['ir_id'] = ir_id
+                if type == 'GRN':
+                        return render(request,"GRN/IR/ir_add_document.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+                ir = IRTracker.objects.get(id = ir_id)
+                
+                IRAttachment.objects.create(
+                        ir = ir,
+                        description = data['document_description'],
+                        document_no = data['document_no'],
+                        document_date = data['document_date'],
+                        attachment = request.FILES['attachment']
+                )
+                return HttpResponseRedirect(reverse('invoice-received-add-invoice',args=[grn_no,ir_id]))
+
+#Add Supplier Invoice 
+@login_required(login_url="/employee/login/")
+def IRComplete(request, grn_no=None, ir_id = None):
+        context={}
+        context['ir'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                grn = GRNTracker.objects.get(grn_no = grn_no)
+                ir = IRTracker.objects.get(id = ir_id)
+
+                ir_attachment_count = IRAttachment.objects.filter(ir = ir).count()
+                if ir_attachment_count < 1:
+                        return JsonResponse({'Message': 'Attachment Not Found'})
+
+                grn.status = 'ir_completed'
+                grn.save()
+
+                return JsonResponse({'Message': 'Success'})
