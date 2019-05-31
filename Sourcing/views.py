@@ -30,6 +30,8 @@ from django.views.static import serve
 from django.http import FileResponse
 #from datetime import datetime
 from num2words import num2words
+from datetime import timedelta, datetime
+import pytz
 
 @login_required(login_url="/employee/login/")
 def rfp_pending_list(request):
@@ -42,7 +44,20 @@ def rfp_pending_list(request):
 
         if type == 'Sourcing':
                 if request.method == "GET":
-                        rfp = RFP.objects.filter(opportunity_status='Open',enquiry_status='Approved',rfp_assign1__assign_to1=user).values('rfp_no','customer__name','customer__location','rfp_creation_details__creation_date','rfp_keyaccounts_details__key_accounts_manager__first_name','priority','current_sourcing_status')    
+                        rfp = RFP.objects.filter(opportunity_status='Open',enquiry_status='Approved',rfp_assign1__assign_to1=user).values(
+                                'rfp_no',
+                                'customer__name',
+                                'customer__location',
+                                'rfp_creation_details__creation_date',
+                                'rfp_keyaccounts_details__key_accounts_manager__first_name',
+                                'priority','current_sourcing_status',
+                                'up_time') 
+                        utc=pytz.UTC
+                        for item in rfp:
+                                diff = utc.localize(datetime.now()) - item['rfp_creation_details__creation_date']
+                                hrs = round((((diff.days) * 24) + (diff.seconds/3600)),2)
+                                item['up_time'] = hrs
+
                         context['rfp_list'] = rfp
                         return render(request,"Sourcing/Sourcing/pending_list.html",context)
 

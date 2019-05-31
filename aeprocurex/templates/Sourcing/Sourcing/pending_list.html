@@ -16,6 +16,7 @@
                           <th>Key Accounts Person</th>
                           <th>Priority</th>
                           <th>Current Sourcing Status</th>
+                          <th>Up Time (Hrs)</th>
                         </tr>
                       </thead>
                       <tbody>   
@@ -31,6 +32,7 @@
                                 <td>{{rfp.rfp_keyaccounts_details__key_accounts_manager__first_name}}</td>
                                 <td>{{rfp.priority}}</td>
                                 <td>{{rfp.current_sourcing_status}}</td>
+                                <td>{{rfp.up_time}}</td>
                             </tr>
                           {% empty %}
                             <p>No Pending RFP Approval Found</p>

@@ -1008,6 +1008,8 @@ def cpo_create_selected_lineitem(request, cpo_id=None):
         if request.method == 'POST':
                 data = request.POST
                 cpo = CustomerPO.objects.get(id=cpo_id)
+                total_basic_price = round((float(data['quantity']) * float(data['unit_price'])),2)
+                total_price = round((total_basic_price + (total_basic_price * float(data['gst']) / 100)),2) 
                 CPOLineitem.objects.create(
                         cpo = cpo,
                         product_title = data['product_title'],
@@ -1022,8 +1024,8 @@ def cpo_create_selected_lineitem(request, cpo_id=None):
                         uom = data['uom'],
                         quantity = data['quantity'],
                         unit_price = data['unit_price'],
-                        total_basic_price = round((float(data['quantity']) * float(data['unit_price'])),2),
-                        total_price = round(((float(data['quantity']) * float(data['unit_price'])) + (float(data['quantity']) * float(data['unit_price']) * float(data['unit_price']) / 100)),2),
+                        total_basic_price = total_basic_price,
+                        total_price = total_price,
                         pending_po_releasing_quantity = data['quantity'],
                         pending_delivery_quantity = data['quantity'],
                 )

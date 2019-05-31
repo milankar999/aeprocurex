@@ -1346,7 +1346,7 @@ def Quotation_Generator(quotation_no,gst_price,image,total_basic,total_basic_wit
     #y = add_new_page(pdf,quotation_obj.quotation_no)
     if quotation_obj.comments != '':
         pdf.setFont('Helvetica-Bold', 9)
-        wrapper = textwrap.TextWrapper(width=150) 
+        wrapper = textwrap.TextWrapper(width=135) 
         word_list = wrapper.wrap(text='Note : ' + quotation_obj.comments)
         for element in word_list:
             pdf.drawString(10,y,element)

@@ -136,7 +136,7 @@ def SelectGRNLineitem(request,vpo_no=None):
                                         pack_size = vpo_lineitem.pack_size,
                                         uom = vpo_lineitem.uom,
                                         quantity = vpo_lineitem.receivable_quantity,
-                                        unit_price = 0,
+                                        unit_price = vpo_lineitem.unit_price,
                                         gst = vpo_lineitem.gst
 
                                 )
@@ -358,8 +358,6 @@ def CompleteGRN(request,grn_no=None):
                                 pass
 
                 return JsonResponse({'Message': 'Success'})
-
-
 
 
 ###----------------------------------Direct Processing Customer PO--------------------------
@@ -673,9 +671,6 @@ def DirectGRNProductDelete(request, grn_no=None, lineitem_id=None):
                 return HttpResponseRedirect(reverse('direct-grn-product-entry',args=[grn_no]))
 
 
-
-
-
 ##----------------------------------------------------------------------Invoice Receive---------------------------------------------------------------------------------------------
 
 #Pending List
@@ -692,7 +687,9 @@ def IRPendingList(request):
                         'grn_no',
                         'vendor__name',
                         'vendor__location',
-                        'date'
+                        'date',
+                        'vpo__po_number',
+                        'vpo__po_date'
                 )
                 context['grn_list'] = grn_list
 
@@ -919,3 +916,5 @@ def IRComplete(request, grn_no=None, ir_id = None):
                 grn.save()
 
                 return JsonResponse({'Message': 'Success'})
+
+#

@@ -13,6 +13,8 @@
                           <th>Vendor Name</th>
                           <th>Location</th>
                           <th>GRN Date</th>
+                          <th>Vendor PO Number</th>
+                          <th>PO Date</th>
                         </tr>
                       </thead>
                       <tbody>   
@@ -25,6 +27,8 @@
                                 <td>{{item.vendor__name}}</td>
                                 <td>{{item.vendor__location}}</td>
                                 <td>{{item.date}}</td>
+                                <td>{{item.vpo__po_number}}</td>
+                                <td>{{item.vpo__po_date}}</td>
                             </tr>
                           {% empty %}
                             <p>No CPO Found</p>

@@ -73,7 +73,7 @@ class CPOSelectedQuotation(models.Model):
 class CPOLineitem(models.Model):
         id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
         cpo = models.ForeignKey(CustomerPO,on_delete=models.CASCADE)
-        quotation_lineitem = models.ForeignKey(QuotationLineitem,on_delete=models.CASCADE, null=True, blank=True)
+        quotation_lineitem = models.ForeignKey(QuotationLineitem,on_delete=models.SET_NULL, null=True, blank=True)
         product_title = models.CharField(max_length=200,null = False, blank = False)
         description = models.TextField(null=False, blank=False)
         model = models.CharField(max_length=200,null = True, blank = True)

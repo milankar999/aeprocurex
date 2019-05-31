@@ -10,7 +10,7 @@ from Sourcing.models import *
 from COQ.models import  *
 from Customer.models import *
 import random
-from django.db.models import F
+from django.db.models import F, DurationField, ExpressionWrapper
 import textwrap
 import datetime
 import os
@@ -21,6 +21,8 @@ from django.core.mail import send_mail, EmailMessage
 from django.core import mail
 from django.conf import settings
 from django.db.models import Count
+from datetime import timedelta, datetime
+import pytz
 
 
 @login_required(login_url="/employee/login/")
@@ -72,8 +74,16 @@ def pending_enquiry_list(request):
             'rfp_assign1__assign_to1__username',
             'opportunity_status',
             'enquiry_status',
-            'current_sourcing_status').order_by('-rfp_creation_details__creation_date')
+            'current_sourcing_status',
+            'up_time').order_by('-rfp_creation_details__creation_date')
         
+        utc=pytz.UTC
+        for item in enquiry:
+            diff = utc.localize(datetime.now()) - item['rfp_creation_details__creation_date']
+            hrs = round((((diff.days) * 24) + (diff.seconds/3600)),2)
+            item['up_time'] = hrs
+
+
         context['enquiry_list'] = enquiry
 
         if type == 'Sales':
@@ -355,7 +365,14 @@ def pending_enquiry_slider(request):
             'rfp_assign1__assign_to1__username',
             'opportunity_status',
             'enquiry_status',
-            'current_sourcing_status').order_by('-rfp_creation_details__creation_date')
+            'current_sourcing_status',
+            'up_time').order_by('rfp_assign1__assign_to1__username')
+        
+        utc=pytz.UTC
+        for item in enquiry:
+            diff = utc.localize(datetime.now()) - item['rfp_creation_details__creation_date']
+            hrs = round((((diff.days) * 24) + (diff.seconds/3600)),2)
+            item['up_time'] = hrs
 
         enquiry_counter = RFP.objects.filter(Q(enquiry_status='Approved') | Q(enquiry_status='Sourcing_Completed') | Q(enquiry_status='COQ Done')).values(
             'rfp_assign1__assign_to1__first_name',
@@ -366,7 +383,8 @@ def pending_enquiry_slider(request):
             'rfp_assign1__assign_to1__username',
             'rfp_no',
             'rfp_creation_details__creation_date'       
-        )
+        ).order_by('rfp_assign1__assign_to1__username')
+
         pending_lineitem = RFPLineitem.objects.filter(Q(rfp_no__enquiry_status='Approved') | Q(rfp_no__enquiry_status='Sourcing_Completed') | Q(rfp_no__enquiry_status='COQ Done')).values(
             'rfp_no__rfp_no',
             'product_title',
@@ -374,7 +392,13 @@ def pending_enquiry_slider(request):
         )
 
         time = RFP.objects.filter(Q(enquiry_status='Approved') | Q(enquiry_status='Sourcing_Completed') | Q(enquiry_status='COQ Done')).count()
-        total_time = (time * 4000) + 4000
+        total_time = ((time * 7000) + 7000) * 2
+
+        total_pending = 0
+        for item in enquiry_counter:
+            total_pending = total_pending + item['count']
+        
+        context['total_pending'] = total_pending
 
         context['total_time'] = total_time
         context['enquiry_list'] = enquiry
@@ -384,3 +408,4 @@ def pending_enquiry_slider(request):
 
         if type == 'Sales':
             return render(request,"Sales/EnquiryTracker/pending_enquiry_slider.html",context)
+

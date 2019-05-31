@@ -2430,7 +2430,7 @@ def add_lineitem(pdf,y,i,po_number,product_title,description,model,brand,product
                 
         if currency_code == 'INR':
                 pdf.setFont('Helvetica-Bold', 8)
-                pdf.drawString(350,y,"Integrated GST "+ str(gst) + " %")
+                pdf.drawString(350,y,"Applicable GST "+ str(gst) + " %")
                 pdf.drawString(490,y,currency_code + ' ' +str(currencyInIndiaFormat(str(gst_value))))
                 y = y - 10
 
@@ -3889,3 +3889,5 @@ def IVPOMarkDirectBuying(request, vpo_id=None):
 
                 except:
                         return JsonResponse({'Message': 'Error Occured'})
+
+                        

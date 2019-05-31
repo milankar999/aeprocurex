@@ -1,154 +1,171 @@
-<!DOCTYPE html>
+{% load static %}
+<!doctype html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-* {box-sizing: border-box;}
-body {font-family: Verdana, sans-serif;}
-.mySlides {display: none;}
-img {vertical-align: middle;}
+    <link rel="stylesheet" href="{% static 'css/JiSlider.css' %}">
+    <link rel="stylesheet" href="{% static 'css/flipclock.css' %}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<style>
+			* {
+				margin: 0;
+			}
 
-/* Slideshow container */
-.slideshow-container {
-  max-width: 1000px;
-  position: relative;
-  margin: auto;
-}
+			html, body {
+				height: 100%;
+			}
 
-/* Caption text */
-.text {
-  color: #f2f2f2;
-  font-size: 15px;
-  padding: 8px 12px;
-  position: absolute;
-  bottom: 8px;
-  width: 100%;
-  text-align: center;
-}
-
-/* Number text (1/3 etc) */
-.numbertext {
-  color: #f2f2f2;
-  font-size: 12px;
-  padding: 8px 12px;
-  position: absolute;
-  top: 0;
-}
-
-/* The dots/bullets/indicators */
-.dot {
-  height: 15px;
-  width: 15px;
-  margin: 0 2px;
-  background-color: #bbb;
-  border-radius: 50%;
-  display: inline-block;
-  transition: background-color 0.6s ease;
-}
-
-.active {
-  background-color: #717171;
-}
-
-/* Fading animation */
-.fade {
-  -webkit-animation-name: fade;
-  -webkit-animation-duration: 1.5s;
-  animation-name: fade;
-  animation-duration: 1.5s;
-}
-
-@-webkit-keyframes fade {
-  from {opacity: .4} 
-  to {opacity: 1}
-}
-
-@keyframes fade {
-  from {opacity: .4} 
-  to {opacity: 1}
-}
-
-/* On smaller screens, decrease text size */
-@media only screen and (max-width: 300px) {
-  .text {font-size: 11px}
-}
-</style>
+			#JiSlider {
+				width: 100%;
+				height: 80%;
+			}
+      blink {
+        animation: blinker 0.6s linear infinite;
+        color: #1c87c9;
+       }
+       @keyframes blinker {  
+        50% { opacity: 0; }
+       }
+       .blink-one {
+         animation: blinker-one 1s linear infinite;
+       }
+       @keyframes blinker-one {  
+         0% { opacity: 0; }
+       }
+       .blink-two {
+         animation: blinker-two 1.4s linear infinite;
+       }
+       @keyframes blinker-two {  
+         100% { opacity: 0; }
+       }
+		</style>
+    <title>Aeprocurex</title>
 </head>
-<body>
+	<body>
+    <div class="">
+       <div class="col-sm-2">
+          <h1 style="text-align: center;"><strong><span style="color: #0000ff;">Pending Enquiry</span></strong></h1>
+          <h1 style="text-align: center;"><strong><span style="color: #ff6600;">{{total_pending}}</span></strong></h1>
+       </div>
+       <div class="col-sm-6">
+       </div>
+       <div class="col-sm-4">
+          <label class="clock pull-right"></label>
+       </div>
+    </div> 
+   
+    <div id="JiSlider" class="jislider">
+        <ul>
+          <li>
+              <h1 style="text-align: center;"><span style="color: #0000ff;"><strong>AEPROCUREX&nbsp;</strong></span></h1>
+              <h1 style="text-align: center;"><span style="color: #0000ff;"><strong>Pending Enquiry Tracker</strong></span></h1>
+              <hr>
+              {% for item in enquiry_counter %}
+                {% ifnotequal item.rfp_assign1__assign_to1__first_name null %}
+                  <h2 style="text-align: center;">{{item.rfp_assign1__assign_to1__first_name}}&nbsp;{{item.rfp_assign1__assign_to1__last_name}} :: {{item.count}}</h2>
+                {% endifnotequal %}
+              {% endfor %}
+          </li>
 
-<div class="slideshow-container">
+        {% for item in enquiry_counter %}
+          {% for rfp in enquiry_list %}
+            {% if rfp.rfp_assign1__assign_to1__username == item.rfp_assign1__assign_to1__username %}
+              {% if rfp.current_sourcing_status == 'Not Mentioned' %}    
+                <li>
+                  <h1 style="text-align: center;"><span style="color: #0000ff;"><strong>Sourcing Person :  {{item.rfp_assign1__assign_to1__first_name}}&nbsp;{{item.rfp_assign1__assign_to1__last_name}}&nbsp; :: Total Pending : {{item.count}}</strong></span></h1>
+                  <h1 style="text-align: center;" class="blink-one"><span style="color: #ff0000;">FRESH PENDING ENQUIRY</span></h1>
+                  <hr>
+                  <div class="col-sm-3">
+                      <h1 style="text-align: center; color: #0000ff;"><strong><spa>{{rfp.customer__name}}</span></strong></h1>
+                      <h1 style="text-align: center; color: #0000ff;"><strong><span style="text-align: center; color: #0000ff;">{{rfp.customer__location}}</span></strong></h1>
+                  </div>
+                  <div class="col-sm-6">
+                      <h1 style="text-align: center; font-size: 200px" class="blink-two"><strong><span style="color: #fc0000;">{{rfp.up_time}}</span></strong></h1>
+                      <h1 style="text-align: center; font-size: 100px" class="blink-two"><strong><span style="color: #0000ff;">HOURS</span></strong></h1>
+                      <h1 style="text-align: center; font-size: 100px" class="blink-two"><strong><span style="color: #0000ff;">OVER</span></strong></h1>
+                  </div>
 
-  <div class="mySlides fade">
-    <h1 style="text-align: center;"><span style="color: #0000ff;"><strong>AEPROCUREX&nbsp;</strong></span></h1>
-    <h1 style="text-align: center;"><span style="color: #0000ff;"><strong>Pending Enquiry Tracker</strong></span></h1>
-    <hr>
-    {% for item in enquiry_counter %}
-      {% ifnotequal item.rfp_assign1__assign_to1__first_name null %}
-        <h2 style="text-align: center;">{{item.rfp_assign1__assign_to1__first_name}}&nbsp;{{item.rfp_assign1__assign_to1__last_name}} :: {{item.count}}</h2>
-      {% endifnotequal %}
-    {% endfor %}
-  </div>
-
-  {% for item in enquiry_counter %}
-
-    {% for rfp in pending_enquiry %}
-        {% if rfp.rfp_assign1__assign_to1__username == item.rfp_assign1__assign_to1__username %}
-          <div class="mySlides fade">
-            <h1 style="text-align: center;"><span style="color: red;"><strong>{{item.rfp_assign1__assign_to1__first_name}}&nbsp;{{item.rfp_assign1__assign_to1__last_name}}&nbsp;</strong></span></h1>
-            <hr>
-            <h4>RFP No: {{rfp.rfp_no}} &nbsp;//&nbsp; Enquiry Date :: {{rfp.rfp_creation_details__creation_date}}</h4>
-            <blockquote>
-                <h1 style="text-align: center;"><strong>
-                  <span style="color: #0000ff;">
-                  {% for lineitem in pending_lineitem %}
+                  <div class="col-sm-3">
+                      <h1 style="text-align: center; color: #0000ff;">Item Details</h1>
+                    {% for lineitem in pending_lineitem %}
                       {% if lineitem.rfp_no__rfp_no == rfp.rfp_no %}
-                        {{lineitem.product_title}} &nbsp; / &nbsp;
+                      <h1 style="text-align: center; color: #0000ff;">{{lineitem.product_title}}</h1>
                       {% endif %}
+                    {% endfor %}
+                  </div>
+                  
+                  
+                </li>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+
+        {% for item in enquiry_counter %}
+        {% for rfp in enquiry_list %}
+          {% if rfp.rfp_assign1__assign_to1__username == item.rfp_assign1__assign_to1__username %}
+            {% if rfp.current_sourcing_status != 'Not Mentioned' %}    
+              <li>
+                <h1 style="text-align: center;"><span style="color: #0000ff;"><strong>Sourcing Person :  {{item.rfp_assign1__assign_to1__first_name}}&nbsp;{{item.rfp_assign1__assign_to1__last_name}}&nbsp; :: Total Pending : {{item.count}}</strong></span></h1>
+                <h1 style="text-align: center;" class="blink-one"><span style="color: #ff0000;">PENDING ENQUIRY WITH HAVING ISSUES</span></h1>
+                <hr>
+                <div class="col-sm-3">
+                    <h1 style="text-align: center; color: #0000ff;"><strong><spa>{{rfp.customer__name}}</span></strong></h1>
+                    <h1 style="text-align: center; color: #0000ff;"><strong><span style="text-align: center; color: #0000ff;">{{rfp.customer__location}}</span></strong></h1>
+                </div>
+                <div class="col-sm-6">
+                    <h1 style="text-align: center; font-size: 200px" class="blink-two"><strong><span style="color: #fc0000;">{{rfp.up_time}}</span></strong></h1>
+                    <h1 style="text-align: center; font-size: 100px" class="blink-two"><strong><span style="color: #0000ff;">HOURS</span></strong></h1>
+                    <h1 style="text-align: center; font-size: 100px" class="blink-two"><strong><span style="color: #0000ff;">OVER</span></strong></h1>
+                </div>
+
+                <div class="col-sm-3">
+                    <h1 style="text-align: center; color: #0000ff;">Item Details</h1>
+                  {% for lineitem in pending_lineitem %}
+                    {% if lineitem.rfp_no__rfp_no == rfp.rfp_no %}
+                    <h1 style="text-align: center; color: #0000ff;">{{lineitem.product_title}}</h1>
+                    {% endif %}
                   {% endfor %}
-                  </span></strong>
-                </h1>
-            </blockquote>
-          </div>
-        {% endif %}
-    {% endfor %}
-  {% endfor %}
+                </div>
+                
+                
+              </li>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+        
+        </ul>
+    </div>
+		<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="{% static 'js/JiSlider.js' %}"></script>
+    <script src="{% static 'js/flipclock.min.js' %}"></script>
+    
+		<script>
+			$(window).load(function () {
+				$('#JiSlider').JiSlider({color: '#fff', start: 1, reverse: false}).addClass('ff')
+			})
+		</script><script type="text/javascript">
 
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-36251023-1']);
+  _gaq.push(['_setDomainName', 'jqueryscript.net']);
+  _gaq.push(['_trackPageview']);
 
-</div>
-<br>
-
-<div style="text-align:center">
-  <span class="dot"></span> 
-  {% for item in pending_enquiry %}
-    <span class="dot"></span> 
-  {% endfor %}
-</div>
-
-<script>
-var slideIndex = 0;
-showSlides();
-
-function showSlides() {
-  var i;
-  var slides = document.getElementsByClassName("mySlides");
-  var dots = document.getElementsByClassName("dot");
-  for (i = 0; i < slides.length; i++) {
-    slides[i].style.display = "none";  
-  }
-  slideIndex++;
-  if (slideIndex > slides.length) {slideIndex = 1}    
-  for (i = 0; i < dots.length; i++) {
-    dots[i].className = dots[i].className.replace(" active", "");
-  }
-  slides[slideIndex-1].style.display = "block";  
-  dots[slideIndex-1].className += " active";
-  setTimeout(showSlides, 4000); // Change image every 2 seconds
-}
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+  var clock = $('.clock').FlipClock({
+		clockFace: 'TwelveHourClock'
+	});
 </script>
 <script language="javascript">
-        setTimeout(function(){
-           window.location.reload(1);
-        }, {{total_time}});
+    setTimeout(function(){
+       window.location.reload(1);
+    }, {{total_time}});
 </script>
-</body>
-</html> 
+	</body>
+</html>

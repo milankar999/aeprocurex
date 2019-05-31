@@ -83,6 +83,7 @@ class RFP(models.Model):
     single_vendor_reason = models.TextField(null=True,blank=True)
 
     current_sourcing_status = models.CharField(max_length = 200, default = 'Not Mentioned')
+    up_time = models.FloatField(default = 0)
 
     #attachment
     document1 = models.FileField(upload_to='rfp/',null=True,blank=True)
