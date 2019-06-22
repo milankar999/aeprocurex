@@ -122,17 +122,19 @@
                                             <label>Installation <a style="color:red"> *</a></label>
                                             <input type="text" class="form-control" id="installation" name="installation" required value="{{vendor_po.installation}}">
                                         </div>
-                                        <div class="col-md-12">
-                                            <label>Payment Terms<a style="color:red"> *</a></label>
-                                            <input type="text" class="form-control" id="terms_of_payment" name="terms_of_payment" required value="{{vendor_po.terms_of_payment}}">
+                                        <div class="col-md-4">
+                                                <label>Please Select Payment Terms <a style="color:red"> *</a></label>
+                                                <select class="form-control" id="pterms" name="pterms" required>
+                                                    <option>{{vendor_po.payment_option.text}}</option>
+                                                    {% for item in pterms_list %}
+                                                    <option>{{item.text}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                
                                         </div>
-                                        <div class="col-md-6">
-                                            <label>Advance % <a style="color:red"> *</a></label>
-                                            <input type="number" class="form-control" id="advance_percentage" name="advance_percentage" required value="{{vendor_po.advance_percentage}}">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label>Credit Period In Days<a style="color:red"> *</a></label>
-                                            <input type="number" class="form-control" id="payment_term" name="payment_term" required value="{{vendor_po.payment_term}}">
+                                        <div class="col-md-4">
+                                            <br>
+                                            <a href="/api/po_to_vendor/{{vpo_id}}/add_new_vendor_payment_terms/" class="btn btn-info">Add New Payment Terms</a>
                                         </div>
                                     </div>
 

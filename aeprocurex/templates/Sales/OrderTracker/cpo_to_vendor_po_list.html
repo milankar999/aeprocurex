@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Sales Home</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+</head>
+<body>
+
+  <div class="container">
+    <h1 align="middle">Prepared Vendor PO Details</h1>
+    <hr>
+    {% for vpo in vendor_po_list %}
+      <h1 align="middle"><b>PO No : {{vpo.po_number}} | PO Date : {{vpo.po_date}}</b></h1>
+      <br>
+      <label>Vendor : {{vpo.vpo__vendor__name}} | Location : {{vpo.vpo__vendor__location}} </label><br>
+      <label>Delivery Address : {{vpo.vpo__shipping_address}} | Delivery Date : {{vpo.vpo__delivery_date}}</label><br>
+      <label>Payment Terms : {{vpo.vpo__terms_of_payment}}</label>
+      <table class="table table-hover table-bordered table-sm" width="100%">
+          <thead>
+            <tr>
+              <th>Product Title</th>
+              <th>Description</th>
+              <th>Model</th>
+              <th>Brand</th>
+              <th>Product Code</th>
+              <th>HSN Code</th>
+              <th>Quantity</th>
+              <th>UOM</th>
+              <th>Unit Price</th>
+              <th>Discount (%)</th>
+              <th>Discounted Price/Unit</th>
+              <th>Total Basic Price</th>
+              <th>GST (%)</th>
+              <th>Total Price</th>
+            </tr>
+          </thead>
+          <tbody>   
+              {% for item in vendor_po_lineitem %}
+                {% if item.vpo__id == vpo.vpo__id %}
+                <tr>    
+                  <td>{{item.product_title}}</td>
+                  <td>{{item.description}}</td>
+                  <td>{{item.model}}</td>
+                  <td>{{item.brand}}</td>
+                  <td>{{item.product_code}}</td>
+                  <td>{{item.hsn_code}}</td>
+                  <td>{{item.quantity}}</td>
+                  <td>{{item.uom}}</td>
+                  <td>{{item.unit_price}}</td>
+                  <td>{{item.discount}}</td>
+                  <td>{{item.actual_price}}</td>
+                  <td>{{item.total_basic_price}}</td>
+                  <td>{{item.gst}}</td>
+                  <td>{{item.total_price}}</td>
+                </tr>
+                {% endif %}
+              {% empty %}
+                <p>No Pending Order</p>
+              {% endfor %}
+          </tbody>
+      </table>
+      <br>
+      <label>Total Basic Value : {{vpo.basic_value}}&nbsp;INR</label><br>
+      <label>Total Value : {{vpo.total_value}}&nbsp;INR</label>
+      <label class="pull-right">Total Value : {{vpo.non_inr_value}}&nbsp;{{vpo.vpo__currency}}</label><br>
+      <a href="/api/media/po/{{vpo.po_number}}.pdf/" target="-blank" class="btn btn-info pull-right">Get Copy of this Order &nbsp;<span class="glyphicon glyphicon-copy"></span></a>
+      <br>
+      <hr>
+    {% endfor %}
+  </div>
+
+
+</body>
+<style>
+    html *
+    {
+       font-size: 12px !important;
+    }
+</style>
+
+</html>

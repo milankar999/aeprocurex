@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title></title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+</head>
+<body>
+
+
+{% if message %}
+<div class="alert alert-{{message_type}}">
+    <strong>{{message}}</strong>
+</div>
+{% endif %}
+<div class="container">
+    <h2>Select Customer from this list </h2> 
+
+     
+    <div class="table-responsive">          
+            <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Customer Code</th>
+                  <th>Name</th>
+                  <th>Location</th>
+                  <th>Code</th>
+                  <th>Address</th>
+                </tr>
+              </thead>
+              <tbody>   
+                  {% for customer in customer_list %}
+                    <tr>
+                        <td>
+                          <a href="/order_tracker/pending_customer_order_list/{{cpo_id}}/change_customer/{{customer.id}}/confirmation/"><span class="glyphicon glyphicon-send"></span></a>
+                        </td>
+                        <td>{{customer.id}}</td>
+                        <td>{{customer.name}}</td>
+                        <td>{{customer.location}}</td>
+                        <td>{{customer.code}}</td>
+                        <td>{{customer.address}}</td>
+                    </tr>
+                  {% empty %}
+                    <p>No Customers Found</p>
+                  {% endfor %}
+              </tbody>
+            </table>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    $(document).ready( function () {
+        $('#dcustomer').DataTable();
+    } );
+    </script>
+
+</body> 
+</html>

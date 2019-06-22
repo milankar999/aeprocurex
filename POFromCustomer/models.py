@@ -6,7 +6,7 @@ import uuid
 class CPOCreationDetail(models.Model):
         id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
         creation_date = models.DateTimeField(auto_now_add=True)
-        created_by = models.ForeignKey(User,on_delete = models.CASCADE)
+        created_by = models.ForeignKey(User,on_delete = models.SET_NULL,null=True,blank=True)
 
         def __str__(self):
                 return  self.created_by.username + '    ' + str(self.creation_date)
@@ -14,14 +14,14 @@ class CPOCreationDetail(models.Model):
 class CPOApprovalDetail(models.Model):
         id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
         approved_date = models.DateTimeField(auto_now_add=True)
-        approved_by = models.ForeignKey(User,on_delete = models.CASCADE)
+        approved_by = models.ForeignKey(User,on_delete = models.SET_NULL,null=True,blank=True)
 
         def __str__(self):
                 return str(self.approved_date) + '     ' + self.approved_by.username
 
 class CPOAssign(models.Model):
         id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-        assign_to = models.ForeignKey(User,on_delete = models.CASCADE)
+        assign_to = models.ForeignKey(User,on_delete = models.SET_NULL,null=True,blank=True)
         
         assigned_time = models.DateTimeField(auto_now_add=True)
         def __str__(self):
@@ -30,8 +30,8 @@ class CPOAssign(models.Model):
 class CustomerPO(models.Model):
         id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
         customer = models.ForeignKey(CustomerProfile,on_delete=models.CASCADE)
-        customer_contact_person = models.ForeignKey(CustomerContactPerson,on_delete=models.CASCADE)
-        delivery_contact_person = models.ForeignKey(DeliveryContactPerson,null=True,blank=True,on_delete=models.CASCADE)
+        customer_contact_person = models.ForeignKey(CustomerContactPerson,on_delete=models.SET_NULL,null=True,blank=True)
+        delivery_contact_person = models.ForeignKey(DeliveryContactPerson,null=True,blank=True,on_delete=models.SET_NULL)
 
         customer_po_no = models.CharField(max_length=200,null=True,blank=True)
         customer_po_date = models.DateField(null=True,blank=True)
@@ -64,7 +64,7 @@ class CustomerPO(models.Model):
 
 class CPOSelectedQuotation(models.Model):
         id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-        quotation = models.ForeignKey(QuotationTracker,on_delete=models.CASCADE)
+        quotation = models.ForeignKey(QuotationTracker,on_delete=models.SET_NULL,null=True,blank=True)
         customer_po = models.ForeignKey(CustomerPO,on_delete=models.CASCADE)
 
         def __str__(self):

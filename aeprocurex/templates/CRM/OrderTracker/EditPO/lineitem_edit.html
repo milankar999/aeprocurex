@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title></title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+</head>
+  <body>
+{% block content %}
+
+
+<div class="container">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+    
+    
+                        <!--Form with header-->
+    
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="card border-primary rounded-0">
+                                <div class="card-header p-0">
+                                    <div class="bg-info text-white text-center py-2">
+                                        <h3>Edit Customer PO Lineitem</h3>
+                                    </div>
+                                </div>
+                                <div class="card-body p-3">
+    
+                           <label class="form-input" for="product_title">Product Title <a style="color: red">*</a></label>
+                           <input type="text" class="form-control" id="product_title" name="product_title" required value="{{cpo_lineitem.product_title}}">
+
+                           <label class="form-input" for="description">Product Description <a style="color: red">*</a></label>
+                           <textarea type="text" class="form-control" id="description" name="description" required>{{cpo_lineitem.description}}</textarea>
+   
+                           <label class="form-input" for="model">Model </label>
+                           <input type="text" class="form-control" id="model" name="model" value="{{cpo_lineitem.model}}">
+   
+                           <label class="form-input" for="brand">Brand</label>
+                           <input type="text" class="form-control" id="brand" name="brand" value="{{cpo_lineitem.brand}}">
+
+                           <label class="form-input" for="product_code">Product Code (Manufacturer Part No)</label>
+                           <input type="text" class="form-control" id="product_code" name="product_code" value="{{cpo_lineitem.product_code}}">
+
+                           <label class="form-input" for="part_no">Customer Part No</label>
+                           <input type="text" class="form-control" id="part_no" name="part_no" value="{{cpo_lineitem.part_no}}">
+
+                           <label class="form-input" for="pack_size">Pack Size </label>
+                           <input type="text" class="form-control" id="pack_size" name="pack_size" value="{{cpo_lineitem.pack_size}}">
+   
+                           <label class="form-input" for="hsn_code">HSN Code</label>
+                           <input type="text" class="form-control" id="hsn_code" name="hsn_code" value="{{cpo_lineitem.hsn_code}}">
+
+                           <label class="form-input" for="gst">GST %</label>
+                           <input type="number" class="form-control" id="gst" step="0.01" name="gst" value={{cpo_lineitem.gst}}>
+
+                           <label class="form-input" for="uom">UOM <a style="color: red">*</a></label>
+                           <input type="text" class="form-control" id="uom" name="uom" required value={{cpo_lineitem.uom}}>
+
+                           <label class="form-input" for="quantity">Quantity <a style="color: red">*</a></label>
+                           <input type="number" class="form-control" step="0.01" id="quantity" name="quantity" required value={{cpo_lineitem.quantity}}>
+
+                           <label class="form-input" for="unit_price">Unit Price(In INR)<a style="color: red">*</a> </label>
+                           <input type="number" class="form-control" id="unit_price" step="0.01" name="unit_price" required value={{cpo_lineitem.unit_price}}>  <br>                                 
+    
+                                    <div class="text-center">
+                                        <input type="submit" value="Save Changes" class="btn btn-info btn-block rounded-0 py-2">
+                                    </div>
+                                </div><br>
+    
+                            </div>
+                        </form>
+                        <!--Form with header-->
+        </div>
+</div>
+
+{% endblock content %}
+</body>
+</html>

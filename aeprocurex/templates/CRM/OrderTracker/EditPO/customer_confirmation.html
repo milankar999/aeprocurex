@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Sourcing</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+</head>
+<body>
+
+
+<div>
+
+        <!--New Payment terms Modal -->
+
+  <div class="modal-dialog">
+  
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Fill the terms & conditions Details</h4>
+      </div>
+      <div class="modal-body">
+        <form type="submit" autocomplete="off" id="customer-form" method="POST">
+          {% csrf_token %}
+          <div class="form-group">
+            <label>Are you sure want to select this Customer?</label>   
+            <h1>Customer : {{customer.name}}</h1>
+            <h1>Location : {{customer.location}}</h1>
+            <h1>Address : {{customer.Address}}</h1>
+            <h1>Code : {{customer.code}}</h1>                 
+
+          </div>
+      </div>
+      <div class="modal-footer">
+              <input type="submit" class="btn btn-success" value="Confirm">
+        </form>
+      </div>
+    </div>
+    
+  </div>
+<!--End of New payment terms Model-->
+
+
+
+   </div>
+   <script type="text/javascript">
+       $(document).ready( function () {
+           $('#dcustomer').DataTable();
+       } );
+   </script> 
+   <style>
+    html *
+    {
+       font-size: 12px !important;
+    }
+   </style>
+  </body>
+</html>

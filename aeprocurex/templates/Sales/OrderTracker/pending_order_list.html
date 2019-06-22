@@ -42,7 +42,6 @@
                                 </td>
                                 <td>{{forloop.counter}}</td>
 
-
                                 {% if cpo.status == 'Created' %}
                                 <td>Waiting For Approval</td>
 
@@ -64,7 +63,18 @@
                                 </td>
                                 
                                 {% elif cpo.status == 'po_processed' %}
-                                <td>Vendor PO Released</td>   
+                                <td>
+                                  Vendor PO Released
+                                  <a 
+                                  data-toggle="tooltip"
+                                   data-placement="top"
+                                   title="View Purchase Order Details"
+                                   onclick="window.open(
+                                  '/order_tracker/pending_customer_order_list/{{cpo.id}}/view_supplier_purchase_order/', 
+                                  'newwindow', 
+                                  'height=1600,width=1800,resizable=yes,scrollbars=yes,toolbar=yes,menubar=yes,location=yes'); 
+                                  return false;"><span class="glyphicon glyphicon-pawn" style="color: green"></span></a>
+                                </td>   
                                 
                                 {% endif %}
                                 

@@ -41,7 +41,7 @@ class QuotationLineitem(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     quotation = models.ForeignKey(QuotationTracker,on_delete=models.CASCADE)
     sourcing_lineitem = models.ForeignKey(SourcingLineitem, on_delete = models.CASCADE, null=True, blank=True)
-
+    
     product_title = models.CharField(max_length=200,null = False, blank = False)
     description = models.TextField(null=False, blank=False)
     model = models.CharField(max_length=200,null = True, blank = True)

@@ -12,11 +12,22 @@ class CurrencyIndex(models.Model):
         def __str__(self):
                 return self.currency + ' / ' + self.currency_symbol + ' / ' + self.currency_code
 
+class PaymentTerms(models.Model):
+        text = models.CharField(max_length = 200, primary_key=True)
+        days = models.IntegerField(default=0)
+        advance_percentage = models.IntegerField(default = 100)
+
+        created_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+
+        def __str__(self):
+                return self.text + ' / ' + str(self.days) + ' / ' + str(self.advance_percentage)
+
+
 class VendorPO(models.Model):
         id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-        cpo = models.ForeignKey(CustomerPO,on_delete=models.CASCADE,null=True, blank=True)
+        cpo = models.ForeignKey(CustomerPO,on_delete=models.SET_NULL,null=True, blank=True)
         vendor = models.ForeignKey(SupplierProfile,on_delete=models.CASCADE)
-        vendor_contact_person = models.ForeignKey(SupplierContactPerson,on_delete=models.CASCADE)
+        vendor_contact_person = models.ForeignKey(SupplierContactPerson,on_delete=models.SET_NULL,null=True,blank=True)
 
         offer_reference =  models.CharField(max_length=100,null=True,blank=True)
         offer_date = models.DateField(null=True,blank=True)
@@ -25,7 +36,7 @@ class VendorPO(models.Model):
         shipping_address = models.TextField(default = 'Aeprocurex Sourcing Private Limited No 1318, 3rd Floor, 24th Main Rd, Sector 2, HSR Layout, Bengaluru, Karnataka 560102')
         delivery_date = models.DateField(null=True, blank=True)
 
-        requester = models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
+        requester = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,blank=True)
         
         receiver_name = models.CharField(max_length = 200, null=True, blank=True)
         receiver_phone1 = models.CharField(max_length = 20, null=True, blank=True)
@@ -44,6 +55,7 @@ class VendorPO(models.Model):
         inco_terms = models.CharField(max_length=200, default = 'DAP')
         installation = models.CharField(max_length=200, default = 'Supplier Scope')
         terms_of_payment = models.CharField(max_length=200,null=True,blank=True)
+        payment_option = models.ForeignKey(PaymentTerms,null=True,blank=True,on_delete=models.SET_NULL) 
 
         currency = models.ForeignKey(CurrencyIndex,on_delete = models.CASCADE,null=True,blank=True,default=CurrencyIndex.DEFAULT_PK)
         inr_value = models.FloatField(default=1)
@@ -76,7 +88,7 @@ class VendorPOTracker(models.Model):
         vpo_type = models.CharField(max_length=50, default='Regular')
 
         vpo = models.ForeignKey(VendorPO,on_delete=models.CASCADE)
-        requester = models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
+        requester = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,blank=True)
 
         non_inr_value = models.FloatField(default = 0) 
         basic_value = models.FloatField(default = 0)
@@ -94,7 +106,7 @@ class VendorPOTracker(models.Model):
 class VendorPOLineitems(models.Model):
         id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
         vpo = models.ForeignKey(VendorPO,related_name='vpo_lineitems',on_delete=models.CASCADE)
-        cpo_lineitem = models.ForeignKey(CPOLineitem,on_delete=models.CASCADE,null=True, blank=True)
+        cpo_lineitem = models.ForeignKey(CPOLineitem,on_delete=models.SET_NULL,null=True, blank=True)
         
         product_title = models.CharField(max_length=200,null = False, blank = False)
         description = models.TextField(null=False, blank=False)
@@ -136,3 +148,4 @@ class VPOStatus(models.Model):
 
         def __str__(self):
                 return self.vpo.po_number + ' - ' + self.order_status
+                

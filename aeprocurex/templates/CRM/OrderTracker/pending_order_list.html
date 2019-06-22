@@ -40,7 +40,18 @@
                                   'height=1600,width=1800,resizable=yes,scrollbars=yes,toolbar=yes,menubar=yes,location=yes'); 
                                   return false;"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
                                 </td>
-                                <td>{{forloop.counter}}</td>
+                                <td>
+                                  {{forloop.counter}}
+                                  <a
+                                   data-toggle="tooltip"
+                                   data-placement="top"
+                                   title="Edit Order Details"
+                                   onclick="window.open(
+                                  '/order_tracker/pending_customer_order_list/{{cpo.id}}/change_orderdetails/', 
+                                  'newwindow', 
+                                  'height=1600,width=1800,resizable=yes,scrollbars=yes,toolbar=yes,menubar=yes,location=yes'); 
+                                  return false;"> <span class="glyphicon glyphicon-edit" style="color: rgb(250, 26, 26)"></span></a>
+                                </td>
 
 
                                 {% if cpo.status == 'Created' %}
@@ -64,7 +75,18 @@
                                 </td>
                                 
                                 {% elif cpo.status == 'po_processed' %}
-                                <td>Vendor PO Released</td>   
+                                <td>
+                                    Vendor PO Released
+                                    <a 
+                                    data-toggle="tooltip"
+                                     data-placement="top"
+                                     title="View Purchase Order Details"
+                                     onclick="window.open(
+                                    '/order_tracker/pending_customer_order_list/{{cpo.id}}/view_supplier_purchase_order/', 
+                                    'newwindow', 
+                                    'height=1600,width=1800,resizable=yes,scrollbars=yes,toolbar=yes,menubar=yes,location=yes'); 
+                                    return false;"><span class="glyphicon glyphicon-pawn" style="color: green"></span></a>
+                                </td>   
                                 
                                 {% endif %}
                                 

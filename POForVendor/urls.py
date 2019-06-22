@@ -140,4 +140,11 @@ urlpatterns = [
     path('vendor_po_prepare/independent_po_generation/<vpo_id>/mark_as_regular/',IVPOMarkRegular,name='indepen-vpo-mark-as-regular-po'),
     path('vendor_po_prepare/independent_po_generation/<vpo_id>/mark_direct_buying/',IVPOMarkDirectBuying,name='indepen-vpo-mark-as-regular-po'),
     #path('vendor_po_prepare/independent_po_generation/<vpo_id>/delete_vpo/',IVPODelete,name='indepen-vpo-delete'),
+
+
+
+
+    #add new payment terms
+    path('<cpo_id>/<vpo_id>/add_new_vendor_payment_terms/', AddNewPaymentTerms, name='add-new-payment-terms'),
+    path('<vpo_id>/add_new_vendor_payment_terms/', IAddNewPaymentTerms, name='independent-add-new-payment-terms'),
 ]

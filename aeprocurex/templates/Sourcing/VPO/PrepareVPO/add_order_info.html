@@ -16,7 +16,7 @@
     
                         <!--Form with header-->
     
-                        <form method="POST">
+                        <form method="POST" autocomplete="off">
                             {% csrf_token %}
                             <div class="card border-primary rounded-0">
                             
@@ -122,17 +122,20 @@
                                             <label>Installation <a style="color:red"> *</a></label>
                                             <input type="text" class="form-control" id="installation" name="installation" required value="{{vendor_po.installation}}">
                                         </div>
-                                        <div class="col-md-12">
-                                            <label>Payment Terms<a style="color:red"> *</a></label>
-                                            <input type="text" class="form-control" id="terms_of_payment" name="terms_of_payment" required value="{{vendor_po.terms_of_payment}}">
+                                        
+                                        <div class="col-md-4">
+                                            <label>Please Select Payment Terms <a style="color:red"> *</a></label>
+                                            <select class="form-control" id="pterms" name="pterms" required>
+                                                <option>{{vendor_po.payment_option.text}}</option>
+                                                {% for item in pterms_list %}
+                                                <option>{{item.text}}</option>
+                                                {% endfor %}
+                                            </select>
+                                            
                                         </div>
-                                        <div class="col-md-6">
-                                            <label>Advance % <a style="color:red"> *</a></label>
-                                            <input type="number" class="form-control" id="advance_percentage" name="advance_percentage" required value="{{vendor_po.advance_percentage}}">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label>Credit Period In Days<a style="color:red"> *</a></label>
-                                            <input type="number" class="form-control" id="payment_term" name="payment_term" required value="{{vendor_po.payment_term}}">
+                                        <div class="col-md-4">
+                                            <br>
+                                            <a href="/api/po_to_vendor/{{cpo_id}}/{{vpo_id}}/add_new_vendor_payment_terms/" class="btn btn-info">Add New Payment Terms</a>
                                         </div>
                                     </div>
 
@@ -167,4 +170,53 @@
         </div>
 </div>
 
+
+ <script type="text/javascript">
+     function AddPTerms() {
+        $('body').append('<div id="requestOverlay" class="request-overlay"></div>'); /*Create overlay on demand*/
+        
+        $("#requestOverlay").show();
+       }
+
+       function MarkDirectBuyPO(checkboxName,vpo_id) {
+        $('body').append('<div id="requestOverlay" class="request-overlay"></div>'); /*Create overlay on demand*/
+        
+        $("#requestOverlay").show();
+         data = {
+             'csrfmiddlewaretoken': '{{ csrf_token }}'
+             }
+             $.ajax({
+               type: "POST",
+               url: "/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/{{vpo_id}}/mark_direct_buying/",
+               data: data,
+               success: function(data) {
+                 window.alert(data.Message);
+                 //window.alert(data.status);
+                 if(data.status == 'completed')
+                    redirect2();
+                  else
+                    redirect1();
+               },
+               failure: function(){
+                 window.alert('Some Error Occurred, Please Try Again');
+                 document.getElementById("btnAbsorve").disabled = false;
+               }
+           }
+         );
+       }
+     
+</script> 
+<style>
+    .request-overlay {
+      z-index: 9999;
+      position: fixed; /*Important to cover the screen in case of scolling content*/
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      text-align: center;
+      background: rgba(200,200,200,0.5) url('/api/media/media/ldm.gif') no-repeat center; /*.gif file or just div with message etc. however you like*/
+  }
+</style>
 {% endblock content %}

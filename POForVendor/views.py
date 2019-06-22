@@ -357,6 +357,9 @@ def VPOAddOrderInformation(request,cpo_id=None,vpo_id=None):
                 context['vendor_po'] = vendor_po
                 context['cpo_id'] = cpo_id
                 context['vpo_id'] = vpo_id
+
+                pterms_list = PaymentTerms.objects.all()
+                context['pterms_list'] = pterms_list
         
                 if type == 'Sourcing':
                         return render(request,"Sourcing/VPO/PrepareVPO/add_order_info.html",context)
@@ -383,9 +386,13 @@ def VPOAddOrderInformation(request,cpo_id=None,vpo_id=None):
                 vendor_po.inco_terms = data['inco_terms']
                 vendor_po.installation = data['installation']
                 
-                vendor_po.terms_of_payment = data['terms_of_payment']
-                vendor_po.payment_term = data['payment_term']
-                vendor_po.advance_percentage = data['advance_percentage']
+                #Payment terms
+                print(data['pterms'])
+                pterms = PaymentTerms.objects.get(text = data['pterms'])
+                vendor_po.payment_option = pterms
+                vendor_po.terms_of_payment = pterms.text
+                vendor_po.payment_term = pterms.days
+                vendor_po.advance_percentage = pterms.advance_percentage
 
                 if vendor_po.di1 != 'None' or vendor_po.di1 != None:
                         vendor_po.di1 = data['di1']
@@ -418,7 +425,37 @@ def VPOAddOrderInformation(request,cpo_id=None,vpo_id=None):
                         vendor_po.di10 = data['di10']
 
                 vendor_po.save()
+
+
                 return HttpResponseRedirect(reverse('vpo-vendor-product-segmentation',args=[cpo_id]))                
+
+#Add New Payment terms
+@login_required(login_url="/employee/login/")
+def AddNewPaymentTerms(request,cpo_id = None, vpo_id = None):
+        context={}
+        u = User.objects.get(username=request.user)
+
+        if request.method == 'GET':
+                return render(request,"Sourcing/VPO/PrepareVPO/add_terms_conditions.html",context)
+        
+        if request.method == 'POST':
+                data = request.POST
+
+                days = int(data['days'])
+                advance_percentage = int(data['advance'])
+
+                if advance_percentage > 100:
+                        return JsonResponse({'Message': 'Advance Percentage should be less than or equealto 100'})
+                
+                PaymentTerms.objects.create(
+                        text = (data['text']).strip(),
+                        days = days,
+                        advance_percentage = advance_percentage,
+                        created_by = u
+                )
+
+                return HttpResponseRedirect(reverse('vpo-vendor-product-segmentation-add-order-information',args=[cpo_id,vpo_id]))
+
 
 #VPO edit vendor data
 @login_required(login_url="/employee/login/")
@@ -1942,6 +1979,7 @@ class VPOApprovalPreview(APIView):
 #                        vpo = VPO.objects.get(id = vpo_id)
 #                        vpo_tracker = VPOTracker.objects.get(po_number=po_number)
 
+
 #                        vpo.po_status = 'Approved'
 #                        vpo_tracker.status = 'Approved' 
 
@@ -2185,9 +2223,15 @@ def Add_grt(pdf,y,contact_person,mobile_no,email1):
         pdf.setFont('Helvetica-Bold', 9)
         cp = contact_person
         if mobile_no != '' and mobile_no != 'None':
-                cp = cp + ', ' + mobile_no
+                try:
+                        cp = cp + ', ' + mobile_no
+                except:
+                        pass
         if email1 != '' and email1 != 'None':
-                cp = cp + ', ' + email1
+                try:
+                        cp = cp + ', ' + email1
+                except:
+                        pass
         pdf.drawString(10,y,"Kind Attention " + cp )
         y = y - 10
         pdf.setFont('Helvetica', 8)
@@ -2869,15 +2913,15 @@ def PO_Generator(po_number):
         email1 = ''
         mobileNo1 = ''
         
-        try:
-                email1 = vpo_object.vendor_contact_person.email1
-        except:
-                pass
+        #try:
+        email1 = vpo_object.vendor_contact_person.email1
+        #except:
+        #        email1 = '1'
 
         try:
                 mobileNo1 = vpo_object.vendor_contact_person.mobileNo1
         except:
-                pass
+                mobileNo1 = ''
 
         y = Add_grt(
                 pdf,
@@ -3331,6 +3375,9 @@ def IVPOAddOrderInformation(request,vpo_id=None):
                 vendor_po = VendorPO.objects.get(id=vpo_id)
                 context['vendor_po'] = vendor_po
                 context['vpo_id'] = vpo_id
+
+                pterms_list = PaymentTerms.objects.all()
+                context['pterms_list'] = pterms_list
         
                 if type == 'Sourcing':
                         return render(request,"Sourcing/VPO/IndependentVPO/add_order_info.html",context)
@@ -3357,9 +3404,13 @@ def IVPOAddOrderInformation(request,vpo_id=None):
                 vendor_po.inco_terms = data['inco_terms']
                 vendor_po.installation = data['installation']
                 
-                vendor_po.terms_of_payment = data['terms_of_payment']
-                vendor_po.payment_term = data['payment_term']
-                vendor_po.advance_percentage = data['advance_percentage']
+                #Payment terms
+                print(data['pterms'])
+                pterms = PaymentTerms.objects.get(text = data['pterms'])
+                vendor_po.payment_option = pterms
+                vendor_po.terms_of_payment = pterms.text
+                vendor_po.payment_term = pterms.days
+                vendor_po.advance_percentage = pterms.advance_percentage
 
                 if vendor_po.di1 != 'None' or vendor_po.di1 != None:
                         vendor_po.di1 = data['di1']
@@ -3393,6 +3444,34 @@ def IVPOAddOrderInformation(request,vpo_id=None):
 
                 vendor_po.save()
                 return HttpResponseRedirect(reverse('indepen-vpo-product-selection',args=[vpo_id]))
+
+#Add New Payment terms
+@login_required(login_url="/employee/login/")
+def IAddNewPaymentTerms(request, vpo_id = None):
+        context={}
+        u = User.objects.get(username=request.user)
+
+        if request.method == 'GET':
+                return render(request,"Sourcing/VPO/PrepareVPO/add_terms_conditions.html",context)
+        
+        if request.method == 'POST':
+                data = request.POST
+
+                days = int(data['days'])
+                advance_percentage = int(data['advance'])
+
+                if advance_percentage > 100:
+                        return JsonResponse({'Message': 'Advance Percentage should be less than or equealto 100'})
+                
+                PaymentTerms.objects.create(
+                        text = (data['text']).strip(),
+                        days = days,
+                        advance_percentage = advance_percentage,
+                        created_by = u
+                )
+
+                return HttpResponseRedirect(reverse('indepen-vpo-add-order-info',args=[vpo_id]))
+
 
 #Vendor info change
 @login_required(login_url="/employee/login/")
@@ -3890,4 +3969,6 @@ def IVPOMarkDirectBuying(request, vpo_id=None):
                 except:
                         return JsonResponse({'Message': 'Error Occured'})
 
-                        
+
+
+
