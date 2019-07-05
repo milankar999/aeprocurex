@@ -1,0 +1,45 @@
+{% extends 'Accounts/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <h2>Pending Invoice Received List</h2>
+            <div class="table-responsive">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>GRN No</th>
+                          <th>Vendor Name</th>
+                          <th>Location</th>
+                          <th>GRN Date</th>
+                          <th>Vendor PO Number</th>
+                          <th>PO Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for item in grn_list %}
+                            <tr>
+                               <td>
+                                   <a href="/grnir/invoice_received/{{item.grn_no}}/details/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td>{{item.grn_no}}</td>
+                                <td>{{item.vendor__name}}</td>
+                                <td>{{item.vendor__location}}</td>
+                                <td>{{item.date}}</td>
+                                <td>{{item.vpo__po_number}}</td>
+                                <td>{{item.vpo__po_date}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No CPO Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable();
+            } );
+            </script>     
+{% endblock content %}

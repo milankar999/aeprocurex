@@ -15,21 +15,29 @@
                           <th>PO No</th>
                           <th>PO Date</th>
                           <th>Requested Amount</th>
+                          <th>Current Status</th>
                         </tr>
                       </thead>
                       <tbody>   
                           {% for item in request_list %}
                             <tr>
+                                <td>{{forloop.counter}}</td>
                                 <td>
+                                  
+                                  {% ifnotequal item.status 'Approved1' %}
                                    <a href="/supplier_payment/payment_request/{{item.id}}/edit/" data-toggle="tooltip" data-placement="top" title="Edit Request"> <span class="glyphicon glyphicon-edit" style="color: blue"></span></a>
                                    <a href="/supplier_payment/payment_request/{{item.id}}/delete/" data-toggle="tooltip" data-placement="top" title="Delete Request"> <span class="glyphicon glyphicon-trash" style="color: red"></span></a>
+                          
+                                  {% endifnotequal %}
+                                  <a href="/supplier_payment/payment_request/{{item.id}}/wave/" data-toggle="tooltip" data-placement="top" title="Wave"> <span class="glyphicon glyphicon-transfer" style="color: green"></span></a>
                                 </td>
-                                <td>{{forloop.counter}}</td>
+                                
                                 <td>{{item.vpo__vpo__vendor__name}}</td>
                                 <td>{{item.vpo__vpo__vendor__location}}</td>
                                 <td>{{item.vpo__po_number}}</td>
                                 <td>{{item.vpo__po_date}}</td>
                                 <td>{{item.amount}}</td>
+                                <td>{{item.status}}</td>
                             </tr>
                           {% empty %}
                             <p>No Vendor PO Found</p>
@@ -40,7 +48,9 @@
         </div>
         <script type="text/javascript">
             $(document).ready( function () {
-                $('#dcustomer').DataTable();
+                $('#dcustomer').DataTable({
+                  "paging":   false,
+                });
             } );
             </script>     
 {% endblock content %}

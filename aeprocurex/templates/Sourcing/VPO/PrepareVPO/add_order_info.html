@@ -57,6 +57,7 @@
                                         <div class="col-md-12">
                                             <label>Shipping Address<a style="color:red"> *</a></label>
                                             <input type="text" class="form-control" id="shipping_address" name="shipping_address" required value="{{vendor_po.shipping_address}}">        
+                                            <input type="button" class="btn btn-success pull-right" name="set_Value" id="set_Value" value="Change Shipping Address TO Customer Delivery Address" onclick="setValue()" />
                                         </div>
                                     </div>
                                     <div class="row">
@@ -172,6 +173,9 @@
 
 
  <script type="text/javascript">
+    function setValue() {
+        document.getElementById('shipping_address').value = "{{cpo_shipping_address}}";
+    }
      function AddPTerms() {
         $('body').append('<div id="requestOverlay" class="request-overlay"></div>'); /*Create overlay on demand*/
         

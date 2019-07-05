@@ -10,9 +10,9 @@
     <div class="row">
       <label class="form-input" for="basic_value">Amount :: {{request_details.amount}}</label><br>
       <label class="form-input" for="gst_value">Note :: {{request_details.notes}}</label>        <br>
-      {% if payment_request.attachment1 %}
-      <label class="form-input" for="supporting_document">Supporting Document &nbsp;&nbsp; <a href="/api/media/{{payment_request.attachment1}}" target="-blank">Click Here</a></label>   
-      {% endif %}
+      {% ifnotequal request_details.attachment1 "" %}
+      <label class="form-input" for="supporting_document">Supporting Document &nbsp;&nbsp; <a href="/api/media/{{request_details.attachment1}}" target="-blank">Click Here</a></label>   
+      {% endifnotequal %}
     </div>
     <div class="row">
       <button class="btn btn-danger pull-left" data-toggle="modal" data-target="#reject">Reject &nbsp;<span class="glyphicon glyphicon-remove"></span></button>

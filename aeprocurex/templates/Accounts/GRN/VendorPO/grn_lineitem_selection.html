@@ -1,0 +1,105 @@
+{% extends 'Accounts/base.html' %}
+{% load static %}
+{% block content %}
+<div class="">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+        <h2>Please Select The Selected Lineitem</h2>        
+       <div class="table-responsive">          
+               <table id="product" class="table table-hover table-bordered table-sm" width="100%">
+                 <thead>
+                   <tr>
+                     <th></th>
+                     <th>Sl No</th>
+                     <th>Product Title</th>
+                     <th>Description</th>
+                     <th>Model</th>
+                     <th>Brand</th>
+                     <th>Product Code</th>
+                     <th>Part no</th>
+                     <th>Pack Size</th>
+                     <th>HSN Code</th>
+                     <th>UOM</th>
+                     <th>Quantity</th>
+                     <th>Unit Price</th>
+                     <th>Total Basic Value</th>
+                     <th>GST (%)</th>
+                     <th>Including GST Value</th>
+                     <th>Receivable Quantity</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                        
+                     {% for item in vpo_lineitem %}
+                       <tr>
+                           <td>
+                              <input type="checkbox" 
+                              name="vpo_lineitem"
+                              value="{{item.id}}"
+                              change="getCheckedCheckboxesFor('vpo_lineitem')"
+                              />       
+                           </td>
+                           <td>{{forloop.counter}}</td>
+                           <td>{{item.product_title}}</td>
+                           <td>{{item.description}}</td>
+                           <td>{{item.model}}</td>
+                           <td>{{item.brand}}</td>
+                           <td>{{item.product_code}}</td>
+                           <td>{{item.part_no}}</td>      
+                           <td>{{item.pack_size}}</td>
+                           <td>{{item.hsn_code}}</td>
+                           <td>{{item.uom}}</td>
+                           <td>{{item.quantity}}</td>
+                           <td>{{item.unit_price}}</td>
+                           <td>{{item.total_basic_price}}</td>
+                           <td>{{item.gst}}</td>
+                           <td>{{item.total_price}}</td>
+                           <td>{{item.receivable_quantity}}</td>
+                       </tr>
+                     {% empty %}
+                       <p>No Lineitem Found</p>
+                     {% endfor %}
+                 </tbody>
+               </table>
+       </div><br>
+       <div class="container">
+          <button class="btn btn-success pull-right" id='preceed' type="button" onclick="getCheckedCheckboxesFor('vpo_lineitem');" value="Get Values">Go with Selected Items</button>
+       </div>
+</div>   
+<script type="text/javascript">
+  function getCheckedCheckboxesFor(checkboxName) {
+       var checkboxes = document.querySelectorAll('input[name="' + checkboxName + '"]:checked'), values = [];
+       Array.prototype.forEach.call(checkboxes, function(el) {
+         values = values + ',' + el.value;
+     });
+     if(values.length==0){
+       alert('Minimum one item you have To Select');
+     }
+     else{
+       document.getElementById("preceed").disabled = true;
+         data = {
+           'item_list' : values,
+           'csrfmiddlewaretoken': '{{ csrf_token }}'
+           }
+           $.ajax({
+             type: "POST",
+             url: "",
+             data: data,
+             success: function(data) {
+               console.log(data.grn_no);
+               window.location.href ="/grnir/supplier_po/"+ data.grn_no +"/selected_lineitem/";
+             },
+             failure: function(){
+               window.alert('Some Error Occurred, Please Try Again');
+               document.getElementById("preceed").disabled = false;
+             }
+         }
+       );
+     }
+   }
+</script>
+{% endblock content %}

@@ -354,6 +354,9 @@ def VPOAddOrderInformation(request,cpo_id=None,vpo_id=None):
         
         if request.method == 'GET':
                 vendor_po = VendorPO.objects.get(id=vpo_id)
+                cpo = CustomerPO.objects.get(id=cpo_id)
+
+                context['cpo_shipping_address'] = cpo.shipping_address
                 context['vendor_po'] = vendor_po
                 context['cpo_id'] = cpo_id
                 context['vpo_id'] = vpo_id
@@ -687,6 +690,9 @@ def VPOMarkRegular(request,cpo_id=None,vpo_id=None):
                         vpo_lineitem = VendorPOLineitems.objects.filter(vpo=vpo)
 
                         vpo_lineitem_count = VendorPOLineitems.objects.filter(vpo = vpo).count()
+
+                        if vpo.vpo.vendor.gst_number == '' or vpo.vpo.vendor.gst_number == 'None':
+                                return JsonResponse({'Message': 'GST No Not Found'})
 
                         if vpo_lineitem_count == 0:
                                 return JsonResponse({'Message': 'No Lineitem Found'})
@@ -3096,6 +3102,216 @@ def VPOApprovedReadyList(request):
                         )
                         context['vpo_list'] = vpo_list
                         return render(request,"Sales/VPO/ready_approval_list.html",context)
+
+#VPO Recently Approved List
+@login_required(login_url="/employee/login/")
+def VPORecentlyApprovedList(request):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+                if type == 'Sourcing':
+                        vpo_list = VendorPOTracker.objects.filter(status='Approved',order_status='Order Preparing',vpo__requester=u).values(
+                                'po_number',
+                                'vpo__vendor__name',
+                                'vpo__vendor__location',
+                                'po_number',
+                                'po_date',
+                                'vpo__cpo__customer__name',
+                                'basic_value',
+                                'total_value',
+                                'all_total_value',
+                                'vpo__currency__currency_code',
+                                'vpo_type',
+                                'order_status',
+                                'remarks'
+                        )
+                        context['vpo_list'] = vpo_list
+                        return render(request,"Sourcing/VPO/approval_list.html",context)
+
+                if type == 'Sales':
+                        vpo_list = VendorPOTracker.objects.filter(status='Approved',order_status='Order Preparing').values(
+                                'po_number',
+                                'vpo__vendor__name',
+                                'vpo__vendor__location',
+                                'po_date',
+                                'vpo__cpo__customer__name',
+                                'basic_value',
+                                'total_value',
+                                'all_total_value',
+                                'vpo_type',
+                                'vpo__delivery_date',
+                                'order_status',
+                                'remarks',
+                                'vpo__requester__first_name',
+                                'vpo__requester__last_name',
+                                'vpo__terms_of_payment'
+                        )
+                        context['vpo_list'] = vpo_list
+                        return render(request,"Sales/VPO/ready_approval_list.html",context)
+
+#VPO Materila Processing List
+@login_required(login_url="/employee/login/")
+def VPOMaterialProcessingList(request):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+                if type == 'Sourcing':
+                        vpo_list = VendorPOTracker.objects.filter(Q(status='Approved',order_status='PO Released',vpo__requester=u) | 
+                                Q(status='Approved',order_status='Order Accepted',vpo__requester=u) |
+                                Q(status='Approved',order_status='Material Processing',vpo__requester=u)
+                                ).values(
+                                        'po_number',
+                                        'vpo__vendor__name',
+                                        'vpo__vendor__location',
+                                        'po_number',
+                                        'po_date',
+                                        'vpo__cpo__customer__name',
+                                        'basic_value',
+                                        'total_value',
+                                        'all_total_value',
+                                        'vpo__currency__currency_code',
+                                        'vpo_type',
+                                        'order_status',
+                                        'remarks'
+                                )
+                        context['vpo_list'] = vpo_list
+                        return render(request,"Sourcing/VPO/approval_list.html",context)
+
+                if type == 'Sales':
+                        vpo_list = VendorPOTracker.objects.filter(Q(status='Approved',order_status='PO Released') | 
+                                Q(status='Approved',order_status='Order Accepted') |
+                                Q(status='Approved',order_status='Material Processing')
+                                ).values(
+                                        'po_number',
+                                        'vpo__vendor__name',
+                                        'vpo__vendor__location',
+                                        'po_date',
+                                        'vpo__cpo__customer__name',
+                                        'basic_value',
+                                        'total_value',
+                                        'all_total_value',
+                                        'vpo_type',
+                                        'vpo__delivery_date',
+                                        'order_status',
+                                        'remarks',
+                                        'vpo__requester__first_name',
+                                        'vpo__requester__last_name',
+                                        'vpo__terms_of_payment'
+                                )
+                        context['vpo_list'] = vpo_list
+                        return render(request,"Sales/VPO/ready_approval_list.html",context)
+
+#VPO Received List
+@login_required(login_url="/employee/login/")
+def VPOIntransitList(request):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+                if type == 'Sourcing':
+                        vpo_list = VendorPOTracker.objects.filter(status='Approved',order_status='Intransit',vpo__requester=u).values(
+                                'po_number',
+                                'vpo__vendor__name',
+                                'vpo__vendor__location',
+                                'po_number',
+                                'po_date',
+                                'vpo__cpo__customer__name',
+                                'basic_value',
+                                'total_value',
+                                'all_total_value',
+                                'vpo__currency__currency_code',
+                                'vpo_type',
+                                'order_status',
+                                'remarks'
+                        )
+                        context['vpo_list'] = vpo_list
+                        return render(request,"Sourcing/VPO/approval_list.html",context)
+
+                if type == 'Sales':
+                        vpo_list = VendorPOTracker.objects.filter(status='Approved',order_status='Intransit').values(
+                                'po_number',
+                                'vpo__vendor__name',
+                                'vpo__vendor__location',
+                                'po_date',
+                                'vpo__cpo__customer__name',
+                                'basic_value',
+                                'total_value',
+                                'all_total_value',
+                                'vpo_type',
+                                'vpo__delivery_date',
+                                'order_status',
+                                'remarks',
+                                'vpo__requester__first_name',
+                                'vpo__requester__last_name',
+                                'vpo__terms_of_payment'
+                        )
+                        context['vpo_list'] = vpo_list
+                        return render(request,"Sales/VPO/ready_approval_list.html",context)
+
+
+
+#VPO Received List
+@login_required(login_url="/employee/login/")
+def VPOReceivedList(request):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        
+        if request.method == 'GET':
+                if type == 'Sourcing':
+                        vpo_list = VendorPOTracker.objects.filter(status='GRN_Complete',vpo__requester=u).values(
+                                'po_number',
+                                'vpo__vendor__name',
+                                'vpo__vendor__location',
+                                'po_number',
+                                'po_date',
+                                'vpo__cpo__customer__name',
+                                'basic_value',
+                                'total_value',
+                                'all_total_value',
+                                'vpo__currency__currency_code',
+                                'vpo_type',
+                                'order_status',
+                                'remarks'
+                        )
+                        context['vpo_list'] = vpo_list
+                        return render(request,"Sourcing/VPO/approval_list.html",context)
+
+                if type == 'Sales':
+                        vpo_list = VendorPOTracker.objects.filter(status='GRN_Complete').values(
+                                'po_number',
+                                'vpo__vendor__name',
+                                'vpo__vendor__location',
+                                'po_date',
+                                'vpo__cpo__customer__name',
+                                'basic_value',
+                                'total_value',
+                                'all_total_value',
+                                'vpo_type',
+                                'vpo__delivery_date',
+                                'order_status',
+                                'remarks',
+                                'vpo__requester__first_name',
+                                'vpo__requester__last_name',
+                                'vpo__terms_of_payment'
+                        )
+                        context['vpo_list'] = vpo_list
+                        return render(request,"Sales/VPO/ready_approval_list.html",context)
+
+
 
 #VPO Approved Ready List
 @login_required(login_url="/employee/login/")

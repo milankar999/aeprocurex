@@ -1,0 +1,48 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <h2>These are The Invoice List Currently Creation in Progress</h2>
+        <label>Either You Delete or Continue with these invoice</label>
+            <div class="table-responsive">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Invoice No</th>
+                          <th>Invoice Date</th>
+                          <th>Customer</th>
+                          <th>Location</th>
+                          <th>Customer PO No</th>
+                          <th>Customer PO Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for invoice in processing_invoicce_list %}
+                            <tr>
+                               <td>
+                                   <a href="/invoice/new_creation/{{invoice.invoice_no}}/selected_items/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td>{{invoice.invoice_no}}</td>
+                                <td>{{invoice.invoice_date}}</td>
+                                <td>{{invoice.customer.name}}</td>
+                                <td>{{invoice.customer.location}}</td>
+                                <td>{{invoice.po_reference}}</td>
+                                <td>{{invoice.po_date}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No CPO Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+            <hr>
+            <a class="btn btn-info pull-right" href="/invoice/new_creation/customer_selection/">Direct Invoice</a>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable();
+            } );
+            </script>     
+{% endblock content %}

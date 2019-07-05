@@ -33,13 +33,13 @@ def purchare_order_selection(request):
                 if processing_count > 0:
                         processing_invoice_list = InvoiceTracker.objects.filter(generating_status='creation_in_progress')
                         context['processing_invoicce_list'] = processing_invoice_list
-                        return render(request,"Sales/Invoice/invoice_processing_list.html",context)
+                        return render(request,"Accounts/Invoice/invoice_processing_list.html",context)
 
-                cpo_list = CustomerPO.objects.all()
+                cpo_list = CustomerPO.objects.filter(Q(status='direct_processing') | Q(status = 'po_processed') | Q(status = 'Full_Product_Received'))
                 context['cpo_list'] = cpo_list
 
-                if type == 'Sales':
-                        return render(request,"Sales/Invoice/purchase_order_selection.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/Invoice/purchase_order_selection.html",context)
 
 def get_financial_year(datestring):
         date = datetime.datetime.strptime(datestring, "%Y-%m-%d").date()
@@ -77,8 +77,8 @@ def invoice_lineitem_selection(request,cpo_id=None):
                 context['pending_delivery'] = pending_delivery
                 context['cpo_lineitem'] = cpo_lineitem
                 
-                if type == 'Sales':
-                        return render(request,"Sales/Invoice/invoice_pending_lineitem.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/Invoice/invoice_pending_lineitem.html",context)
 
         if request.method == 'POST':
                 data = request.POST
@@ -154,8 +154,8 @@ def invoice_selected_lineitem(request,invoice_no=None):
                 context['invoice_total_gst'] = round((invoice.total_value - invoice.basic_value),2)
                 context['invoice_total'] = invoice.total_value
 
-                if type == 'Sales':
-                        return render(request,"Sales/Invoice/invoice_selected_lineitem.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/Invoice/invoice_selected_lineitem.html",context)
 
 @login_required(login_url="/employee/login/")
 def invoice_delete(request,invoice_no=None):

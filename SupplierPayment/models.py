@@ -1,5 +1,6 @@
 from django.db import models
 from POForVendor.models import *
+from BankAccount.models import *
 import uuid
 
 class SupplierPaymentRequest(models.Model):
@@ -20,6 +21,7 @@ class SupplierPaymentRequest(models.Model):
         def __str__(self):
                 return str(self.vpo.po_number) + ' / ' + str(self.amount)
 
+
 class SupplierPaymentInfo(models.Model):
         id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
         payment_request = models.ForeignKey(SupplierPaymentRequest, on_delete=models.CASCADE)
@@ -30,8 +32,13 @@ class SupplierPaymentInfo(models.Model):
         attachment1 = models.FileField(upload_to='supplier_payment/',null=True,blank=True)
         #attachment2 = models.FileField(upload_to='supplier_payment/',null=True,blank=True)
         #attachment3 = models.FileField(upload_to='supplier_payment/',null=True,blank=True)
+        transaction_number = models.CharField(max_length = 200, null=True, blank=True)
+        transaction_date = models.DateField(null=True, blank=True)
 
-        payment_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+        payment_date = models.DateTimeField(auto_now_add=True,null=True, blank=True)
+        bank = models.ForeignKey(VendorBankAccount, on_delete = models.SET_NULL, null=True, blank = True)
+
+        acknowledgement = models.CharField(max_length = 200, default = 'no')
 
         def __str__(self):
                 return str(self.payment_request.vpo.po_number) + ' / ' + str(self.amount)

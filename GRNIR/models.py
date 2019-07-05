@@ -6,8 +6,8 @@ import uuid
 
 class GRNTracker(models.Model):
         grn_no = models.CharField(max_length=50,primary_key=True)
-        vpo = models.ForeignKey(VendorPOTracker,null=True,blank=True,on_delete=models.CASCADE)
-        cpo = models.ForeignKey(CustomerPO,null=True,blank=True,on_delete=models.CASCADE)
+        vpo = models.ForeignKey(VendorPOTracker,null=True,blank=True,on_delete=models.SET_NULL)
+        cpo = models.ForeignKey(CustomerPO,null=True,blank=True,on_delete=models.SET_NULL)
         vendor = models.ForeignKey(SupplierProfile,on_delete=models.CASCADE)
 
         date = models.DateTimeField(auto_now_add=True)
@@ -17,6 +17,8 @@ class GRNTracker(models.Model):
 
         status = models.CharField(max_length=50,null=True,blank=True,default = 'creation_in_progress')
         ir_status = models.CharField(max_length=50,null=True,blank=True,default = 'incomplete')
+
+        grn_type = models.CharField(max_length=30, default='regular')
 
         def __str__(self):
                 return self.vendor.name + ' ' + str(self.date)
@@ -77,6 +79,7 @@ class IRTracker(models.Model):
 
         converted_total_basic_price = models.FloatField()
         converted_total_price = models.FloatField()
+        comments = models.TextField(null=True, blank=True)
 
         def __str__(self):
                 return self.grn.grn_no + self.invoice_no

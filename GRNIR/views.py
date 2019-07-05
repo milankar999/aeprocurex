@@ -41,8 +41,8 @@ def IntransitSupplierPOList(request):
                 )
                 context['vpo_list'] = vpo_list
 
-                if type == 'GRN':
-                        return render(request,"GRN/GRN/VendorPO/intransit_list.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/GRN/VendorPO/intransit_list.html",context)
 
 #Direct Processing Po Lineitem
 @login_required(login_url="/employee/login/")
@@ -59,8 +59,8 @@ def IntransitSupplierPOLineitem(request,vpo_no=None):
                 context['vpo_lineitem'] = vpo_lineitem
                 context['vpo_no'] = vpo_no
 
-                if type == 'GRN':
-                        return render(request,"GRN/GRN/VendorPO/intransit_lineitem.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/GRN/VendorPO/intransit_lineitem.html",context)
 
 def get_financial_year(datestring):
         date = datetime.datetime.strptime(datestring, "%Y-%m-%d").date()
@@ -96,8 +96,8 @@ def SelectGRNLineitem(request,vpo_no=None):
                 context['vpo_lineitem'] = vpo_lineitem
                 context['vpo_no'] = vpo_no
 
-                if type == 'GRN':
-                        return render(request,"GRN/GRN/VendorPO/grn_lineitem_selection.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/GRN/VendorPO/grn_lineitem_selection.html",context)
 
         if request.method == 'POST':
                 data = request.POST
@@ -122,7 +122,9 @@ def SelectGRNLineitem(request,vpo_no=None):
                 for item in item_list:
                         if item != '':
                                 vpo_lineitem = VendorPOLineitems.objects.get(id = item)
-                                print(vpo_lineitem.product_title)
+                                
+                                item_total_price = round((float(vpo_lineitem.receivable_quantity) * float(vpo_lineitem.unit_price)),2)
+                                item_total_price_with_gst = round((item_total_price + (item_total_price * float(vpo_lineitem.gst) / 100)),2)
                                 GRNLineitem.objects.create(
                                         grn = grn,
                                         vpo_lineitem = vpo_lineitem,
@@ -137,10 +139,10 @@ def SelectGRNLineitem(request,vpo_no=None):
                                         uom = vpo_lineitem.uom,
                                         quantity = vpo_lineitem.receivable_quantity,
                                         unit_price = vpo_lineitem.unit_price,
-                                        gst = vpo_lineitem.gst
-
+                                        gst = vpo_lineitem.gst,
+                                        total_basic_price = item_total_price,
+                                        total_price = item_total_price_with_gst
                                 )
-                
                 return JsonResponse({"grn_no" : grn_no})
 
 #GRN Selected Lineitem
@@ -162,8 +164,8 @@ def GRNSelectedLineitem(request,grn_no=None):
                 context['vendor'] = grn.vendor.name
                 context['location'] = grn.vendor.location
 
-                if type == 'GRN':
-                        return render(request,"GRN/GRN/VendorPO/grn_selected_lineitem.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/GRN/VendorPO/grn_selected_lineitem.html",context)
 
 #GRN Selected Lineitem Edit
 @login_required(login_url="/employee/login/")
@@ -178,8 +180,8 @@ def GRNSelectedLineitemChangeQuantity(request,grn_no=None,item=None):
                 grn_lineitem = GRNLineitem.objects.get(id=item)
                 context['grn_lineitem'] = grn_lineitem
 
-                if type == 'GRN':
-                        return render(request,"GRN/GRN/VendorPO/grn_chnage_quantity.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/GRN/VendorPO/grn_chnage_quantity.html",context)
 
         if request.method == 'POST':
                 data = request.POST
@@ -211,8 +213,8 @@ def GRNSelectedLineitemRemove(request,grn_no=None,item=None):
                 grn_lineitem = GRNLineitem.objects.get(id=item)
                 context['grn_lineitem'] = grn_lineitem
 
-                if type == 'GRN':
-                        return render(request,"GRN/GRN/VendorPO/remove_item.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/GRN/VendorPO/remove_item.html",context)
 
         if request.method == 'POST':
                 data = request.POST
@@ -259,7 +261,7 @@ def GRNProcessFurther(request,grn_no=None):
                 if lineitem_count == 0:
                         return JsonResponse({"Message" : "No Lineitem Found"})
 
-                return render(request,"GRN/GRN/VendorPO/grn_proceed.html",context)
+                return render(request,"Accounts/GRN/VendorPO/grn_proceed.html",context)
 
 
 #GRN Document
@@ -294,6 +296,7 @@ def vpo_status_changer(po_number):
                         return
 
         vpo.status = 'GRN_Complete'
+        vpo.order_status = 'Received'
         vpo.save()
         return
 
@@ -385,8 +388,8 @@ def DirectProcessingCustomerPOList(request):
                 )
                 context['cpo_list'] = cpo_list
 
-                if type == 'GRN':
-                        return render(request,"GRN/GRN/CustomerPO/direct_processing_list.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/GRN/CustomerPO/direct_processing_list.html",context)
 
 
 #Direct Processing Customer PO Lineitems
@@ -404,8 +407,8 @@ def DirectProcessingCustomerPOLineitems(request, cpo_no=None):
                 context['cpo_lineitems'] = cpo_lineitems
                 context['cpo_no'] = cpo_no
 
-                if type == 'GRN':
-                        return render(request,"GRN/GRN/CustomerPO/direct_processing_lineitems.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/GRN/CustomerPO/direct_processing_lineitems.html",context)
 
 
 #Direct Processing Customer PO Lineitems
@@ -432,8 +435,8 @@ def DirectProcessingCustomerPOVendorSelection(request, cpo_no=None):
                 context['vendor_list'] = vendor_list
                 context['cpo_no'] = cpo_no
 
-                if type == 'GRN':
-                        return render(request,"GRN/GRN/CustomerPO/vendor_selection.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/GRN/CustomerPO/vendor_selection.html",context)
 
 
 #Direct Processing Product Selection
@@ -451,8 +454,8 @@ def DirectProcessingCustomerPOProductSelection(request, cpo_no=None, vendor_id=N
                 context['cpo_lineitems'] = cpo_lineitems
                 context['cpo_no'] = cpo_no
 
-                if type == 'GRN':
-                        return render(request,"GRN/GRN/CustomerPO/direct_processing_lineitem_selection.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/GRN/CustomerPO/direct_processing_lineitem_selection.html",context)
 
         if request.method == 'POST':
                 data = request.POST
@@ -471,7 +474,8 @@ def DirectProcessingCustomerPOProductSelection(request, cpo_no=None, vendor_id=N
                         cpo = cpo,
                         vendor = vendor,
                         grn_by = u,
-                        financial_year = financial_year
+                        financial_year = financial_year,
+                        grn_type = 'deirect_processing_customer_po'
                 )
 
 
@@ -513,8 +517,8 @@ def DirectGRNVendorSelection(request):
                 vendor_list = SupplierProfile.objects.all()
                 context['vendor_list'] = vendor_list
 
-                if type == 'GRN':
-                        return render(request,"GRN/GRN/DirectGRN/vendor_selection.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/GRN/DirectGRN/vendor_selection.html",context)
 
         if request.method == 'POST':
                 data = request.POST
@@ -531,7 +535,8 @@ def DirectGRNVendorSelection(request):
                         grn_no = grn_no,
                         vendor = vendor,
                         grn_by = u,
-                        financial_year = financial_year
+                        financial_year = financial_year,
+                        grn_type = 'direct_material_received'
                 )
                 return JsonResponse({'Message' : 'Success','grn_no' : grn_no})
 
@@ -554,8 +559,8 @@ def DirectGRNProductEntry(request, grn_no=None):
                 context['vendor_location'] = grn.vendor.location
                 context['grn_no'] = grn_no
 
-                if type == 'GRN':
-                        return render(request,"GRN/GRN/DirectGRN/grn_lineitem.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/GRN/DirectGRN/grn_lineitem.html",context)
 
         if request.method == 'POST':
                 data = request.POST
@@ -610,8 +615,8 @@ def DirectGRNProductEdit(request, grn_no=None, lineitem_id=None):
 
                 context['grn_lineitem'] = grn_lineitem
 
-                if type == 'GRN':
-                        return render(request,"GRN/GRN/DirectGRN/grn_lineitem_edit.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/GRN/DirectGRN/grn_lineitem_edit.html",context)
 
         if request.method == 'POST':
                 data = request.POST
@@ -661,14 +666,137 @@ def DirectGRNProductDelete(request, grn_no=None, lineitem_id=None):
 
                 context['grn_lineitem'] = grn_lineitem
 
-                if type == 'GRN':
-                        return render(request,"GRN/GRN/DirectGRN/grn_lineitem_delete.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/GRN/DirectGRN/grn_lineitem_delete.html",context)
 
         if request.method == 'POST':
                 grn_lineitem = GRNLineitem.objects.get(id=lineitem_id)
                 grn_lineitem.delete()
 
                 return HttpResponseRedirect(reverse('direct-grn-product-entry',args=[grn_no]))
+
+
+
+
+##-----------------------------------------------------------------------Manage Inwards---------------------------------------------------------------------
+
+#Inwards list by grn
+@login_required(login_url="/employee/login/")
+def InwardsByGRN(request):
+        context={}
+        context['inwards'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+    
+        if request.method == 'GET':
+                grn_list = GRNTracker.objects.filter(Q(status = 'completed') | Q(status = 'ir_completed')).values(
+                    'grn_no',
+                    'vpo__po_number',
+                    'vpo__po_date',
+                    'vendor__name',
+                    'vendor__location',
+                    'date',
+                    'ir_status',
+                    'grn_type'
+                )
+                context['grn_list'] = grn_list
+
+                if type == 'Accounts':
+                        return render(request,"Accounts/Inwards/all_grn_list.html",context)
+
+#Inwards list by items
+@login_required(login_url="/employee/login/")
+def InwardsByItems(request):
+        context={}
+        context['inwards'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+    
+        if request.method == 'GET':
+                grn_lineitem = GRNLineitem.objects.filter(grn__status = 'completed').values(
+                    'grn__grn_no',
+                    'grn__vpo__po_number',
+                    'grn__vendor__name',
+                    'product_title',
+                    'description',
+                    'model',
+                    'brand',
+                    'quantity',
+                    'uom',
+                    'grn__ir_status'
+                )
+                context['grn_lineitem'] = grn_lineitem
+                
+
+                if type == 'Accounts':
+                        return render(request,"Accounts/Inwards/all_item_list.html",context)
+
+#inward grn details
+@login_required(login_url="/employee/login/")
+def InwardGRNDetails(request, grn_no=None):
+        context={}
+        context['inwards'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                grn = GRNTracker.objects.get(grn_no = grn_no)
+                grn_lineitem = GRNLineitem.objects.filter(grn = grn).values(
+                        'id',
+                        'product_title',
+                        'description',
+                        'model',
+                        'brand',
+                        'product_code',
+                        'hsn_code',
+                        'uom',
+                        'quantity',
+                        'unit_price',
+                        'total_basic_price',
+                        'gst',
+                        'total_price'
+                )
+
+                context['grn_lineitem'] = grn_lineitem
+                context['vendor_name'] = grn.vendor.name
+                context['vendor_location'] = grn.vendor.location
+                context['grn_no'] = grn_no
+                context['grn_date'] = grn.date
+
+                if type == 'Accounts':
+                        return render(request,"Accounts/Inwards/grn_details.html",context)
+
+#inward grn delete
+@login_required(login_url="/employee/login/")
+def InwardGRNDelete(request, grn_no=None):
+        context={}
+        context['inwards'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                grn = GRNTracker.objects.get(grn_no = grn_no)
+
+                if grn.grn_type == 'regular':
+                        grn_lineitem = GRNLineitem.objects.filter(grn = grn)
+                        for item in grn_lineitem:
+                                item.vpo_lineitem.receivable_quantity = item.vpo_lineitem.receivable_quantity + item.quantity
+                                item.vpo_lineitem.save()
+
+                        grn.status = 'deleted'
+                        grn.save()
+                        grn.vpo.status='Approved'
+                        grn.vpo.save()
+                        return HttpResponseRedirect(reverse('intransit-supplier-po-list'))
+                
+                elif grn.grn_type == 'direct_material_received':
+                        grn.status = 'deleted'
+                        grn.save()
+                        return HttpResponseRedirect(reverse('inwards-by-grn'))
 
 
 ##----------------------------------------------------------------------Invoice Receive---------------------------------------------------------------------------------------------
@@ -683,7 +811,7 @@ def IRPendingList(request):
         context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if request.method == 'GET':
-                grn_list = GRNTracker.objects.filter(status = 'completed').values(
+                grn_list = GRNTracker.objects.filter(Q(status = 'completed') & Q(ir_status = 'incomplete')).values(
                         'grn_no',
                         'vendor__name',
                         'vendor__location',
@@ -693,8 +821,8 @@ def IRPendingList(request):
                 )
                 context['grn_list'] = grn_list
 
-                if type == 'GRN':
-                        return render(request,"GRN/IR/pending_list.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/IR/pending_list.html",context)
 
 
 #Pending Lineitem
@@ -756,8 +884,8 @@ def IRPendingGRNLineitem(request, grn_no=None):
                         context['current_currency'] = CurrencyIndex.DEFAULT_PK
                         context['conversion_rate'] = 1
 
-                if type == 'GRN':
-                        return render(request,"GRN/IR/pending_grn_lineitems.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/IR/pending_grn_lineitems.html",context)
 
         if request.method == 'POST':
 
@@ -842,8 +970,8 @@ def IRLineitemPriceChange(request, grn_no=None, lineitem_id = None):
                 lineitem = GRNLineitem.objects.get(id = lineitem_id)
                 context['grn_lineitem'] = lineitem
 
-                if type == 'GRN':
-                        return render(request,"GRN/IR/ir_change_price.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/IR/ir_change_price.html",context)
 
         if request.method == 'POST':
                 lineitem = GRNLineitem.objects.get(id = lineitem_id)
@@ -862,7 +990,6 @@ def IRLineitemPriceChange(request, grn_no=None, lineitem_id = None):
 
                 return HttpResponseRedirect(reverse('invoice-received-pending-grn-lineitem',args=[grn_no]))
 
-
 #Add Supplier Invoice 
 @login_required(login_url="/employee/login/")
 def IRPendingGRNAddInvoice(request, grn_no=None, ir_id = None):
@@ -879,8 +1006,8 @@ def IRPendingGRNAddInvoice(request, grn_no=None, ir_id = None):
                 context['ir_attachment'] = ir_attachment
                 context['grn_no'] = grn_no
                 context['ir_id'] = ir_id
-                if type == 'GRN':
-                        return render(request,"GRN/IR/ir_add_document.html",context)
+                if type == 'Accounts':
+                        return render(request,"Accounts/IR/ir_add_document.html",context)
 
         if request.method == 'POST':
                 data = request.POST
@@ -912,9 +1039,244 @@ def IRComplete(request, grn_no=None, ir_id = None):
                 if ir_attachment_count < 1:
                         return JsonResponse({'Message': 'Attachment Not Found'})
 
-                grn.status = 'ir_completed'
+                grn.ir_status = 'completed'
                 grn.save()
 
                 return JsonResponse({'Message': 'Success'})
 
-#
+#Received Linvoice List
+@login_required(login_url="/employee/login/")
+def ReceivedInvoiceList(request):
+        context={}
+        context['ir'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                ir_list = IRTracker.objects.filter(grn__status = 'completed').values(
+                        'id',
+                        'invoice_no',
+                        'invoice_date',
+                        'total_basic_price',
+                        'total_price',
+                        'received_currency',
+                        'grn__grn_no',
+                        'grn__vendor__name',
+                        'grn__vpo__po_number',
+                        'grn__vpo__po_date'
+                )
+                context['ir_list'] = ir_list
+
+                if type == 'Accounts':
+                        return render(request,"Accounts/IR/received_invoice_list.html",context)
+
+#Received Invoice Details
+@login_required(login_url="/employee/login/")
+def ReceivedInvoiceDetails(request, id=None):
+        context={}
+        context['ir'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                ir = IRTracker.objects.get(id=id)
+                grn = ir.grn
+                grn_lineitem = GRNLineitem.objects.filter(grn = grn).values(
+                        'id',
+                        'product_title',
+                        'description',
+                        'model',
+                        'brand',
+                        'product_code',
+                        'hsn_code',
+                        'uom',
+                        'quantity',
+                        'unit_price',
+                        'total_basic_price',
+                        'gst',
+                        'total_price'
+                )
+
+                total_basic_value = 0
+                total_value = 0
+
+                for item in grn_lineitem:
+                        total_basic_value = total_basic_value + item['total_basic_price']
+                        total_value = total_value + item['total_price']
+
+                context['total_basic_value'] = total_basic_value
+                context['total_value'] = total_value
+                context['vendor_name'] = grn.vendor.name
+                context['vendor_location'] = grn.vendor.location
+                context['grn_no'] = grn.grn_no
+                context['grn_date'] = grn.date
+                context['grn_lineitem'] = grn_lineitem
+                try:
+                        context['currency'] = grn.vpo.vpo.currency.currency_code
+                except:
+                        context['currency'] = 'INR'
+
+                
+                
+                currency_list = CurrencyIndex.objects.all()
+                context['currency_list'] = currency_list
+
+                try:
+                        context['current_currency'] = grn.vpo.vpo.currency
+                        context['conversion_rate'] = grn.vpo.vpo.inr_value
+
+                except:
+                        context['current_currency'] = CurrencyIndex.DEFAULT_PK
+                        context['conversion_rate'] = 1
+
+                context['ir'] = ir
+
+                irAttachment = IRAttachment.objects.filter(ir=ir).values(
+                        'description',
+                        'document_no',
+                        'document_date',
+                        'attachment'
+                )
+                context['irAttachment'] = irAttachment
+
+                if type == 'Accounts':
+                        return render(request,"Accounts/IR/received_invoice_details.html",context)
+
+
+#Received Invoice Details Edit
+@login_required(login_url="/employee/login/")
+def ReceivedInvoiceDetailsEdit(request, id=None):
+        context={}
+        context['ir'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                ir = IRTracker.objects.get(id=id)
+                grn = ir.grn
+                grn_lineitem = GRNLineitem.objects.filter(grn = grn).values(
+                        'id',
+                        'product_title',
+                        'description',
+                        'model',
+                        'brand',
+                        'product_code',
+                        'hsn_code',
+                        'uom',
+                        'quantity',
+                        'unit_price',
+                        'total_basic_price',
+                        'gst',
+                        'total_price'
+                )
+
+                total_basic_value = 0
+                total_value = 0
+
+                for item in grn_lineitem:
+                        total_basic_value = total_basic_value + item['total_basic_price']
+                        total_value = total_value + item['total_price']
+
+                context['total_basic_value'] = total_basic_value
+                context['total_value'] = total_value
+                context['vendor_name'] = grn.vendor.name
+                context['vendor_location'] = grn.vendor.location
+                context['grn_no'] = grn.grn_no
+                context['grn_date'] = grn.date
+                context['grn_lineitem'] = grn_lineitem
+                try:
+                        context['currency'] = grn.vpo.vpo.currency.currency_code
+                except:
+                        context['currency'] = 'INR'
+
+                
+                
+                currency_list = CurrencyIndex.objects.all()
+                context['currency_list'] = currency_list
+
+                try:
+                        context['current_currency'] = grn.vpo.vpo.currency
+                        context['conversion_rate'] = grn.vpo.vpo.inr_value
+
+                except:
+                        context['current_currency'] = CurrencyIndex.DEFAULT_PK
+                        context['conversion_rate'] = 1
+
+                if type == 'Accounts':
+                        return render(request,"Accounts/IR/received_invoice_edit.html",context)
+
+        if request.method == 'POST':
+
+                ir = IRTracker.objects.get(id=id)
+                grn = ir.grn
+                grn_no = grn.grn_no
+                grn_lineitem_count = GRNLineitem.objects.filter(grn=grn).count()
+
+                if grn_lineitem_count < 1 :
+                        return JsonResponse({'Message' : 'No Lineitem Found'})
+
+                grn_lineitem = GRNLineitem.objects.filter(grn = grn)
+
+                for item in grn_lineitem:
+                        if item.unit_price < 0.01:
+                                return JsonResponse({'Message' : 'Lineitem Price Missing'})
+
+                        if item.gst < 0.01:
+                                return JsonResponse({'Message' : 'GST % Not Found'})
+
+                total_basic_value = 0
+                total_value = 0
+                actual_total_basic_value = 0
+                actual_total_value = 0
+
+                for item in grn_lineitem:
+                        total_basic_value = total_basic_value + item.total_basic_price
+                        total_value = total_value + item.total_price
+
+                total_basic_value = round(total_basic_value, 2)
+                total_value = round(total_value , 2)
+
+                data = request.POST
+                
+                actual_total_basic_value = round((total_basic_value * float(data['conversion_rate'])), 2)
+                actual_total_value = round((total_value * float(data['conversion_rate'])), 2)
+
+                currency = data['currency']
+                cl = currency.split("/")
+                currency_index = CurrencyIndex.objects.get(currency = cl[0].strip())
+
+                ir_count = IRTracker.objects.filter(grn = grn).count()
+
+                if ir_count > 0:
+                        ir_list = IRTracker.objects.filter(grn = grn)
+                        ir = ir_list[0]
+                        
+                        ir.invoice_no = data['invoice_no']
+                        ir.invoice_date = data['invoice_date']
+                        ir.total_basic_price = total_basic_value
+                        ir.total_price = total_value
+                        ir.received_currency = currency_index
+                        ir.inr_value = data['conversion_rate']
+                        ir.converted_total_basic_price = actual_total_basic_value
+                        ir.converted_total_price = actual_total_value
+                        ir.save()
+                        ir_id = ir.id
+                    
+                else:
+                        ir = IRTracker.objects.create(
+                                grn = grn,
+                                invoice_no = data['invoice_no'],
+                                invoice_date = data['invoice_date'],
+                                total_basic_price = total_basic_value,
+                                total_price = total_value,
+                                received_currency = currency_index,
+                                inr_value = data['conversion_rate'],
+                                converted_total_basic_price = actual_total_basic_value,
+                                converted_total_price = actual_total_value
+                        )
+                        ir_id = ir.id
+                return HttpResponseRedirect(reverse('invoice-received-add-invoice',args=[grn_no,ir_id]))
+

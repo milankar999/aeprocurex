@@ -36,4 +36,19 @@ urlpatterns = [
 
     #All Payment List
     path('all_payment_list/',SupplierPaymentAllList,name='supplier-payment-all-list'),
+
+    #Wave
+    path('payment_request/<id>/wave/',SupplierPaymentWave,name='supplier-payment-wave'),
+
+
+    #-----------------Accounts------------------------------------
+    path('accounts/all_payment_list/',AccountsSupplierPaymentList,name='accounts-supplier-payment-list'),
+    path('accounts/payment/<id>/details/',AccountsPaymentDetails,name='accounts-payment-details'),
+    path('accounts/payment/<id>/details/add_info/',AccountsPaymentDetailsAddInfo,name='accounts-payment-details-add-info'),
+    path('accounts/payment/<id>/details/acknowledge/',AccountsPaymentDetailsAcknowledge,name='accounts-payment-details-acknowledge'),
+    path('accounts/all_payment_list/acknowledge/list/',AccountsPaymentAcknowledgeList,name='accounts-payment-acknowledge-list'),
+    path('accounts/all_payment_list/acknowledge/list/<id>/details/',AccountsPaymentAcknowledgeDetails,name='accounts-payment-acknowledge-details'),
 ]   
+
+
+

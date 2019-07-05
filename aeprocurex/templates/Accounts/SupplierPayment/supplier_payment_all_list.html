@@ -1,0 +1,55 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="">
+        <h2>Supplier Payment List</h2>
+            <div class="container">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th></th>
+                          <th>PO Number</th>
+                          <th>Vendor</th>
+                          <th>Contact Person</th>
+                          <th>Payment Date</th>
+                          <th>Amount</th>
+                          <th>Requester</th>
+                          <th>Payment By</th>
+                          <th>Attachment</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for item in payment_info %}
+                            <tr>
+                                <td>
+                                   <a href="/supplier_payment/accounts/payment/{{item.id}}/details/" data-toggle="tooltip" data-placement="top" title="Delete Request"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td>{{forloop.counter}}</td>
+                                <td>{{item.payment_request__vpo__po_number}}</td>
+                                <td>{{item.payment_request__vpo__vpo__vendor__name}}</td>
+                                <td>{{item.payment_request__vpo__vpo__vendor_contact_person__name}}</td>
+                                <td>{{item.payment_date}}</td>
+                                <td>{{item.amount}}</td>
+                                <td>{{item.payment_request__requester__first_name}}&nbsp;{{item.payment_request__requester__last_name}}</td>
+                                <td>{{item.payment_by__first_name}}&nbsp;{{item.payment_by__last_name}}</td>
+                                <td>
+                                  {% ifnotequal item.attachment1 "" %}
+                                      <a href="/api/media/{{item.attachment1}}" target="-blank">Click Here</a>
+                                  {% endifnotequal %}
+                                </td>
+                            </tr>
+                          {% empty %}
+                            <p>No Vendor PO Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable();
+            } );
+            </script>     
+{% endblock content %}

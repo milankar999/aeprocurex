@@ -110,9 +110,16 @@ urlpatterns = [
 
     #Generating VPO Directly
     path('approved_vendor_po/ready_list/',VPOApprovedReadyList,name='vpo-approved-ready-list'),
+    path('approved_vendor_po/recently_approved_list/',VPORecentlyApprovedList,name='vpo-recently-approved-list'),
+    path('approved_vendor_po/material_processing_list/',VPOMaterialProcessingList,name='vpo-material-processing-list'),
+    path('approved_vendor_po/material_intransit_list/',VPOIntransitList,name='vpo-intransit-list'),
+    path('approved_vendor_po/material_received_list/',VPOReceivedList,name='vpo-received-list'),
+
     path('approved_vendor_po/<po_number>/lineitems/',VPOApprovedReadyLineitems,name='vpo-approved-ready-lineitems'),
     path('approved_vendor_po/<po_number>/change_data/',VPOApprovedChangeData,name='vpo-approved-change-data'),
     path('approved_vendor_po/<po_number>/update_status/',VPOUpdateStatus,name='vpo-update-status'),
+
+    #
 
     #path('approved_vendor_po/<po_number>/new_payment_request/',VPONewPaymentRequest,name='vpo-new-payment-request'),
 

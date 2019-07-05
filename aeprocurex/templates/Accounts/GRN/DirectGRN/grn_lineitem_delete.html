@@ -1,0 +1,56 @@
+{% extends 'Accounts/base.html' %}
+{% load static %}
+{% block content %}
+
+
+<div class="container">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+    
+    
+                        <!--Form with header-->
+    
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="card border-primary rounded-0">
+                                <div class="card-header p-0">
+                                    <div class="bg-info text-white text-center py-2">
+                                        <h3>Are You Sure Want To remove This Item ?</h3>
+                                    </div>
+                                </div>
+                                <div class="card-body p-3">
+    
+                           <label class="form-input" for="product_title">Product Title :: {{grn_lineitem.product_title}}</label><br>
+
+                           <label class="form-input" for="description">Product Description :: {{grn_lineitem.description}}</label><br>
+   
+                           <label class="form-input" for="model">Model :: {{grn_lineitem.model}}</label><br> 
+   
+                           <label class="form-input" for="brand">Brand :: {{grn_lineitem.brand}}</label><br>
+
+                           <label class="form-input" for="product_code">Product Code (Manufacturer Part No) :: {{grn_lineitem.product_code}}</label><br>
+   
+                           <label class="form-input" for="hsn_code">HSN Code :: {{grn_lineitem.hsn_code}}</label><br>
+
+                           <label class="form-input" for="uom">UOM :: {{grn_lineitem.uom}}</label><br>
+
+                           <label class="form-input" for="quantity">Quantity :: {{grn_lineitem.quantity}}</label><br>
+                           
+                            <div class="text-center">
+                                <input type="submit" value="Confirm Remove" class="btn btn-danger btn-block rounded-0 py-2">
+                            </div>
+                        </div><br>
+    
+                            </div>
+                        </form>
+                        <!--Form with header-->
+        </div>
+</div>
+
+{% endblock content %}

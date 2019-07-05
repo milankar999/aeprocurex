@@ -1,0 +1,102 @@
+{% extends 'Accounts/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="">
+        
+        <div class="container">
+ 
+            <h2>Select Vendor from this Vendor Master</h2> 
+            <div class="table-responsive">          
+                    <table id="vendor_list" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Supplier Name</th>
+                          <th>Location</th>
+                          <th>Contact No</th>
+                          <th>Email ID</th>
+                          <th>City</th>
+                          <th>State</th>
+                          <th>Country</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for supplier in vendor_list %}
+                            <tr>
+                              <td>
+                                  <input type="button" 
+                                  name="vendor"
+                                  id = "vendor"
+                                  value="Select"
+                                  onclick="getSelectedItemFor('{{supplier.id}}','{{supplier.name}}')"
+                                  /> 
+                              </td>
+                              <td>{{supplier.name}}</td>
+                              <td>{{supplier.location}}</td>
+                              <td>{{supplier.office_phone1}}</td>
+                              <td>{{supplier.office_email1}}</td>
+                              <td>{{supplier.city}}</td>
+                              <td>{{supplier.state}}</td>
+                              <td>{{supplier.country}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Vendor Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>  
+        </div>
+<br><br>
+        
+        <br>
+        </div>
+<script type="text/javascript">
+$(document).ready( function () {
+  $('#vendor_list').DataTable();
+            } );
+
+function getSelectedItemFor(vendor_id, vendor_name) {
+  r = confirm('Do You want to Go With ' + vendor_name + ' ?');
+  if (r == true){
+    $('body').append('<div id="requestOverlay" class="request-overlay"></div>');
+    $("#requestOverlay").show();
+    data = {
+      'csrfmiddlewaretoken': '{{ csrf_token }}',
+      'vendor_id' : vendor_id
+    }
+    $.ajax({
+      type: "POST",
+      url: "",
+      data: data,
+      success: function(data) {
+        //window.alert(data.Message);
+        //window.alert(data.status);
+        if(data.Message == 'Success')
+          {
+            window.location.href = "/grnir/direct_grn/"+ data.grn_no +"/product_entry/";
+          }
+        },
+        failure: function(){
+          window.alert('Some Error Occurred, Please Try Again');
+          
+          }
+      }
+    );
+  }
+}            
+</script> 
+<style>
+    .request-overlay {
+      z-index: 9999;
+      position: fixed; /*Important to cover the screen in case of scolling content*/
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      text-align: center;
+      background: rgba(200,200,200,0.5) url('/api/media/media/ldm.gif') no-repeat center; /*.gif file or just div with message etc. however you like*/
+  }
+</style>    
+{% endblock content %}

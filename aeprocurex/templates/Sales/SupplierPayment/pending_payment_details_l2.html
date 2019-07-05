@@ -10,9 +10,9 @@
     <div class="row">
       <label class="form-input" for="basic_value">Amount :: {{request_details.amount}}</label><br>
       <label class="form-input" for="gst_value">Note :: {{request_details.notes}}</label>        <br>
-      {% if payment_request.attachment1 %}
-      <label class="form-input" for="supporting_document">Supporting Document &nbsp;&nbsp; <a href="/api/media/{{payment_request.attachment1}}" target="-blank">Click Here</a></label>   
-      {% endif %}
+      {% ifnotequal request_details.attachment1 "" %}
+      <label class="form-input" for="supporting_document">Supporting Document &nbsp;&nbsp; <a href="/api/media/{{request_details.attachment1}}" target="-blank">Click Here</a></label>   
+      {% endifnotequal %}
     </div>
     <div class="row">
       <button class="btn btn-danger pull-left" data-toggle="modal" data-target="#reject">Reject &nbsp;<span class="glyphicon glyphicon-remove"></span></button>
@@ -20,7 +20,7 @@
           <div class="modal-dialog">
           
             <!-- Modal content-->
-            <form method="POST" action="/supplier_payment/payment_request/pending_approval_list_1/{{request_details.id}}/reject/">   
+            <form method="POST" action="/supplier_payment/payment_request/pending_approval_list_2/{{request_details.id}}/reject/">   
               {% csrf_token %}
                   <div class="modal-content">
                           <div class="modal-header">
@@ -55,8 +55,15 @@
                           <div class="modal-body">
                               
                                   <div class="form-group">
+                                    
                                       <label class="form-input" for="amount">Amount <a style="color: red">*</a></label>
                                       <input class="form-control" type="number" step="0.01" id="amount" name="amount" required/>
+
+                                      <label class="form-input" for="transaction_no">Transaction No</label>
+                                      <input class="form-control" type="text" id="transaction_no" name="transaction_no"/>
+
+                                      <label class="form-input" for="transaction_date">Transaction Date</label>
+                                      <input class="form-control" type="date" id="transaction_date" name="transaction_date"/>
                                       
                                       <label class="form-input" for="supporting_document">Supporting Payment Document</label>
                                       <input type="file" id="supporting_document" name="supporting_document">

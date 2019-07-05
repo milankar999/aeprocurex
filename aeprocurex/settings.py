@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'BankAccount',
     'Invoice',
     'GRNIR',
+    'Inventory',
     'OrderTracker',
     'SupplierPayment',
 ]

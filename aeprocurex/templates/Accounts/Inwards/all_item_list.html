@@ -1,0 +1,56 @@
+{% extends 'Accounts/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="">
+        <h2>ALL Inwards Items</h2>
+            <div class="table-responsive">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>GRN No</th>
+                          <th>Vendor Name</th>
+                          <th>PO No</th>
+                          <th>Product Title</th>
+                          <th>Description</th>
+                          <th>Model</th>
+                          <th>Brand</th>
+                          <th>Quantity</th>
+                          <th>UOM</th>
+                          <th>IR Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for item in grn_lineitem %}
+                            <tr>
+                               <td>
+                                   <a href="/grnir/all_inwards/grn/{{item.grn__grn_no}}/details/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td>{{item.grn__grn_no}}</td>
+                                <td>{{item.grn__vendor__name}}</td>
+                                <td>{{item.grn__vpo__po_number}}</td>
+                                <td>{{item.product_title}}</td>
+                                <td>{{item.description}}</td>
+                                <td>{{item.model}}</td>
+                                <td>{{item.brand}}</td>
+                                <td>{{item.quantity}}</td>
+                                <td>{{item.uom}}</td>
+                                <td>{{item.grn__ir_status}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No CPO Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable({
+                  "paging":   false,
+                   fixedHeader: true
+                });
+            } );
+            </script>     
+{% endblock content %}

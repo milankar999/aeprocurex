@@ -7,6 +7,7 @@
             <div class="table-responsive">          
                     <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
                       <thead>
+
                         <tr>
                           <th></th>
                           <th></th>
@@ -15,15 +16,14 @@
                           <th>PO No</th>
                           <th>PO Date</th>
                           <th>PO For</th>
-                          <th>Basic Amount</th>
-                          <th>Total Basic Amount</th>
-                          <th>All Total Amount</th>
+                          <th>Basic Amount ₹</th>
+                          <th>Total Basic Amount ₹</th>
+                          <th>All Total Amount ₹</th>
+                          <th>Currency</th>
                           <th>PO Type</th>
-                          <th>Delivery Date</th>
-                          <th>Order Status</th>
-                          <th>Payment Status</th>
                           <th>Buyer</th>
-                          <th>Payment Term</th>
+                          <th>Order Status</th>
+                          <th>Payment Terms</th>
                         </tr>
                       </thead>
                       <tbody>   
@@ -41,11 +41,10 @@
                                 <td>{{item.basic_value}}</td>
                                 <td>{{item.total_value}}</td>
                                 <td>{{item.all_total_value}}</td>
+                                <td>{{item.vpo__currency__currency_code}}</td>
                                 <td>{{item.vpo_type}}</td>
-                                <td>{{item.vpo__delivery_date}}</td>
-                                <td>{{item.order_status}}</td>
-                                <td>{{item.remarks}}</td>
                                 <td>{{item.vpo__requester__first_name}}&nbsp;{{item.vpo__requester__last_name}}</td>
+                                <td>{{item.order_status}}</td>
                                 <td>{{item.vpo__terms_of_payment}}</td>
                             </tr>
                           {% empty %}

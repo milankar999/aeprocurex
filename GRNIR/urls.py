@@ -30,6 +30,12 @@ urlpatterns = [
     path('direct_grn/<grn_no>/product_entry/<lineitem_id>/edit/',DirectGRNProductEdit,name='direct-grn-product-edit'),
     path('direct_grn/<grn_no>/product_entry/<lineitem_id>/delete/',DirectGRNProductDelete,name='direct-grn-product-delete'),
 
+    #Managge Inwareds
+    path('all_inwards/grn/',InwardsByGRN,name='inwards-by-grn'),
+    path('all_inwards/lineitems/',InwardsByItems,name='inwards-by-items'),
+
+    path('all_inwards/grn/<grn_no>/details/',InwardGRNDetails,name='inwards-grn-details'),
+    path('all_inwards/grn/<grn_no>/delete/',InwardGRNDelete,name='inwards-grn-delete'),
 
 
     ##--------------------Invoice Received-------------------------------
@@ -38,4 +44,9 @@ urlpatterns = [
     path('invoice_received/<grn_no>/lineitem/<lineitem_id>/change_price/',IRLineitemPriceChange,name='invoice-received-lineitem-price-change'),
     path('invoice_received/<grn_no>/<ir_id>/add_invoice/',IRPendingGRNAddInvoice,name='invoice-received-add-invoice'),
     path('invoice_received/<grn_no>/<ir_id>/complete_invoice_receive/',IRComplete,name='invoice-received-complete'),
+
+    path('invoice_received/received_list/',ReceivedInvoiceList,name='received-invoice-list'),
+    path('invoice_received/<id>/received_details/',ReceivedInvoiceDetails,name='received-invoice-details'),
+    path('invoice_received/<id>/received_details_edit/',ReceivedInvoiceDetailsEdit,name='received-invoice-details-edit'),
+
 ]   
