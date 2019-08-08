@@ -3,38 +3,38 @@
 
 {% block content %}
     <div class="container">
-        <h2>Please Select Customer Purchase Order from This List</h2>
+        <label>All Invoice List</label>
             <div class="table-responsive">          
                     <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
                       <thead>
                         <tr>
                           <th></th>
+                          <th>Invoice No</th>
+                          <th>Invoice Date</th>
                           <th>Customer</th>
                           <th>Location</th>
-                          <th>Customer Code</th>
                           <th>Customer PO No</th>
                           <th>Customer PO Date</th>
-                          <th>Requester</th>
-                          <th>Processing Type</th>
                           <th>Basic Value</th>
                           <th>Total Value</th>
+                          <th>Status</th>
                         </tr>
                       </thead>
                       <tbody>   
-                          {% for cpo in cpo_list %}
+                          {% for invoice in invoice_list %}
                             <tr>
                                <td>
-                                   <a href="/invoice/new_creation/{{cpo.id}}/lineitem_selection/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                   <a href="/invoice/new_creation/{{invoice.invoice_no}}/selected_items/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
                                 </td>
-                                <td>{{cpo.customer__name}}</td>
-                                <td>{{cpo.customer__location}}</td>
-                                <td>{{cpo.customer__code}}</td>
-                                <td>{{cpo.customer_po_no}}</td>
-                                <td>{{cpo.customer_po_date}}</td>
-                                <td>{{cpo.customer_contact_person__name}}</td>
-                                <td>{{cpo.processing_type}}</td>
-                                <td>{{cpo.total_basic_value}}</td>
-                                <td>{{cpo.total_value}}</td>
+                                <td>{{invoice.invoice_no}}</td>
+                                <td>{{invoice.invoice_date}}</td>
+                                <td>{{invoice.customer__name}}</td>
+                                <td>{{invoice.customer__location}}</td>
+                                <td>{{invoice.po_reference}}</td>
+                                <td>{{invoice.po_date}}</td>
+                                <td>{{invoice.basic_value}}</td>
+                                <td>{{invoice.total_value}}</td>
+                                <td>{{invoice.generating_status}}</td>
                             </tr>
                           {% empty %}
                             <p>No CPO Found</p>
@@ -43,7 +43,6 @@
                     </table>
             </div>
             <hr>
-            <a class="btn btn-info pull-right" href="/invoice/new_creation/customer_selection/">Direct Invoice</a>
         </div>
         <script type="text/javascript">
             $(document).ready( function () {

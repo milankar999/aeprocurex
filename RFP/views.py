@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
@@ -429,6 +429,14 @@ def rfp_generate(request, rfp_no=None):
         if request.method == "POST":
                 rfp = RFP.objects.get(rfp_no=rfp_no)
                 data = request.POST
+
+                if data['rfp_type'] == 'PSP':
+                        rfp_lineitem = RFPLineitem.objects.filter(rfp_no = rfp)
+
+                        for item in rfp_lineitem:
+                                if item.target_price == 0 :
+                                        return(JsonResponse({'Message' : 'Please mention target price for all items as it is PSP'}))
+
                 rfp.reference = data['rfp_reference']
                 rfp.priority = data['priority']
                 rfp.rfp_type = data['rfp_type']

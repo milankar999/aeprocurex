@@ -237,6 +237,30 @@ def offer_reference(request,rfp_no=None,vendor_id=None,contact_person_id=None):
                         data = request.POST
                         sourcing_id = rfp_no + vendor_id
                         Sourcing.objects.create(id=sourcing_id,rfp=RFP.objects.get(rfp_no=rfp_no),supplier=SupplierProfile.objects.get(id=vendor_id),supplier_contact_person=SupplierContactPerson.objects.get(id=contact_person_id),offer_reference=data['reference'],offer_date=data['oDate'],created_by=user)
+                        rfp = RFP.objects.get(rfp_no = rfp_no)
+                        
+                        if rfp.rfp_type == 'PSP':
+                                rfp_lineitem = RFPLineitem.objects.filter(rfp_no = rfp)
+                                
+                                for item in rfp_lineitem:
+                                        sourcing_lineitem_id = sourcing_id + str(random.randint(100000,9999999))
+
+                                        try:
+                                                SourcingLineitem.objects.create(
+                                                        id=sourcing_lineitem_id,
+                                                        sourcing=Sourcing.objects.get(id=sourcing_id),
+                                                        rfp_lineitem=item,
+                                                        product_title=item.product_title,
+                                                        description=item.description,
+                                                        model=item.model,
+                                                        brand=item.brand,
+                                                        product_code=item.product_code,
+                                                        price1 = item.target_price,
+                                                        creation_time = item.creation_time )
+
+                                        except:
+                                                pass
+
                         return HttpResponseRedirect(reverse('vendor-selection', args=[rfp_no]))
 
 #Add Front Page Header

@@ -41,6 +41,7 @@ class CustomerPO(models.Model):
         inco_terms = models.CharField(max_length = 200,null=True,blank=True)
         payment_terms = models.IntegerField(default = 0,null=True,blank=True)
         status = models.CharField(max_length = 100, default='creation_inprogress')
+        processing_type = models.CharField(max_length = 100, default = 'direct')
         po_type = models.CharField(max_length = 100, null=True, blank=True) 
 
         rejection_reason = models.TextField(null=True, blank = True)

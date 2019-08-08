@@ -14,6 +14,7 @@
                           <th>Our PO Number</th>
                           <th>PO Date</th>
                           <th>Buyer</th>
+                          <th>Order Status</th>
                         </tr>
                       </thead>
                       <tbody>   
@@ -27,6 +28,7 @@
                                 <td>{{vpo.po_number}}</td>
                                 <td>{{vpo.po_date}}</td>
                                 <td>{{vpo.vpo__requester__first_name}}&nbsp;{{vpo.vpo__requester__last_name}}</td>
+                                <td>{{vpo.order_status}}</td>
                             </tr>
                           {% empty %}
                             <p>No CPO Found</p>

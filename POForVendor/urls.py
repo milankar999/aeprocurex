@@ -92,6 +92,9 @@ urlpatterns = [
     path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/mark_as_regular/',VPOMarkRegular,name='vpo-mark-as-regular-po'),
     path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/mark_direct_buying/',VPOMarkDirectBuying,name='vpo-mark-as-regular-po'),
     path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/delete_vpo/',VPODelete,name='vpo-delete'),
+
+    #Apply discount
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/apply_discount/',VPOApplyDiscount,name='vpo-apply-discount'),
     
     #Application View
     #Regular VPO Approval list
@@ -108,7 +111,7 @@ urlpatterns = [
 
     path('vpo/ready_list/<po_number>/generate/po/',VPOGeneratePO.as_view()),
 
-    #Generating VPO Directly
+    #Generating VPO Directly.
     path('approved_vendor_po/ready_list/',VPOApprovedReadyList,name='vpo-approved-ready-list'),
     path('approved_vendor_po/recently_approved_list/',VPORecentlyApprovedList,name='vpo-recently-approved-list'),
     path('approved_vendor_po/material_processing_list/',VPOMaterialProcessingList,name='vpo-material-processing-list'),

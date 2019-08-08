@@ -1,3 +1,8 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import *
+
+admin.site.register(PendingDelivery)
+admin.site.register(InvoiceTracker)
+admin.site.register(InvoiceLineitem)
+admin.site.register(InvoiceGRNLink)

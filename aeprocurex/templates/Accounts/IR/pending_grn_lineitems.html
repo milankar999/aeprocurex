@@ -12,7 +12,77 @@
         <hr>
         <label>Received Product From :: {{vendor_name}} // Location :: {{vendor_location}}</label>
         <h2>Lineitems For GRN No : {{grn_no}} &nbsp; / {{grn_date}}</h2>
-        <lavel>Currency :: {{currency}}</lavel>        
+        <lavel>Currency :: {{currency}}</lavel>   
+        
+        
+
+        <button class="btn btn-success" data-toggle="modal" data-target="#ADDNew">ADD Other Costs &nbsp;<span class="glyphicon glyphicon-plus"></span></button>        
+
+        <!--New Product Modal -->
+            <div class="modal fade" id="ADDNew" role="dialog">
+                <div class="modal-dialog">
+                
+                  <!-- Modal content-->
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      <h4 class="modal-title">Fill the Product Details</h4>
+                    </div>
+                    <div class="modal-body">
+                      <form type="submit" id="customer-form" method="POST" action="/grnir/invoice_received/{{grn_no}}/add_price/">
+                        {% csrf_token %}
+                        <div class="form-group">
+                                <label class="form-input" for="product_title">Product Title <a style="color: red">*</a></label>
+                                <input type="text" class="form-control" id="product_title" name="product_title" required>
+        
+                                <label class="form-input" for="description">Product Description <a style="color: red">*</a></label>
+                                <textarea type="text" class="form-control" id="description" name="description" required></textarea>
+        
+                                <label class="form-input" for="model">Model </label>
+                                <input type="text" class="form-control" id="model" name="model">
+        
+                                <label class="form-input" for="brand">Brand</label>
+                                <input type="text" class="form-control" id="brand" name="brand">
+        
+                                <label class="form-input" for="product_code">Product Code (Manufacturer Part No)</label>
+                                <input type="text" class="form-control" id="product_code" name="product_code">
+        
+                                <label class="form-input" for="pack_size">Pack Size</label>
+                                <input type="text" class="form-control" id="pack_size" name="pack_size">
+        
+                                <label class="form-input" for="quantity">Quantity <a style="color: red">*</a></label>
+                                <input type="number" class="form-control" step="0.01" id="quantity" name="quantity" required>
+        
+                                <label class="form-input" for="uom">UOM <a style="color: red">*</a></label>
+                                <input type="text" class="form-control" id="uom" name="uom" required>
+        
+                                <label class="form-input" for="unit_price">Unit Price </label>
+                                <input type="number" class="form-control" id="unit_price" step="0.01" name="unit_price">
+        
+                                <label class="form-input" for="hsn_code">HSN Code</label>
+                                <input type="text" class="form-control" id="hsn_code" name="hsn_code">
+        
+                                <label class="form-input" for="gst">GST %</label>
+                                <input type="number" class="form-control" step="0.01" id="gst" name="gst">               
+        
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                            <input type="submit" class="btn btn-success" value="Confirm">
+                      </form>
+                    </div>
+                  </div>
+                  
+                </div>
+         </div>
+        <!--End of New Product Model-->
+
+
+
+
+
+
        <div class="table-responsive">          
                <table id="product" class="table table-hover table-bordered table-sm" width="100%">
                  <thead>

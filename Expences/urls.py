@@ -37,4 +37,7 @@ urlpatterns = [
 
     #Payment Completion
     path('pending_payment_list/<username>/payment_completion/',pending_payment_completion,name='pending-payment-completion'),
+
+    #view for accounts
+    path('all_expence_list/',all_expence_list,name='all-expence-list'),
 ]   

@@ -17,7 +17,8 @@
             
             <label>{{vpo.vendor.name}} :: {{vpo.vendor.location}} :: {{vpo.vendor_contact_person.name}} :: {{vpo.vendor_contact_person.mobileNo1}} </label><br>
             <label>All The Values is in >> {{vpo.currency}} // Index : {{vpo.inr_value}}</label> # <a href="/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/{{vpo.id}}/change_currency/">Change Currency</a><br>
-            <a href="/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/{{vpo.id}}/add_order_info/" type="button" class="btn btn-success pull-left">Add Order Information</a>
+            <a href="/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/{{vpo.id}}/add_order_info/" type="button" class="btn btn-success pull-left">Add Order Information</a>&nbsp;&nbsp;
+            <a href="/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/{{vpo.id}}/apply_discount/" type="button" class="btn btn-info pull-left">Apply Discount</a>
             <a href="/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/{{vpo.id}}/delete_vpo/" class="btn btn-danger pull-right"> Delete This Vendor PO</a>&nbsp;&nbsp;
             <button type="button" class="btn btn-info pull-right" id="btnAbsorve" onclick="getCheckedCheckboxesFor('cpo_lineitem','{{vpo.id}}')"> Add Selected Unassigned Products</button>
           </div>

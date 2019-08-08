@@ -31,13 +31,14 @@ def IntransitSupplierPOList(request):
         context['login_user_name'] = u.first_name + ' ' + u.last_name
     
         if request.method == 'GET':
-                vpo_list = VendorPOTracker.objects.filter(order_status='Intransit', status='Approved').values(
+                vpo_list = VendorPOTracker.objects.filter(Q(order_status='Intransit', status='Approved') | Q(order_status='Partial Intransit', status='Approved')).values(
                         'po_number',
                         'vpo__vendor__name',
                         'vpo__vendor__location',
                         'po_date',
                         'vpo__requester__first_name',
-                        'vpo__requester__last_name'
+                        'vpo__requester__last_name',
+                        'order_status'
                 )
                 context['vpo_list'] = vpo_list
 
@@ -790,6 +791,7 @@ def InwardGRNDelete(request, grn_no=None):
                         grn.status = 'deleted'
                         grn.save()
                         grn.vpo.status='Approved'
+                        grn.vpo.order_status = 'Intransit'
                         grn.vpo.save()
                         return HttpResponseRedirect(reverse('intransit-supplier-po-list'))
                 
@@ -823,7 +825,6 @@ def IRPendingList(request):
 
                 if type == 'Accounts':
                         return render(request,"Accounts/IR/pending_list.html",context)
-
 
 #Pending Lineitem
 @login_required(login_url="/employee/login/")
@@ -897,12 +898,12 @@ def IRPendingGRNLineitem(request, grn_no=None):
 
                 grn_lineitem = GRNLineitem.objects.filter(grn = grn)
 
-                for item in grn_lineitem:
-                        if item.unit_price < 0.01:
-                                return JsonResponse({'Message' : 'Lineitem Price Missing'})
+                #for item in grn_lineitem:
+                #        if item.unit_price < 0.01:
+                #                return JsonResponse({'Message' : 'Lineitem Price Missing'})
 
-                        if item.gst < 0.01:
-                                return JsonResponse({'Message' : 'GST % Not Found'})
+                #        if item.gst < 0.01:
+                #                return JsonResponse({'Message' : 'GST % Not Found'})
 
                 total_basic_value = 0
                 total_value = 0
@@ -956,6 +957,42 @@ def IRPendingGRNLineitem(request, grn_no=None):
                         )
                         ir_id = ir.id
                 return HttpResponseRedirect(reverse('invoice-received-add-invoice',args=[grn_no,ir_id]))
+
+#Add extra items
+@login_required(login_url="/employee/login/")
+def IRPendingGRNAddExtraItem(request, grn_no=None):
+        context={}
+        context['ir'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                if type == 'Accounts':
+                        grn = GRNTracker.objects.get(grn_no = grn_no)
+                        data = request.POST
+
+                        total_basic_price = float(data['quantity']) * float(data['unit_price'])
+                        total_price = total_basic_price + (total_basic_price * float(data['gst']) / 100)
+
+                        GRNLineitem.objects.create(
+                                grn = grn,
+                                product_title = data['product_title'],
+                                description = data['description'],
+                                model = data['model'],
+                                brand = data['brand'],
+                                product_code = data['product_code'],
+                                hsn_code = data['hsn_code'],
+                                pack_size = data['pack_size'],
+                                uom = data['uom'],
+                                quantity = data['quantity'],
+                                unit_price = data['unit_price'],
+                                gst = data['gst'],
+                                total_basic_price = total_basic_price,
+                                total_price = total_price
+                        )
+
+                        return HttpResponseRedirect(reverse('invoice-received-pending-grn-lineitem',args=[grn_no]))
 
 #Lineitem Change Price
 @login_required(login_url="/employee/login/")
@@ -1143,7 +1180,6 @@ def ReceivedInvoiceDetails(request, id=None):
 
                 if type == 'Accounts':
                         return render(request,"Accounts/IR/received_invoice_details.html",context)
-
 
 #Received Invoice Details Edit
 @login_required(login_url="/employee/login/")

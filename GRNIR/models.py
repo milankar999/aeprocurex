@@ -41,6 +41,7 @@ class GRNLineitem(models.Model):
         
         uom = models.CharField(max_length=20,null = False, blank = False, default='Pcs')
         quantity = models.FloatField(null = False, blank = False)
+        invoiced_quantity = models.FloatField(default = 0,null = False, blank = False)
         unit_price = models.FloatField(null = False, blank = False,default = 0)
         gst = models.FloatField(null = True, blank = True, default=0)
 

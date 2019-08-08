@@ -27,6 +27,8 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics, mixins
 from rest_framework.renderers import JSONRenderer
+from django.db.models import Q
+
 
 class NewClaimViewSet(generics.GenericAPIView,
                         mixins.CreateModelMixin,
@@ -626,3 +628,36 @@ def individual_payment_status(request):
         
         if type == 'CRM':
             return render(request,"CRM/Claim/individual_payment_status.html",context)
+
+#All expence list
+@login_required(login_url="/employee/login/")
+def all_expence_list(request):
+    context={}
+    context['expence'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type   
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+    if request.method == 'GET':
+        user_list = User.objects.all()
+        context['user_list'] = user_list
+
+        expence_list = ClaimDetails.objects.filter(Q(status = 'Approved2')|Q(status = 'Paid')).values(
+            'id',
+            'claim_type',
+            'employee__username',
+            'description',
+            'date',
+            'total_basic_amount',
+            'applicable_gst_value',
+            'document').order_by('-date')
+        context['expense_list'] = expence_list
+
+        date_object = ClaimDetails.objects.filter(Q(status = 'Approved2')|Q(status = 'Paid')).values('date').order_by('-date').distinct()
+        context['date_object'] = date_object
+
+        user_date_object = ClaimDetails.objects.filter(Q(status = 'Approved2')|Q(status = 'Paid')).values('date','employee__username','employee__first_name','employee__last_name').order_by('-date').distinct().annotate(Count("date"))
+        context['user_date_object'] = user_date_object
+
+        if type == 'Accounts':
+            return render(request,"Accounts/Claim/claim_list.html",context)

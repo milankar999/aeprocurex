@@ -672,6 +672,36 @@ def CPOCompletionStatusChecker(cpo_id):
         
         return(status)
 
+#VPO apply discount
+@login_required(login_url="/employee/login/")
+def VPOApplyDiscount(request,cpo_id=None,vpo_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                if type == 'Sourcing':
+                        return render(request,"Sourcing/VPO/PrepareVPO/apply_discount.html",context)
+
+        if request.method == 'POST':
+                if type == 'Sourcing':
+                        data = request.POST
+                        discount = float(data['discount'])
+
+                        vpo = VendorPO.objects.get(id = vpo_id)
+                        vpo_lineitems = VendorPOLineitems.objects.filter(vpo = vpo)
+
+                        for item in vpo_lineitems:
+                                item.discount = discount
+                                item.actual_price = round((item.unit_price - (item.unit_price * discount / 100)),2)
+                                item.total_basic_price = round((item.actual_price * item.quantity),2)
+                                item.total_price = round((item.total_basic_price + (item.total_basic_price * item.gst / 100)),2)
+                                item.save()
+                                
+                        return HttpResponseRedirect(reverse('vpo-vendor-product-segmentation',args=[cpo_id])) 
+
 #VPO Mark as Regular
 @login_required(login_url="/employee/login/")
 def VPOMarkRegular(request,cpo_id=None,vpo_id=None):
@@ -691,8 +721,9 @@ def VPOMarkRegular(request,cpo_id=None,vpo_id=None):
 
                         vpo_lineitem_count = VendorPOLineitems.objects.filter(vpo = vpo).count()
 
-                        if vpo.vpo.vendor.gst_number == '' or vpo.vpo.vendor.gst_number == 'None':
-                                return JsonResponse({'Message': 'GST No Not Found'})
+                        if vpo.vendor.gst_number == '' or vpo.vendor.gst_number == 'None':
+                                if vpo.vendor.country == 'India' :
+                                        return JsonResponse({'Message': 'GST No Not Found'})
 
                         if vpo_lineitem_count == 0:
                                 return JsonResponse({'Message': 'No Lineitem Found'})
@@ -3077,7 +3108,8 @@ def VPOApprovedReadyList(request):
                                 'vpo__currency__currency_code',
                                 'vpo_type',
                                 'order_status',
-                                'remarks'
+                                'remarks',
+                                'vpo__delivery_date',
                         )
                         context['vpo_list'] = vpo_list
                         return render(request,"Sourcing/VPO/approval_list.html",context)
@@ -3098,7 +3130,8 @@ def VPOApprovedReadyList(request):
                                 'remarks',
                                 'vpo__requester__first_name',
                                 'vpo__requester__last_name',
-                                'vpo__terms_of_payment'
+                                'vpo__terms_of_payment',
+                                'vpo__currency__currency_code'
                         )
                         context['vpo_list'] = vpo_list
                         return render(request,"Sales/VPO/ready_approval_list.html",context)
@@ -3127,7 +3160,8 @@ def VPORecentlyApprovedList(request):
                                 'vpo__currency__currency_code',
                                 'vpo_type',
                                 'order_status',
-                                'remarks'
+                                'remarks',
+                                'vpo__delivery_date'
                         )
                         context['vpo_list'] = vpo_list
                         return render(request,"Sourcing/VPO/approval_list.html",context)
@@ -3148,7 +3182,8 @@ def VPORecentlyApprovedList(request):
                                 'remarks',
                                 'vpo__requester__first_name',
                                 'vpo__requester__last_name',
-                                'vpo__terms_of_payment'
+                                'vpo__terms_of_payment',
+                                'vpo__currency__currency_code'
                         )
                         context['vpo_list'] = vpo_list
                         return render(request,"Sales/VPO/ready_approval_list.html",context)
@@ -3180,7 +3215,8 @@ def VPOMaterialProcessingList(request):
                                         'vpo__currency__currency_code',
                                         'vpo_type',
                                         'order_status',
-                                        'remarks'
+                                        'remarks',
+                                        'vpo__delivery_date'
                                 )
                         context['vpo_list'] = vpo_list
                         return render(request,"Sourcing/VPO/approval_list.html",context)
@@ -3204,7 +3240,8 @@ def VPOMaterialProcessingList(request):
                                         'remarks',
                                         'vpo__requester__first_name',
                                         'vpo__requester__last_name',
-                                        'vpo__terms_of_payment'
+                                        'vpo__terms_of_payment',
+                                        'vpo__currency__currency_code'
                                 )
                         context['vpo_list'] = vpo_list
                         return render(request,"Sales/VPO/ready_approval_list.html",context)
@@ -3233,7 +3270,8 @@ def VPOIntransitList(request):
                                 'vpo__currency__currency_code',
                                 'vpo_type',
                                 'order_status',
-                                'remarks'
+                                'remarks',
+                                'vpo__delivery_date'
                         )
                         context['vpo_list'] = vpo_list
                         return render(request,"Sourcing/VPO/approval_list.html",context)
@@ -3259,8 +3297,6 @@ def VPOIntransitList(request):
                         context['vpo_list'] = vpo_list
                         return render(request,"Sales/VPO/ready_approval_list.html",context)
 
-
-
 #VPO Received List
 @login_required(login_url="/employee/login/")
 def VPOReceivedList(request):
@@ -3285,7 +3321,8 @@ def VPOReceivedList(request):
                                 'vpo__currency__currency_code',
                                 'vpo_type',
                                 'order_status',
-                                'remarks'
+                                'remarks',
+                                'vpo__delivery_date'
                         )
                         context['vpo_list'] = vpo_list
                         return render(request,"Sourcing/VPO/approval_list.html",context)
@@ -3310,7 +3347,6 @@ def VPOReceivedList(request):
                         )
                         context['vpo_list'] = vpo_list
                         return render(request,"Sales/VPO/ready_approval_list.html",context)
-
 
 
 #VPO Approved Ready List
@@ -3956,6 +3992,10 @@ def IVPOMarkRegular(request,vpo_id=None):
 
                         vpo_lineitem_count = VendorPOLineitems.objects.filter(vpo = vpo).count()
 
+                        if vpo.vendor.gst_number == '' or vpo.vendor.gst_number == 'None':
+                                if vpo.vendor.country == 'India' :
+                                        return JsonResponse({'Message': 'GST No Not Found'})
+                                        
                         if vpo_lineitem_count == 0:
                                 return JsonResponse({'Message': 'No Lineitem Found'})
                         

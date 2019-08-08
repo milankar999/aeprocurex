@@ -41,6 +41,8 @@ urlpatterns = [
     ##--------------------Invoice Received-------------------------------
     path('invoice_received/pending_list/',IRPendingList,name='invoice-received-pending-list'),
     path('invoice_received/<grn_no>/details/',IRPendingGRNLineitem,name='invoice-received-pending-grn-lineitem'),
+    path('invoice_received/<grn_no>/add_price/',IRPendingGRNAddExtraItem,name='invoice-received-pending-grn-add-extra-item'),
+
     path('invoice_received/<grn_no>/lineitem/<lineitem_id>/change_price/',IRLineitemPriceChange,name='invoice-received-lineitem-price-change'),
     path('invoice_received/<grn_no>/<ir_id>/add_invoice/',IRPendingGRNAddInvoice,name='invoice-received-add-invoice'),
     path('invoice_received/<grn_no>/<ir_id>/complete_invoice_receive/',IRComplete,name='invoice-received-complete'),

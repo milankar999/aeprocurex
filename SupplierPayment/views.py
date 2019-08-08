@@ -10,7 +10,7 @@ from django.core import mail
 from django.conf import settings
 from django.db.models import Q
 
-host_name = 'http://localhost:8086/'
+host_name = 'http://http://43.225.52.84/'
 email_string_header = '<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">'\
         '<head>'\
         '<meta charset="utf-8"> <!-- utf-8 works for most cases -->'\

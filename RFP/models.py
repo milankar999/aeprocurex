@@ -109,7 +109,7 @@ class RFPLineitem(models.Model):
     gst = models.FloatField(null = True, blank = True)
     uom = models.CharField(max_length=20,null = False, blank = False, default='Pcs')
     quantity = models.FloatField(null = False, blank = False)
-    target_price = models.FloatField(null = True, blank = True)
+    target_price = models.FloatField(default = 0, null = True, blank = True)
     remarks = models.TextField(max_length=200,null = True, blank = True)
     customer_lead_time = models.FloatField(null=True, blank=True)
     image = models.ImageField(upload_to = 'pic_folder/', blank = True, default = 'pic_folder/None/no-img.jpg')

@@ -13,7 +13,8 @@
         <div class="container">
           <label>Invoice No : {{ir.invoice_no}} :-: Invoice Date : {{ir.invoice_date}}</label> <br>
           <label>Basic Value : {{ir.converted_total_basic_price}}&nbsp; INR</label><br>
-          <label>Total Price With GST : {{ir.converted_total_price}}&nbsp; INR</label>
+          <label>Total Price With GST : {{ir.converted_total_price}}&nbsp; INR</label><br>
+          <a class="btn btn-danger" href="/grnir/invoice_received/{{grn_no}}/details/">Edit</a>
         </div>
         <hr>
         <p align="middle"><label>Documents</label></p>

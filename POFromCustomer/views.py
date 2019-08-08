@@ -1276,6 +1276,7 @@ def cpo_approve(request,cpo_id=None):
 
                 cpo = CustomerPO.objects.get(id=cpo_id)
                 cpo.status = 'approved'
+                cpo.processing_type = 'direct'
                 cpo.cpo_assign_detail = assign
                 cpo.save()
                 VendorProductSegmentation(cpo_id)
@@ -1300,6 +1301,7 @@ def mark_direct_processing(request,cpo_id=None):
                 assign = CPOAssign.objects.create(assign_to=assign_user)
                 cpo = CustomerPO.objects.get(id=cpo_id)
                 cpo.status = 'direct_processing'
+                cpo.processing_type = 'indirect'
                 cpo.cpo_assign_detail = assign
                 cpo.save()
 

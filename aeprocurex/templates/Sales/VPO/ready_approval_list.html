@@ -22,7 +22,9 @@
                           <th>Currency</th>
                           <th>PO Type</th>
                           <th>Buyer</th>
+                          <th>Delivery Date</th>
                           <th>Order Status</th>
+                          <th>Remarks</th>
                           <th>Payment Terms</th>
                         </tr>
                       </thead>
@@ -44,7 +46,9 @@
                                 <td>{{item.vpo__currency__currency_code}}</td>
                                 <td>{{item.vpo_type}}</td>
                                 <td>{{item.vpo__requester__first_name}}&nbsp;{{item.vpo__requester__last_name}}</td>
+                                <td>{{item.vpo__delivery_date}}</td>
                                 <td>{{item.order_status}}</td>
+                                <td>{{item.remarks}}</td>
                                 <td>{{item.vpo__terms_of_payment}}</td>
                             </tr>
                           {% empty %}
