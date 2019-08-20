@@ -1,0 +1,71 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block content %}
+{% load mathfilters %}
+<div>
+    <div class="">
+
+            </h2>
+        </div>
+       <div class="table-responsive">          
+               <table id="pending_items" class="table table-hover table-bordered table-sm" width="100%">
+                 <thead>
+                   <tr>
+                     <th></th>
+                     <th>SL No</th>
+                     <th>Product Title</th>
+                     <th>Description</th>
+                     <th>Model</th>
+                     <th>Brand</th>
+                     <th>Product Code</th>
+                     <th>Part No</th>
+                     <th>Quantity</th>
+                     <th>UOM</th>
+                     <th>Unit Price</th>
+                     <th>Total Basic Value</th>
+                     <th>GST %</th>
+                     <th>Total Value</th>
+                   </tr>
+                 </thead>
+                 <tbody>   
+                     {% for item in invoice_lineitem %}
+                       <tr>
+                          <td>
+                          </td>
+                          <td>{{forloop.counter}}</td>
+                          <td>{{item.product_title}}</td>
+                          <td>{{item.description}}</td>
+                          <td>{{item.model}}</td>
+                          <td>{{item.brand}}</td>
+                          <td>{{item.product_code}}</td>
+                          <td>{{item.part_number}}</td>
+                          <td>{{item.quantity}}</td>
+                          <td>{{item.uom}}</td>
+                          <td>{{item.unit_price}}</td>
+                          <td>{{item.total_basic_price}}</td>
+                          <td>{{item.gst}}</td>
+                          <td>{{item.total_price}}</td>
+                       </tr>
+                     {% empty %}
+                       <p>No End User Found</p>
+                     {% endfor %}
+                 </tbody>
+               </table>
+               <hr>
+               <label>Total Basic Value in INR = {{invoice.basic_value}}</label><br>
+               <label>Total GST in INR = {{invoice.total_value|sub:invoice.basic_value}}</label><br>
+               <label>Grand Total in INR= {{invoice.total_value}}</label>
+               <br>
+               
+
+       </div>
+</div>
+<script type="text/javascript">
+       $(document).ready( function () {
+           $('#pending_items').DataTable({
+            "bPaginate": false
+           });
+       });
+</script>      
+
+{% endblock content %}

@@ -13,8 +13,35 @@ urlpatterns = [
     
     #Indirect Invoice // Invoice without vendor po
     path('new_creation/indirect/<invoice_no>/item_selection/',indirect_invoice_item_selection,name='indirect-invoice-item-selection'),
+    path('new_creation/indirect/<invoice_no>/<cpo_lineitem_id>/select_item_from_inventory/',indirect_invoice_select_item_from_inventory,name='indirect-invoice-select-item-from-inventory'),
+    path('new_creation/indirect/<invoice_no>/<cpo_lineitem_id>/<grn_lineitem_id>/select_item_from_inventory/choose_quantity/',indirect_invoice_inventory_choose_quantity,name='indirect-invoice-inventory-choose-quantity'),
 
+    #Selected inventory item delete
+    path('new_creation/indirect/<invoice_no>/item_selection/<link_id>/delete/',indirect_invoice_inventory_item_delete,name='indirect-invoice-inventory-item-delete'),
+    
+    #Continue to generate invoice
+    path('new_creation/indirect/<invoice_no>/show_item_details/',indirect_invoice_show_item_details,name='indirect-invoice-show-item-details'),
+    path('new_creation/indirect/<invoice_no>/continue/',indirect_invoice_continue,name='indirect-invoice-continue'),
+    path('new_creation/indirect/<invoice_no>/generate_invoice/',indirect_invoice_generate,name='indirect-invoice-generate'),
+
+    #indirect delete invoice
+    path('new_creation/indirect/<invoice_no>/delete/',indirect_invoice_delete,name='indirect-invoice-delete'),
+
+    #---DIRECT INVOICING
+    path('new_creation/direct_invoice/customer_selection/',direct_invoice_customer_selection,name='direct-invoice-customer-selection'),
+    path('new_creation/direct_invoice/customer/<customer_id>/contact_person_selection/',direct_invoice_customer_contact_person_selection,name='direct-invoice-customer-contact-person-selection'),
+    path('new_creation/direct_invoice/customer/<customer_id>/contact_person/<contact_person_id>/receiver_selection/',direct_invoice_receiver_selection,name='direct-invoice-customer-contact-person-selection'),
+    path('new_creation/direct_invoice/customer/<customer_id>/contact_person/<contact_person_id>/receiver/<delivery_contact_person_id>/invoice_number_generate/',direct_invoice_number_generate,name='direct-invoice-number-generate'),
+    path('new_creation/direct_invoice/<invoice_no>/lineitem_selection/',direct_invoice_lineitem_selection,name='direct-invoice-lineitem-selection'),
+
+    path('new_creation/direct_invoice/<invoice_no>/lineitem/<lineitem_id>/delete/',direct_invoice_lineitem_delete,name='direct-invoice-lineitem-delete'),
+    path('new_creation/direct_invoice/<invoice_no>/lineitem/<lineitem_id>/edit/',direct_invoice_lineitem_edit,name='direct-invoice-lineitem-edit'),
+    path('new_creation/direct_invoice/<invoice_no>/continue/',direct_invoice_continue,name='direct-invoice-continue'),
+    path('new_creation/direct_invoice/<invoice_no>/generate_invoice/',direct_invoice_generate,name='direct-invoice-generate'),
+
+    
     #Manage Invoices
     path('invoice_list/',invoice_list,name='invoice-list'),
-    path('new_creation/customer_selection/',customer_selection,name='invoice-customer-selection'),
+    path('invoice_list/<invoice_no>/lineitems/',invoice_lineitems,name='invoice-lineitems'),
+
 ]   

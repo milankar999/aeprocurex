@@ -1,0 +1,188 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block content %}
+{% load mathfilters %}
+
+
+<div class="container-well">
+  {% ifnotequal po_document "" %}   
+    <label>Original Purchase Order &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      
+      <a href="/api/media/{{po_document}}"  target="-blank">PO Copy of Customer</a>
+    </label><br><br><br>
+  {% endifnotequal %}
+
+  <label>Please Select Items from Inventory</label>
+  <hr>
+  {% for item in pending_delivery %}
+    {% if item.pending_quantity > 0 %}
+       <div class="table-responsive" style="border-style: solid; border-color: grey;">          
+               <table id="pending_items" class="table table-hover table-bordered table-sm" width="100%">
+                 <thead>
+                   <tr>
+                     <th>SL No</th>
+                     <th>Product Title</th>
+                     <th>Description</th>
+                     <th>Model</th>
+                     <th>Brand</th>
+                     <th>Product Code</th>
+                     <th>Part No</th>
+                     <th>Quantity</th>
+                     <th>UOM</th>
+                   </tr>
+                 </thead>
+                 <tbody>   
+                     
+                       <tr>
+                           
+                           <td>{{forloop.counter}}</td>
+                           <td>{{item.cpo_lineitem__product_title}}</td>
+                           <td>{{item.cpo_lineitem__description}}</td>
+                           <td>{{item.cpo_lineitem__model}}</td>
+                           <td>{{item.cpo_lineitem__brand}}</td>
+                           <td>{{item.cpo_lineitem__product_code}}</td>
+                           <td>{{item.cpo_lineitem__part_no}}</td>
+                           <td>{{item.pending_quantity}}</td>
+                           <td>{{item.cpo_lineitem__uom}}</td>
+
+                       </tr>
+                 </tbody>
+               </table> 
+               <a class="btn btn-success" href="/invoice/new_creation/indirect/{{invoice_no}}/{{item.cpo_lineitem__id}}/select_item_from_inventory/">Add Item From Inventory</a>
+               <table class="table table-hover table-bordered table-sm" width="100%">
+                  <thead>
+                    <tr bgcolor="#FF9754">
+                      <th></th>
+                      <th>GRN No</th>
+                      <th>Vendor Name</th>
+                      <th>Product Title</th>
+                      <th>Description</th>
+                      <th>Model</th>
+                      <th>Brand</th>
+                      <th>Quantity</th>
+                    </tr>
+                  </thead>
+                  <tbody>   
+                      {% for selected_item in selected_items_from_inventory %}
+                        {% if selected_item.invoice_lineitem__customer_po_lineitem__id == item.cpo_lineitem__id %}
+                        <tr bgcolor="#CDF6FA">
+                            <td>
+                              <a href="{{selected_item.id}}/delete/" data-toggle="tooltip" data-placement="top" title="View Details"> <span class="glyphicon glyphicon-trash" style="color: red"></span></a> &nbsp;
+                            </td>
+                            <td>{{selected_item.grn_lineitem__grn__grn_no}}</td>
+                            <td>{{selected_item.grn_lineitem__grn__vendor__name}}</td>
+                            <td>{{selected_item.grn_lineitem__product_title}}</td>
+                            <td>{{selected_item.grn_lineitem__description}}</td>
+                            <td>{{selected_item.grn_lineitem__model}}</td>
+                            <td>{{selected_item.grn_lineitem__brand}}</td>
+                            <td>{{selected_item.quantity}}</td> 
+                        </tr>
+                        {% endif %}
+                      {% endfor %}
+                  </tbody>
+                </table> 
+                          
+       </div><br>
+      {% endif %}
+  {% empty %}
+       <p>No Items Found</p>
+  {% endfor %}
+</div>
+
+
+<hr>
+<button class="btn btn-danger pull-left" data-toggle="modal" data-target="#DeleteModel">Delete This Invoice </button>
+<!--Delete Invoice Modal -->
+<div class="modal fade" id="DeleteModel" role="dialog">
+  <div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+     <button type="button" class="close" data-dismiss="modal">&times;</button>
+     <h4 class="modal-title">Are you Sure want to delete this Invoice</span></h4>
+   </div>
+   <div class="modal-body">
+     <form type="submit" id="customer-form" method="POST" action="/invoice/new_creation/indirect/{{invoice_no}}/delete/">
+      {% csrf_token %}
+      <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Press Continue To Delete this Invoice...</span></h4>
+              <div class="modal-body">
+                  <div class="form-group">
+                                            
+                  </div>
+              </div>
+              <div class="modal-footer">
+                  <input type="submit" class="btn btn-success" value="Continue">
+              </div>
+            </div>                    
+      </div>
+     </form>
+   </div>
+ </div>
+</div>
+</div>
+<!--Delete Invoice Model-->
+
+<button class="btn btn-success pull-right" data-toggle="modal" data-target="#ContinueModel">Continue To generate Invoice </button>
+<!--Continue Invoice Modal -->
+<div class="modal fade" id="ContinueModel" role="dialog">
+    <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+       <button type="button" class="close" data-dismiss="modal">&times;</button>
+       <h4 class="modal-title">Are you Sure want to continue this Invoice</span></h4>
+     </div>
+     <div class="modal-body">
+       <form type="submit" id="customer-form" method="GET" action="/invoice/new_creation/indirect/{{invoice_no}}/show_item_details/">
+        {% csrf_token %}
+        <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title">Press Continue To Proceed further</span></h4>
+                <div class="modal-body">
+                    <div class="form-group">
+                                              
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" class="btn btn-success" value="Continue">
+                </div>
+              </div>                    
+        </div>
+       </form>
+     </div>
+   </div>
+  </div>
+</div>
+<!--Continue Invoice Model-->
+
+<script type="text/javascript">
+  function getCheckedCheckboxesFor(checkboxName) {
+       var checkboxes = document.querySelectorAll('input[name="' + checkboxName + '"]:checked'), values = [];
+       Array.prototype.forEach.call(checkboxes, function(el) {
+         values = values + ',' + el.value;
+     });
+
+       document.getElementById("preceed").disabled = true;
+         data = {
+           'item_list' : values,
+           'csrfmiddlewaretoken': '{{ csrf_token }}'
+           }
+           $.ajax({
+             type: "POST",
+             url: "",
+             data: data,
+             success: function(data) {
+               console.log(data.invoice_no);
+               window.location.href ="/invoice/new_creation/indirect/"+ data.invoice_no +"/item_selection/";
+             },
+             failure: function(){
+               window.alert('Some Error Occurred, Please Try Again');
+               document.getElementById("preceed").disabled = false;
+             }
+         }
+       );
+     
+   }
+</script>
+{% endblock content %}

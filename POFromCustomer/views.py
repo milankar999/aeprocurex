@@ -706,7 +706,7 @@ def cpo_create_receiver_selection(request, cust_id=None,contact_person_id=None):
                 user = User.objects.get(username=request.user)
                 data = request.POST
                 customer = CustomerProfile.objects.get(id=cust_id)
-                enduser_id =  cust_id +'D' + str(EndUser.objects.count() + 1)
+                enduser_id =  cust_id +'D' + str(DeliveryContactPerson.objects.count() + 1)
                 cp = DeliveryContactPerson.objects.create(id=enduser_id,person_name=data['name'],department_name = data['dept'],mobileNo1=data['phone1'],mobileNo2=data['phone2'],email1=data['email1'],email2=data['email2'],customer_name=customer,created_by=user)
                 if cp:
                         context['message'] = 'Successfully registered ' + data['name']

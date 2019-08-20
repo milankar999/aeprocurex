@@ -1,0 +1,71 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block content %}
+{% load mathfilters %}
+
+
+
+<div class="container-well">
+  <label>Product Title : {{product_title}}</label><br>
+  <label>Description : {{description}}</label><br>
+  <label>Quantity : {{quantity}}</label><br>
+  <hr>
+        <label>Please select items from this list !!!</label>    
+        <div class="container">
+        </div>
+
+       <div class="table-responsive">          
+               <table id="inventory_items" class="table table-hover table-bordered table-sm" width="100%">
+                 <thead>
+                   <tr>
+                     <th>Select</th>
+                     <th>Product Title</th>
+                     <th>Description</th>
+                     <th>Model</th>
+                     <th>Brand</th>
+                     <th>Product Code</th>
+                     <th>Quantity</th>
+                     <th>UOM</th>
+                     <th>Vendor</th>
+                     <th>GRN No</th>
+                     <th>GRN Date</th>
+                   </tr>
+                 </thead>
+                 <tbody>   
+                     {% for item in inventory_items %}
+                      {% if item.quantity|sub:item.invoiced_quantity > 0 %}
+                       <tr>
+                           
+                           <td>
+                            <a href="/invoice/new_creation/indirect/{{invoice_no}}/{{cpo_lineitem_id}}/{{item.id}}/select_item_from_inventory/choose_quantity/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                           </td>
+                           <td>{{item.product_title}}</td>
+                           <td>{{item.description}}</td>
+                           <td>{{item.model}}</td>
+                           <td>{{item.brand}}</td>
+                           <td>{{item.product_code}}</td>
+                           <td>{{item.quantity|sub:item.invoiced_quantity}}</td>
+                           <td>{{item.uom}}</td>
+                           <td>{{item.grn__vendor__name}}</td>
+                           <td>{{item.grn__grn_no}}</td>
+                           <td>{{item.grn__date}}</td>
+                       </tr>
+                       {% endif %}
+                     {% empty %}
+                       <p>No End User Found</p>
+                     {% endfor %}
+                 </tbody>
+               </table>               
+       </div>
+</div>
+
+
+<hr>
+
+<script type="text/javascript">
+  $(document).ready( function () {
+      $('#inventory_items').DataTable();
+  } );
+</script>
+
+{% endblock content %}

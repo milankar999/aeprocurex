@@ -1,0 +1,185 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% block content %}
+<div>
+    <div class="">
+            <h2>Please Check the Quantity of this order
+                <button class="btn btn-info" data-toggle="modal" data-target="#AddModel">Add Other Charges </button>
+
+
+<!--Add item Modal -->
+<div class="modal fade" id="AddModel" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+          <form type="submit" id="customer-form" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+
+                    <label class="form-input" for="description">Charge Description <a style="color: red">*</a></label>
+                    <textarea type="text" class="form-control" id="description" name="description" required></textarea>
+
+                    <label class="form-input" for="hsn_code">HSN Code<a style="color: red">*</a></label>
+                    <input type="text" class="form-control" id="hsn_code" name="hsn_code" required>
+
+                    <label class="form-input" for="gst">GST %<a style="color: red">*</a></label>
+                    <input type="number" class="form-control" step="0.01" id="gst" name="gst" required>
+
+                    <label class="form-input" for="quantity">Quantity <a style="color: red">*</a></label>
+                    <input type="number" class="form-control" step="0.01" id="quantity" name="quantity" required>
+
+                    <label class="form-input" for="uom">UOM <a style="color: red">*</a></label>
+                    <input type="text" class="form-control" id="uom" name="uom" required>
+
+                    <label class="form-input" for="unit_price">Unit Price <a style="color: red">*</a></label>
+                    <input type="number" class="form-control" id="unit_price" step="0.01" name="unit_price" required>  
+
+                    <br>
+                    <input type="button" class="btn btn-danger pull-left" data-dismiss="modal" value="Cancel">
+                    <input type="submit" class="btn btn-success pull-right" value="Confirm">
+
+                    <br>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+<!--Add Item Model-->
+
+
+
+
+
+            </h2>
+        </div>
+       <div class="table-responsive">          
+               <table id="pending_items" class="table table-hover table-bordered table-sm" width="100%">
+                 <thead>
+                   <tr>
+                     <th></th>
+                     <th>SL No</th>
+                     <th>Product Title</th>
+                     <th>Description</th>
+                     <th>Model</th>
+                     <th>Brand</th>
+                     <th>Product Code</th>
+                     <th>Part No</th>
+                     <th>Quantity</th>
+                     <th>UOM</th>
+                     <th>Unit Price</th>
+                     <th>Total Basic Value</th>
+                     <th>GST %</th>
+                     <th>Total Value</th>
+                   </tr>
+                 </thead>
+                 <tbody>   
+                     {% for item in invoice_lineitem %}
+                       <tr>
+                          <td>
+                              <!--a href="/invoice/new_creation/{{invoice_no}}/selected_items/{{item.id}}/edit/" data-toggle="tooltip" data-placement="top" title="Edit"> <span class="glyphicon glyphicon-pencil" style="color: orange"></span></a>
+                              <a href="/invoice/new_creation/{{invoice_no}}/selected_items/{{item.id}}/delete/" data-toggle="tooltip" data-placement="top" title="Delete"> <span class="glyphicon glyphicon-trash" style="color: red"></span></a--> 
+                          </td>
+                          <td>{{forloop.counter}}</td>
+                          <td>{{item.product_title}}</td>
+                          <td>{{item.description}}</td>
+                          <td>{{item.model}}</td>
+                          <td>{{item.brand}}</td>
+                          <td>{{item.product_code}}</td>
+                          <td>{{item.part_number}}</td>
+                          <td>{{item.quantity}}</td>
+                          <td>{{item.uom}}</td>
+                          <td>{{item.unit_price}}</td>
+                          <td>{{item.total_basic_price}}</td>
+                          <td>{{item.gst}}</td>
+                          <td>{{item.total_price}}</td>
+                       </tr>
+                     {% empty %}
+                       <p>No End User Found</p>
+                     {% endfor %}
+                 </tbody>
+               </table>
+               <hr>
+               <label>Total Basic Value in INR = {{invoice_total_basic}}</label><br>
+               <label>Total GST in INR = {{invoice_total_gst}}</label><br>
+               <label>Grand Total in INR= {{invoice_total}}</label>
+               <br>
+               <button class="btn btn-info pull-right" data-toggle="modal" data-target="#ContinueModel">Continue </button>  
+               <button class="btn btn-danger pull-left" data-toggle="modal" data-target="#DeleteModel">Delete This Invoice </button>
+
+<!--Delete Invoice Modal -->
+    <div class="modal fade" id="DeleteModel" role="dialog">
+        <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+           <button type="button" class="close" data-dismiss="modal">&times;</button>
+           <h4 class="modal-title">Are you Sure want to delete this Invoice</span></h4>
+         </div>
+         <div class="modal-body">
+           <form type="submit" id="customer-form" method="POST" action="/invoice/new_creation/indirect/{{invoice_no}}/delete/">
+            {% csrf_token %}
+            <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      <h4 class="modal-title">Press Continue To Delete this Invoice...</span></h4>
+                    <div class="modal-body">
+                        <div class="form-group">
+                                                  
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" class="btn btn-success" value="Continue">
+                    </div>
+                  </div>                    
+            </div>
+           </form>
+         </div>
+       </div>
+      </div>
+      </div>
+<!--Delete Invoice Model-->
+
+
+<!--Continue Invoice Modal -->
+<div class="modal fade" id="ContinueModel" role="dialog">
+  <div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+     <button type="button" class="close" data-dismiss="modal">&times;</button>
+     <h4 class="modal-title">Are you Sure want to Continue ?</span></h4>
+   </div>
+   <div class="modal-body">
+     
+      <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Press Continue To Continue...</span></h4>
+              <div class="modal-body">
+                  <div class="form-group">
+                                            
+                  </div>
+              </div>
+              <div class="modal-footer">
+                  <a class="btn btn-info" href="/invoice/new_creation/indirect/{{invoice_no}}/continue/">Continue</a>
+              </div>
+            </div>                    
+      </div>
+     </div>
+ </div>
+</div>
+</div>
+<!--Delete Invoice Model-->
+
+
+
+       </div>
+</div>
+<script type="text/javascript">
+       $(document).ready( function () {
+           $('#pending_items').DataTable({
+            "bPaginate": false
+           });
+       });
+</script>      
+
+{% endblock content %}

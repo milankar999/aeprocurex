@@ -1,4 +1,4 @@
-{% extends '../base.html' %}
+{% extends '../../base.html' %}
 {% load static %}
 
 {% block content %}
@@ -24,7 +24,7 @@
                           {% for invoice in invoice_list %}
                             <tr>
                                <td>
-                                   <a href="/invoice/new_creation/{{invoice.invoice_no}}/selected_items/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                   <a href="/invoice/invoice_list/{{invoice.invoice_no}}/lineitems/" data-toggle="tooltip" data-placement="top" title="Select this invoice"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
                                 </td>
                                 <td>{{invoice.invoice_no}}</td>
                                 <td>{{invoice.invoice_date}}</td>

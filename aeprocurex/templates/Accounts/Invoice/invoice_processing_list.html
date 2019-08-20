@@ -22,7 +22,13 @@
                           {% for invoice in processing_invoicce_list %}
                             <tr>
                                <td>
-                                   <a href="/invoice/new_creation/{{invoice.invoice_no}}/selected_items/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                  {% if invoice.cpo.processing_type == "direct" %}
+                                    <a href="/invoice/new_creation/{{invoice.invoice_no}}/selected_items/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                  {% elif invoice.cpo.processing_type == "indirect" %}
+                                    <a href="/invoice/new_creation/indirect/{{invoice.invoice_no}}/item_selection/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                  {% else %}
+                                    <a href="/invoice/new_creation/direct_invoice/{{invoice.invoice_no}}/lineitem_selection/" data-toggle="tooltip" data-placement="top" title="Select this contact person"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                  {% endif %}
                                 </td>
                                 <td>{{invoice.invoice_no}}</td>
                                 <td>{{invoice.invoice_date}}</td>
