@@ -642,7 +642,7 @@ def all_expence_list(request):
         user_list = User.objects.all()
         context['user_list'] = user_list
 
-        expence_list = ClaimDetails.objects.filter(Q(status = 'Approved2')|Q(status = 'Paid')).values(
+        expence_list = ClaimDetails.objects.filter(Q(status = 'Requested')|Q(status = 'Approved1')|Q(status = 'Approved2')|Q(status = 'Paid')).values(
             'id',
             'claim_type',
             'employee__username',
@@ -653,10 +653,10 @@ def all_expence_list(request):
             'document').order_by('-date')
         context['expense_list'] = expence_list
 
-        date_object = ClaimDetails.objects.filter(Q(status = 'Approved2')|Q(status = 'Paid')).values('date').order_by('-date').distinct()
+        date_object = ClaimDetails.objects.filter(Q(status = 'Requested')|Q(status = 'Approved1')|Q(status = 'Approved2')|Q(status = 'Paid')).values('date').order_by('-date').distinct()
         context['date_object'] = date_object
 
-        user_date_object = ClaimDetails.objects.filter(Q(status = 'Approved2')|Q(status = 'Paid')).values('date','employee__username','employee__first_name','employee__last_name').order_by('-date').distinct().annotate(Count("date"))
+        user_date_object = ClaimDetails.objects.filter(Q(status = 'Requested')|Q(status = 'Approved1')|Q(status = 'Approved2')|Q(status = 'Paid')).values('date','employee__username','employee__first_name','employee__last_name').order_by('-date').distinct().annotate(Count("date"))
         context['user_date_object'] = user_date_object
 
         if type == 'Accounts':

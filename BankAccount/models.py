@@ -7,6 +7,8 @@ class BankAccountList(models.Model):
     bank_name = models.CharField(max_length=200)
     account_holder = models.CharField(max_length=200)
     ifcs_code = models.CharField(max_length = 200)
+    account_number = models.CharField(max_length = 200, default='None')
+    account_type = models.CharField(max_length = 200,default='None')
 
     def __str__(self):
         return self.bank_name + ' : ' + self.account_holder + ' : ' + self.ifcs_code

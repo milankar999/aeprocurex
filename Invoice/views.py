@@ -29,6 +29,7 @@ from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import textwrap
+from num2words import num2words
 
 
 
@@ -51,7 +52,7 @@ def purchare_order_selection(request):
                         context['processing_invoicce_list'] = processing_invoice_list
                         return render(request,"Accounts/Invoice/invoice_processing_list.html",context)
 
-                cpo_list = CustomerPO.objects.filter(Q(status = 'po_processed') | Q(status = 'Full_Product_Received') | Q(status = 'direct_processing')).values(
+                cpo_list = CustomerPO.objects.filter(Q(status = 'po_processed') | Q(status = 'Full_Product_Received') | Q(status = 'direct_processing') | Q(status = 'approved')).values(
                         'id',
                         'customer__name',
                         'customer__location',
@@ -586,6 +587,8 @@ def invoice_generate(request,invoice_no=None):
 
         if request.method == 'POST':
                 invoice = InvoiceTracker.objects.get(invoice_no = invoice_no)
+                if(not(invoice.customer.bank_account)):
+                        return JsonResponse({'message':'bank details not found'})
                 data = request.POST
 
                 invoice.invoice_date = data['invoice_date']
@@ -726,7 +729,7 @@ def indirect_invoice_select_item_from_inventory(request,invoice_no=None,cpo_line
         context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if request.method == 'GET':
-                inventory_items = GRNLineitem.objects.all().values(
+                inventory_items = GRNLineitem.objects.filter(~Q(grn__status = 'deleted')).values(
                         'id',
                         'product_title',
                         'description',
@@ -1059,6 +1062,8 @@ def indirect_invoice_generate(request,invoice_no=None):
 
         if request.method == 'POST':
                 invoice = InvoiceTracker.objects.get(invoice_no = invoice_no)
+                if(not(invoice.customer.bank_account)):
+                        return JsonResponse({'message':'bank details not found'})
                 data = request.POST
 
                 invoice.invoice_date = data['invoice_date']
@@ -1521,6 +1526,8 @@ def direct_invoice_generate(request,invoice_no=None):
 
         if request.method == 'POST':
                 invoice = InvoiceTracker.objects.get(invoice_no = invoice_no)
+                if(not(invoice.customer.bank_account)):
+                        return JsonResponse({'message':'bank details not found'})
                 data = request.POST
 
                 invoice.invoice_date = data['invoice_date']            
@@ -1604,5 +1611,838 @@ def Invoice_Generator(invoice_no):
         invoice_lineitems = InvoiceLineitem.objects.filter(invoice = invoice)
         pdf = canvas.Canvas("media/invoice/" + invoice_no + ".pdf", pagesize=A4)
         pdf.setTitle(invoice_no + '.pdf')
+        tax_type = invoice.customer.tax_type
+        state = invoice.customer.state
+        Add_Header(pdf, tax_type)
+        Add_Footer(pdf)
+        invoice_information(
+                pdf,
+                invoice.invoice_no,
+                invoice.invoice_date,
+                invoice.po_reference,
+                invoice.po_date,
+                invoice.customer.vendor_code
+        )
+        y = Add_To(
+                pdf,
+                invoice.billing_address,
+                invoice.shipping_address,
+                invoice.customer.gst_number,
+                invoice.requester,
+                invoice.requester_phone_no,
+                invoice.receiver,
+                invoice.receiver_department,
+                invoice.receiver_phone_no
+        )
+        y = Add_Table_Header(pdf, y, state)
+        
+        i = 1
+        for item in invoice_lineitems:
+                y = add_lineitem(
+                        pdf,
+                        y,
+                        i,
+                        invoice_no,
+                        item.product_title,
+                        item.description,
+                        item.model,
+                        item.brand,
+                        item.product_code,
+                        item.hsn_code,
+                        item.quantity,
+                        item.uom,
+                        item.unit_price,
+                        item.total_basic_price,
+                        item.gst,
+                        item.total_price,
+                        tax_type,
+                        state
+                )
+                i = i + 1
+        y = add_total(pdf,y,invoice_no,state,tax_type,invoice.basic_value,invoice.total_value)
+        if tax_type == 'SEZ':
+                words = num2words('{0:.2f}'.format(invoice.basic_value))
+        else:
+                words = num2words('{0:.2f}'.format(invoice.total_value))
+        y = add_amount_in_word(pdf, y,invoice_no,'Rupees In Words : ' + words.title() + ' only',tax_type)
+        y = add_bank_details(
+                pdf,
+                y,
+                invoice_no,
+                tax_type,
+                invoice.customer.bank_account.bank_name,
+                invoice.customer.bank_account.account_holder,
+                invoice.customer.bank_account.account_number,
+                invoice.customer.bank_account.ifcs_code,
+                invoice.customer.bank_account.account_type
+        )
+        y = add_tc(pdf,y,invoice_no,tax_type)
+        y = add_other_info(
+                pdf,
+                y,
+                invoice_no,
+                tax_type,
+                invoice.remarks,
+                invoice.other_info1,
+                invoice.other_info2,
+                invoice.other_info3,
+                invoice.other_info4,
+                invoice.other_info5,
+                invoice.other_info6,
+                invoice.other_info7
+        )
         pdf.showPage()
         pdf.save()
+
+#Add Front Page Header
+def Add_Header(pdf, tax_type):
+        print(tax_type)
+
+        if tax_type == 'SEZ':
+                pdf.setFont('Helvetica-Bold', 9)
+                pdf.drawString(20,820,"SUPPLY  MENT FOR EXPORT / SUPPLY TO SEZ UNIT OR SEZ DEVELOPER FOR AUTHORIZED OPERATIONS  UNDER BOND OR")
+                pdf.drawString(160,810,"LETTER OF UNDERTAKING WITHOUT PAYMENT OF GST")
+                pdf.drawInlineImage("static/image/aeprocurex.jpg",360,735,220,70)
+        else:
+                pdf.drawInlineImage("static/image/aeprocurex.jpg",360,750,220,70)
+        pdf.setFont('Helvetica-Bold', 13)
+        pdf.drawString(20,763,"AEPROCUREX SOURCING PRIVATE LIMITED")
+
+        pdf.setFont('Helvetica',9)
+        #pdf.setFillColor(HexColor('#000000'))
+        pdf.drawString(20,752,"Regd. Office: Shankarappa Complex, No.4")
+        pdf.drawString(20,741,"Hosapalya Main Road, Opp. To Om Shakti Temple")
+        pdf.drawString(20,730,"HSR Layout Extension,Bangalore - 560068")
+
+        pdf.drawString(20,719,"Telephone: 080-43743-314 / 315")
+        pdf.drawString(20,708,"E-mail: sales.p@aeprocurex.com")
+        pdf.drawString(20,697,"GST No. 29AAQCA2809L1Z6")
+        pdf.drawString(20,686,"PAN No. - AAQCA2809L")
+        pdf.drawString(20,675,"CIN No.-U74999KA2017PTC108349")
+        if tax_type == 'SEZ':
+                pdf.drawString(20,665,"LUT Number : AD290519001230F / 13-May-2019")
+
+
+        pdf.setFont('Helvetica-Bold', 20)
+        pdf.drawString(300,720,"TAX INVOICE")
+        #pdf.setFillColor(yellow)
+        pdf.rect(300,716,275,1, stroke=1, fill=1)
+
+#Add Footer 
+def Add_Footer(pdf):
+    pdf.setFont('Helvetica-Bold', 8)
+    pdf.rect(20,35,560,1, stroke=1, fill=1)
+    pdf.drawString(212,25,'SUBJECT TO BENGALURU JURISDICTION')
+    pdf.setFont('Helvetica', 8)
+    pdf.drawString(209,15,'This is a Aeprocurex System Generated Invoice')
+    pdf.drawString(525,15,'Page-No : ' + str(pdf.getPageNumber()))
+
+#Add Invoice Information
+def invoice_information(pdf,invoice_no,invoice_date,order_reference,order_date,vendor_code):
+        if vendor_code == None:
+                vendor_code = ' '
+
+        pdf.setFont('Helvetica', 9)
+        pdf.drawString(300,700,"Invoice No :")
+        pdf.drawString(300,688,"Invoice Date :")
+       
+        pdf.drawString(300,672,"Order Reference :")
+        pdf.drawString(300,660,"Order Date :")
+        pdf.drawString(300,648,"Vendor Code :")
+
+        pdf.setFont('Helvetica-Bold', 9)
+        try:
+                pdf.drawString(390,700,invoice_no)
+        except:
+                pdf.drawString(390,700,"")
+        try:
+                pdf.drawString(390,688,str(invoice_date.strftime('%d, %b %Y')))
+        except:
+                pdf.drawString(390,688,"")
+        
+        
+        try:
+                pdf.drawString(390,672,order_reference)
+        except:
+                pdf.drawString(390,672,"")
+        try:
+                pdf.drawString(390,660,str(order_date.strftime('%d, %b %Y')))
+        except:
+                pdf.drawString(390,660,"")
+        try:
+                pdf.drawString(390,648,vendor_code)
+        except:
+                pdf.drawString(390,648,"")
+
+#Add PO To
+def Add_To(pdf,billing_address,shipping_address,gst_number,requester,requester_ph_no,receiver,receiver_department,receiver_phone_no):
+        pdf.setFont('Helvetica-Bold', 9)
+        pdf.drawString(20,635,'BILL TO')
+        
+        pdf.setFont('Helvetica', 9)
+        wrapper = textwrap.TextWrapper(width=130) 
+        word_list = wrapper.wrap(text=billing_address)
+        y = 623
+        for element in word_list:
+                pdf.drawString(20,y,element)
+                y = y - 13
+        y = y -2
+        try:
+                pdf.drawString(20,y,'GST # :' + gst_number)
+                y = y - 13
+        except:
+                pass
+        y = y - 3
+
+        pdf.setFont('Helvetica-Bold', 9)
+        pdf.setFillColor(HexColor('#000000'))
+        pdf.drawString(20,y,'SHIP TO')
+        y = y - 11
+        wrapper = textwrap.TextWrapper(width=130)
+        word_list = wrapper.wrap(text=shipping_address)
+        pdf.setFont('Helvetica', 9)
+        for element in word_list:
+                pdf.drawString(20,y,element)
+                y = y - 11
+
+        y = y - 3
+
+        ##Requester Data
+        req = ''
+        if requester != '' and requester != 'None':
+                req = req + 'Requester : ' + requester
+
+                if requester_ph_no != '' and receiver_phone_no != 'None':
+                        req = req +' ,' + requester_ph_no
+        
+                if req != '':
+                        pdf.setFont('Helvetica-Bold', 8)
+                        pdf.setFillColor(HexColor('#000000'))
+                        pdf.drawString(20,y,req)
+                        y = y -11
+
+        #Receiver Data
+        rec = ''
+        if receiver != '' and receiver != 'None':
+                rec = 'Receiver : ' + receiver
+
+                if receiver_department != '' and receiver_department != 'None':
+                        rec = rec + ', Dep : ' + receiver_department
+
+                if receiver_phone_no != '' and receiver_phone_no != 'None':
+                        rec = rec + ' ,' + receiver_phone_no
+
+                if req != '':
+                        pdf.setFont('Helvetica-Bold', 8)
+                        pdf.setFillColor(HexColor('#000000'))
+                        pdf.drawString(20,y,rec)
+                        y = y -11
+
+
+        
+        return(y)
+
+#Add Table Header
+def Add_Table_Header(pdf,y,state):
+        if state == 'Karnataka':
+                pdf.rect(20,y,560,1, stroke=1, fill=1)
+                pdf.setFillColor(HexColor('#E4E4E4'))
+                pdf.rect(20,y-31,560,30, stroke=0, fill=1)
+                #Colum headers
+                pdf.setFillColor(HexColor('#000000'))
+                pdf.setFont('Helvetica-Bold', 7)
+                pdf.drawString(22,y-17,'SL #')
+                pdf.drawString(60,y-17,'Material / Description / Specification')
+                pdf.drawString(225,y-17,'Quantity')
+                pdf.drawString(275,y-17,'UOM')
+                pdf.drawString(310,y-11,'Unit Price')
+                pdf.drawString(320,y-22,'(INR) ')
+                pdf.drawString(365,y-11,'Total Basic')
+                pdf.drawString(365,y-22,'Price (INR)')
+                pdf.drawString(420,y-11,'CGST(%)')
+                pdf.drawString(428,y-22,'INR')
+                pdf.drawString(470,y-11,'SGST(%)')
+                pdf.drawString(478,y-22,'INR')
+                pdf.drawString(530,y-11,'Total Price')
+                pdf.drawString(542,y-22,'(INR)')
+                y = y - 31
+                pdf.rect(20,y,560,0.1, stroke=1, fill=1)
+                y = y - 10
+                return(y)
+
+        else:
+                pdf.rect(20,y,560,1, stroke=1, fill=1)
+                pdf.setFillColor(HexColor('#E4E4E4'))
+                pdf.rect(20,y-31,560,30, stroke=0, fill=1)
+                #Colum headers
+                pdf.setFillColor(HexColor('#000000'))
+                pdf.setFont('Helvetica-Bold', 7)
+                pdf.drawString(22,y-17,'SL #')
+                pdf.drawString(60,y-17,'Material / Description / Specification')
+                pdf.drawString(230,y-17,'Quantity')
+                pdf.drawString(280,y-17,'UOM')
+                pdf.drawString(325,y-11,'Unit Price')
+                pdf.drawString(335,y-22,'(INR) ')
+                pdf.drawString(380,y-11,'Total Basic')
+                pdf.drawString(380,y-22,'Price (INR)')
+                pdf.drawString(450,y-11,'IGST(%)')
+                pdf.drawString(458,y-22,'INR')
+                pdf.drawString(510,y-11,'Total Price')
+                pdf.drawString(522,y-22,'(INR)')
+                y = y - 31
+                pdf.rect(20,y,560,0.1, stroke=1, fill=1)
+                y = y - 10
+                return(y)
+
+#Add New Page
+def add_new_page(pdf,invoice_no,tax_type):
+        pdf.setFont('Helvetica-Bold', 8)
+        pdf.drawString(534,38,'continued...')
+
+        pdf.showPage()
+        print(tax_type)
+        if tax_type == 'SEZ':
+                pdf.setFont('Helvetica-Bold', 9)
+                pdf.drawString(20,820,"SUPPLY  MENT FOR EXPORT / SUPPLY TO SEZ UNIT OR SEZ DEVELOPER FOR AUTHORIZED OPERATIONS  UNDER BOND OR")
+                pdf.drawString(160,810,"LETTER OF UNDERTAKING WITHOUT PAYMENT OF GST")
+                pdf.drawInlineImage("static/image/aeprocurex.jpg",360,735,220,70)
+                pdf.setFont('Helvetica-Bold', 13)
+                pdf.drawString(20,750,'INVOICE NO : ' + invoice_no)
+                pdf.line(20,740,580,740)
+                Add_Footer(pdf)
+                return(725)
+        else:
+                pdf.drawInlineImage("static/image/aeprocurex.jpg",360,750,220,70) 
+                pdf.setFont('Helvetica-Bold', 13)
+                pdf.drawString(20,763,'INVOICE NO : ' + invoice_no)
+                pdf.line(20,748,580,748)
+                Add_Footer(pdf)
+                return(740)
+
+def currencyInIndiaFormat(n):
+        s = n
+        l = len(s)
+        i = l-1
+        res = ''
+        flag = 0
+        k = 0
+        while i>=0:
+                if flag==0:
+                        res = res + s[i]
+                        if s[i]=='.':
+                                flag = 1
+                elif flag==1:
+                        k = k + 1
+                        res = res + s[i]
+                        if k==3 and i-1>=0:
+                                res = res + ','
+                                flag = 2
+                                k = 0
+                else:
+                        k = k + 1
+                        res = res + s[i]
+                        if k==2 and i-1>=0:
+                                res = res + ','
+                                flag = 2
+                                k = 0
+                i = i - 1
+
+        return res[::-1]
+
+#Add Lineitem
+def add_lineitem(pdf,y,i,invoice_no,product_title,description,model,brand,product_code,hsn_code,quantity,uom,unit_price,total_basic_price,gst,total_price,tax_type,state):
+        pdf.setFont('Helvetica', 8)
+
+        item_description = ''
+
+        if description != '' and description != 'None':
+                item_description = item_description + ', ' + description
+
+        if model != '' and model != 'None':
+                item_description = item_description + ', ' + model
+        
+        if product_code != '' and product_code != 'None':
+                item_description = item_description + ', ' + product_code
+
+        if brand != '' and brand != 'None':
+                item_description = item_description + ', ' + brand
+        
+        #if hsn_code != 'None' and hsn_code != '':
+        #        item_description = item_description + ', HSN Code : ' + hsn_code
+
+        if product_title == 'added_by_accounts':
+                product_title = ''
+
+
+        print(item_description)
+        if state == 'Karnataka':
+                pdf.drawString(22,y,str(i))
+
+                material_wrapper = textwrap.TextWrapper(width=45)
+                title_word_list = material_wrapper.wrap(product_title)
+
+                for element in title_word_list:
+                        pdf.drawString(50,y,element)
+                        break
+
+                pdf.drawString(225,y,'{0:.2f}'.format(quantity))
+                pdf.drawString(275,y,str(uom))
+                pdf.drawString(310,y,currencyInIndiaFormat('{0:.2f}'.format(unit_price)))
+                pdf.drawString(365,y,currencyInIndiaFormat('{0:.2f}'.format(total_basic_price)))
+                if tax_type == 'SEZ':
+                        pdf.drawString(420,y,'0.00 %')
+                        pdf.drawString(470,y,'0.00 %')
+                        pdf.drawString(520,y,currencyInIndiaFormat('{0:.2f}'.format(total_basic_price)))
+                else:
+                        pdf.drawString(420,y,currencyInIndiaFormat('{0:.2f}'.format(round((gst/2),2))+' %'))
+                        pdf.drawString(470,y,currencyInIndiaFormat('{0:.2f}'.format(round((gst/2),2))+' %'))
+                        pdf.drawString(520,y,currencyInIndiaFormat('{0:.2f}'.format(total_price)))
+
+                material_wrapper = textwrap.TextWrapper(width=45)
+                description_word_list = material_wrapper.wrap(item_description)
+                flag = 0
+                y = y - 11
+
+                for element in description_word_list:
+                        #Page Break
+                        if flag == 1:
+                                if y < 50:
+                                        y = add_new_page(pdf,invoice_no,tax_type)
+                                        y = Add_Table_Header(pdf,y,state)
+                                        pdf.setFont('Helvetica', 8)
+
+                        pdf.drawString(50,y,element)
+                        if flag == 0:
+                                flag = 1
+                                
+                                if tax_type == 'SEZ':
+                                        pdf.drawString(420,y-2,'0.00')
+                                        pdf.drawString(470,y-2,'0.00')
+                                else:
+                                        cgst = round(((total_price - total_basic_price)/2),2)
+                                        sgst = round(((total_price - total_basic_price)/2),2)
+                                        
+                                        pdf.drawString(420,y-2,currencyInIndiaFormat('{0:.2f}'.format(cgst)))
+                                        pdf.drawString(470,y-2,currencyInIndiaFormat('{0:.2f}'.format(sgst)))
+                        
+                        y = y - 11
+                pdf.drawString(50,y,'HSN Code : ' + hsn_code)
+                y = y - 5
+                pdf.rect(20,y,560, 0.1, stroke=1, fill=1)
+  
+        else:
+                pdf.drawString(22,y,str(i))
+
+                material_wrapper = textwrap.TextWrapper(width=45)
+                title_word_list = material_wrapper.wrap(product_title)
+
+                for element in title_word_list:
+                        pdf.drawString(50,y,element)
+                        break
+
+                pdf.drawString(230,y,'{0:.2f}'.format(quantity))
+                pdf.drawString(280,y,str(uom))
+                pdf.drawString(325,y,currencyInIndiaFormat('{0:.2f}'.format(unit_price)))
+                pdf.drawString(380,y,currencyInIndiaFormat('{0:.2f}'.format(total_basic_price)))
+                if tax_type == 'SEZ':
+                        pdf.drawString(450,y,'0.00 %')
+                        pdf.drawString(510,y,currencyInIndiaFormat('{0:.2f}'.format(total_basic_price)))
+                else:
+                        pdf.drawString(450,y,currencyInIndiaFormat('{0:.2f}'.format(gst)+' %'))
+                        pdf.drawString(510,y,currencyInIndiaFormat('{0:.2f}'.format(total_price)))
+
+                material_wrapper = textwrap.TextWrapper(width=45)
+                description_word_list = material_wrapper.wrap(item_description)
+                flag = 0
+                y = y - 11
+
+                for element in description_word_list:
+                        #Page Break
+                        if flag == 1:
+                                if y < 50:
+                                        y = add_new_page(pdf,invoice_no,tax_type)
+                                        y = Add_Table_Header(pdf,y,state)
+                                        pdf.setFont('Helvetica', 8)
+
+                        pdf.drawString(50,y,element)
+                        if flag == 0:
+                                flag = 1
+                                
+                                if tax_type == 'SEZ':
+                                        pdf.drawString(450,y-2,'0.00')
+                                else:
+                                        igst = round((total_price - total_basic_price),2)
+                                        pdf.drawString(450,y-2,currencyInIndiaFormat('{0:.2f}'.format(igst)))
+                        
+                        y = y - 11
+                
+                pdf.drawString(50,y,'HSN Code : ' + hsn_code)
+                y = y - 5     
+                pdf.rect(20,y,560, 0.1, stroke=1, fill=1)
+
+        y = y - 9 
+        return(y)
+
+#Add total
+def add_total(pdf,y,invoice_no,state,tax_type,basic_value,total_value):
+        if y < 70:
+                y = add_new_page(pdf,invoice_no,tax_type)
+        if state == 'Karnataka':
+                pdf.rect(300,y,280,1, stroke=1, fill=1)
+                pdf.setFillColor(HexColor('#E4E4E4'))
+                pdf.rect(300,y-15,280,15, stroke=0, fill=1)
+                #Colum headers
+                pdf.setFillColor(HexColor('#000000'))
+                pdf.setFont('Helvetica-Bold', 7)
+                
+                pdf.drawString(305,y-11,'Total Basic Value')
+
+                pdf.drawString(390,y-11,'Total CGST')
+                pdf.drawString(450,y-11,'Total SGST')
+                pdf.drawString(510,y-11,'Grand Total')
+                y = y - 15
+                pdf.rect(300,y,280,0.1, stroke=1, fill=1)
+
+                pdf.setFont('Helvetica', 7)
+                pdf.drawString(305,y-11,currencyInIndiaFormat('{0:.2f}'.format(basic_value))+' INR')
+                if tax_type == 'SEZ':
+                        pdf.drawString(390,y-11,'0.00 INR')
+                        pdf.drawString(450,y-11,'0.00 INR')
+                        pdf.drawString(510,y-11,currencyInIndiaFormat('{0:.2f}'.format(basic_value))+' INR')
+                else:
+                        gst = round(((total_value - basic_value) / 2),2)
+                        pdf.drawString(390,y-11,currencyInIndiaFormat('{0:.2f}'.format(gst))+' INR')
+                        pdf.drawString(450,y-11,currencyInIndiaFormat('{0:.2f}'.format(gst))+' INR')
+                        pdf.drawString(510,y-11,currencyInIndiaFormat('{0:.2f}'.format(total_value))+' INR')
+
+                y = y - 15
+                pdf.rect(300,y,280,0.1, stroke=1, fill=1)
+                y = y - 10
+                return(y)
+        
+        else:
+                pdf.rect(360,y,220,1, stroke=1, fill=1)
+                pdf.setFillColor(HexColor('#E4E4E4'))
+                pdf.rect(360,y-15,220,15, stroke=0, fill=1)
+                #Colum headers
+                pdf.setFillColor(HexColor('#000000'))
+                pdf.setFont('Helvetica-Bold', 7)
+                
+                pdf.drawString(365,y-11,'Total Basic Value')
+                pdf.drawString(450,y-11,'Total IGST')
+                pdf.drawString(510,y-11,'Grand Total')
+                y = y - 15
+                pdf.rect(360,y,220,0.1, stroke=1, fill=1)
+
+                pdf.setFont('Helvetica', 7)
+                pdf.drawString(365,y-11,currencyInIndiaFormat('{0:.2f}'.format(basic_value))+' INR')
+                if tax_type == 'SEZ':
+                        pdf.drawString(450,y-11,'0.00 INR')
+                        pdf.drawString(510,y-11,currencyInIndiaFormat('{0:.2f}'.format(basic_value))+' INR')
+                else:
+                        gst = round((total_value - basic_value),2)
+                        pdf.drawString(450,y-11,currencyInIndiaFormat('{0:.2f}'.format(gst))+' INR')
+                        pdf.drawString(510,y-11,currencyInIndiaFormat('{0:.2f}'.format(total_value))+' INR')
+
+                y = y - 15
+                pdf.rect(360,y,220,0.1, stroke=1, fill=1)
+                y = y - 10
+                return(y)
+
+#add grand total
+def add_amount_in_word(pdf,y,invoice_no,amount,tax_type):
+        #Page Break
+        if y < 50:
+                y = add_new_page(pdf,invoice_no,tax_type)
+                pdf.setFont('Helvetica', 9)
+
+        pdf.rect(20,y,560,0.1, stroke=1, fill=1)
+        wrapper = textwrap.TextWrapper(width=160) 
+        word_list = wrapper.wrap(text=amount)
+        y = y - 11
+        pdf.setFillColor(HexColor('#000000'))
+        pdf.setFont('Helvetica-Bold', 8)
+        for element in word_list:
+                pdf.drawString(20,y,element)
+                y = y - 8
+        pdf.rect(20,y,560,0.1, stroke=1, fill=1)
+        y = y - 8
+        return(y)
+
+#add bank details
+def add_bank_details(pdf,y,invoice_no,tax_type,bank_name,account_holder,account_no,ifcs_code,account_type):
+        #Page Break
+        if y < 80:
+                y = add_new_page(pdf,invoice_no,tax_type)
+        
+        pdf.setFont('Helvetica-Bold', 7)
+        pdf.drawString(20,y,'Bank Details')
+        pdf.setFillColor(HexColor('#E4E4E4'))
+        pdf.rect(20,y-43,250,40, stroke=0, fill=1)
+        pdf.setFillColor(HexColor('#000000'))
+        y = y - 10
+        pdf.setFont('Helvetica', 7)
+        pdf.drawString(20,y,'Name : ' + account_holder)
+
+        pdf.setFont('Helvetica-Bold', 9)
+        pdf.drawString(320,y,'For : Aeprocurex Sourcing Private Limited')
+        pdf.setFont('Helvetica', 7)
+        y = y - 10
+        pdf.drawString(20,y, account_type + ' : ' + account_no)
+        y = y - 10
+        pdf.drawString(20,y, 'Bank : ' + bank_name)
+        y = y - 10
+        pdf.drawString(20,y, 'IFCS Code : ' + ifcs_code)
+        pdf.drawString(515,y-10, 'Authorized Signature')
+        y = y - 10
+
+        return(y)
+
+#Add terms & decl
+def add_tc(pdf,y,invoice_no,tax_type):
+        if y < 80:
+                y = add_new_page(pdf,invoice_no,tax_type)
+        pdf.setFont('Helvetica-Bold', 7)
+        pdf.drawString(20,y,'Terms & Conditions')
+        y = y - 9
+        pdf.setFont('Helvetica', 7)
+        pdf.drawString(20,y,'18% interest will be charged if the bill is not paid before due date.')
+        y = y - 12
+        pdf.setFont('Helvetica-Bold', 7)
+        pdf.drawString(20,y,'Declaration')
+        y = y - 9
+        pdf.setFont('Helvetica', 7)
+        pdf.drawString(20,y,'We decleare that this invoice shows the actual price of the goods described and that all particulars are true and correct.')
+        y = y - 10
+
+        return(y)
+
+#def other info
+def add_other_info(pdf,y,invoice_no,tax_type,remarks,info1,info2,info3,info4,info5,info6,info7):
+        if y < 50:
+                y = add_new_page(pdf,invoice_no,tax_type)
+        if remarks != '' and remarks != 'None':
+                pdf.setFont('Helvetica-Bold', 7)
+                pdf.drawString(20,y,'Remarks : ' + remarks)
+                y = y - 10
+        if y < 50:
+                y = add_new_page(pdf,invoice_no,tax_type)
+        if info1 != '' and info1 != 'None':
+                pdf.setFont('Helvetica-Bold', 7)
+                pdf.drawString(20,y,info1)
+                y = y - 10
+        if y < 50:
+                y = add_new_page(pdf,invoice_no,tax_type)
+        if info2 != '' and info2 != 'None':
+                pdf.setFont('Helvetica-Bold', 7)
+                pdf.drawString(20,y,info2)
+                y = y - 10
+        if y < 50:
+                y = add_new_page(pdf,invoice_no,tax_type)
+        if info3 != '' and info3 != 'None':
+                pdf.setFont('Helvetica-Bold', 7)
+                pdf.drawString(20,y,info3)
+                y = y - 10
+        if y < 50:
+                y = add_new_page(pdf,invoice_no,tax_type)
+        if info4 != '' and info4 != 'None':
+                pdf.setFont('Helvetica-Bold', 7)
+                pdf.drawString(20,y,info4)
+                y = y - 10
+        if y < 50:
+                y = add_new_page(pdf,invoice_no,tax_type)
+        if info5 != '' and info5 != 'None':
+                pdf.setFont('Helvetica-Bold', 7)
+                pdf.drawString(20,y,info5)
+                y = y - 10
+        if y < 50:
+                y = add_new_page(pdf,invoice_no,tax_type)
+        if info6 != '' and info6 != 'None':
+                pdf.setFont('Helvetica-Bold', 7)
+                pdf.drawString(20,y,info6)
+                y = y - 10
+        if y < 50:
+                y = add_new_page(pdf,invoice_no,tax_type)
+        if info7 != '' and info7 != 'None':
+                pdf.setFont('Helvetica-Bold', 7)
+                pdf.drawString(20,y,info7)
+                y = y - 10
+        return(y)
+
+
+##-------------------------------Invoice Acknowledgement-----------------------------------------------------
+#Pending Acknowledgement list
+@login_required(login_url="/employee/login/")
+def invoice_pending_ack_list(request):
+        context={}
+        context['invoice_ack'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                pending_list = InvoiceTracker.objects.filter(generating_status='Generated',acknowledgement='No').values(
+                        'invoice_no',
+                        'invoice_date',
+                        'customer__name',
+                        'customer__location',
+                        'po_reference',
+                        'po_date',
+                        'basic_value',
+                        'total_value'
+                )
+                context['pending_list'] = pending_list
+
+                if type == 'Accounts':
+                        return render(request,"Accounts/InvoiceAck/pending_invoice_list.html",context)
+
+#Pending Acknowledgement invoice details
+@login_required(login_url="/employee/login/")
+def invoice_pending_ack_details(request, invoice_no):
+        context={}
+        context['invoice_ack'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                invoice = InvoiceTracker.objects.get(invoice_no = invoice_no)
+                invoice_lineitems = InvoiceLineitem.objects.filter(invoice = invoice).values(
+                        'id',
+                        'product_title',
+                        'description',
+                        'model',
+                        'brand',
+                        'product_code',
+                        'part_number',
+                        'hsn_code',
+                        'quantity',
+                        'uom',
+                        'unit_price',
+                        'total_basic_price',
+                        'gst',
+                        'total_price'
+                )
+
+                ack_list = AcknowledgeDocument.objects.filter(invoice = invoice)
+
+                context['invoice_lineitem'] = invoice_lineitems
+                context['invoice'] = invoice
+                context['invoice_no'] = invoice_no
+                context['ack_list'] = ack_list
+
+                if type == 'Accounts':
+                        return render(request,"Accounts/InvoiceAck/invoice_selected_lineitem.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+                invoice = InvoiceTracker.objects.get(invoice_no = invoice_no)
+
+                AcknowledgeDocument.objects.create(
+                        invoice = invoice,
+                        description = data['document_description'],
+                        date = data['document_date'],
+                        document = request.FILES['attachment']
+                )
+                return HttpResponseRedirect(reverse('invoice-pending-ack-list',args=[invoice_no]))
+
+#Acknowledge invoice
+@login_required(login_url="/employee/login/")
+def invoice_acknowledge(request, invoice_no):
+        context={}
+        context['invoice_ack'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                invoice = InvoiceTracker.objects.get(invoice_no = invoice_no)
+                doc_count = AcknowledgeDocument.objects.filter(invoice = invoice).count()
+
+                if doc_count == 0:
+                        return JsonResponse({'Message' : 'No Document Found'})
+                
+                invoice.acknowledgement = 'Yes'
+                invoice.save()
+
+                return JsonResponse({'Message' : 'Success'})
+
+#Acknowledgeed Invoice list
+@login_required(login_url="/employee/login/")
+def invoice_ack_list(request):
+        context={}
+        context['invoice_ack'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                pending_list = InvoiceTracker.objects.filter(generating_status='Generated',acknowledgement='Yes').values(
+                        'invoice_no',
+                        'invoice_date',
+                        'customer__name',
+                        'customer__location',
+                        'po_reference',
+                        'po_date',
+                        'basic_value',
+                        'total_value'
+                )
+                context['pending_list'] = pending_list
+
+                if type == 'Accounts':
+                        return render(request,"Accounts/InvoiceAck/acknowledged_invoice_list.html",context)
+
+#Acknowledged invoice details
+@login_required(login_url="/employee/login/")
+def invoice_ack_details(request, invoice_no):
+        context={}
+        context['invoice_ack'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                invoice = InvoiceTracker.objects.get(invoice_no = invoice_no)
+                invoice_lineitems = InvoiceLineitem.objects.filter(invoice = invoice).values(
+                        'id',
+                        'product_title',
+                        'description',
+                        'model',
+                        'brand',
+                        'product_code',
+                        'part_number',
+                        'hsn_code',
+                        'quantity',
+                        'uom',
+                        'unit_price',
+                        'total_basic_price',
+                        'gst',
+                        'total_price'
+                )
+
+                ack_list = AcknowledgeDocument.objects.filter(invoice = invoice)
+
+                context['invoice_lineitem'] = invoice_lineitems
+                context['invoice'] = invoice
+                context['invoice_no'] = invoice_no
+                context['ack_list'] = ack_list
+
+                if type == 'Accounts':
+                        return render(request,"Accounts/InvoiceAck/ack_invoice_lineitem.html",context)
+
+
+#Acknowledged invoice edit
+@login_required(login_url="/employee/login/")
+def invoice_ack_edit(request, invoice_no):
+        context={}
+        context['invoice_ack'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                invoice = InvoiceTracker.objects.get(invoice_no = invoice_no)               
+                invoice.acknowledgement = 'No'
+                invoice.save()
+
+                return JsonResponse({'Message' : 'Success'})

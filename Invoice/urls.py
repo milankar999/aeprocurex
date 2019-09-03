@@ -44,4 +44,15 @@ urlpatterns = [
     path('invoice_list/',invoice_list,name='invoice-list'),
     path('invoice_list/<invoice_no>/lineitems/',invoice_lineitems,name='invoice-lineitems'),
 
+
+
+    #Invoice Acknowledgement
+    path('pending_ack_list/',invoice_pending_ack_list,name='invoice-pending-ack-list'),
+    path('pending_ack/<invoice_no>/details/',invoice_pending_ack_details,name='invoice-pending-ack-details'),
+    path('pending_ack/<invoice_no>/acknowledge/',invoice_acknowledge,name='invoice-acknowledge'),
+
+    path('ack_list/',invoice_ack_list,name='invoice-ack-list'),
+    path('ack/<invoice_no>/details/',invoice_ack_details,name='invoice-ack-details'),
+    path('ack/<invoice_no>/details/edit/',invoice_ack_edit,name='invoice-ack-edit'),
+
 ]   

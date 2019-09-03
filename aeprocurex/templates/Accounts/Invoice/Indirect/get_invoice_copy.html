@@ -14,9 +14,12 @@
                         <h3>Click The Following Link To Download the PDF File</h3>
                     </div>
                 </div>
-            <div class="card-body p-3">
-                <a href="/api/media/invoice/{{invoice_no}}.pdf" download="{{invoice_no}}.pdf" target="_blank">Click Here</a>
-            </div><br>        
+                <div class="card-body p-3">
+                    <a href="/api/media/invoice/{{invoice_no}}.pdf" download="{{invoice_no}}.pdf" target="_blank">Download Invoice</a>
+                </div>
+                <div class="card-body p-3">
+                    <a href="/api/media/invoice/{{invoice_no}}.pdf" target="_blank">View Invoice</a>
+                </div><br>         
 </div>
 </div>
 {% endblock %}

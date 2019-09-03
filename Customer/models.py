@@ -29,7 +29,7 @@ class CustomerProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    bank_account = models.ForeignKey(BankAccountList,null=True,blank=True,on_delete=models.CASCADE)
+    bank_account = models.ForeignKey(BankAccountList,null=True,blank=True,on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.name + ' - ' + self.location

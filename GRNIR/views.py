@@ -124,7 +124,7 @@ def SelectGRNLineitem(request,vpo_no=None):
                         if item != '':
                                 vpo_lineitem = VendorPOLineitems.objects.get(id = item)
                                 
-                                item_total_price = round((float(vpo_lineitem.receivable_quantity) * float(vpo_lineitem.unit_price)),2)
+                                item_total_price = round((float(vpo_lineitem.receivable_quantity) * float(vpo_lineitem.actual_price)),2)
                                 item_total_price_with_gst = round((item_total_price + (item_total_price * float(vpo_lineitem.gst) / 100)),2)
                                 GRNLineitem.objects.create(
                                         grn = grn,
@@ -139,7 +139,7 @@ def SelectGRNLineitem(request,vpo_no=None):
                                         pack_size = vpo_lineitem.pack_size,
                                         uom = vpo_lineitem.uom,
                                         quantity = vpo_lineitem.receivable_quantity,
-                                        unit_price = vpo_lineitem.unit_price,
+                                        unit_price = vpo_lineitem.actual_price,
                                         gst = vpo_lineitem.gst,
                                         total_basic_price = item_total_price,
                                         total_price = item_total_price_with_gst
@@ -1260,8 +1260,8 @@ def ReceivedInvoiceDetailsEdit(request, id=None):
                         if item.unit_price < 0.01:
                                 return JsonResponse({'Message' : 'Lineitem Price Missing'})
 
-                        if item.gst < 0.01:
-                                return JsonResponse({'Message' : 'GST % Not Found'})
+                        #if item.gst < 0.01:
+                        #        return JsonResponse({'Message' : 'GST % Not Found'})
 
                 total_basic_value = 0
                 total_value = 0

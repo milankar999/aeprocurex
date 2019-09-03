@@ -1,0 +1,50 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <label>All Invoice List</label>
+            <div class="table-responsive">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Invoice No</th>
+                          <th>Invoice Date</th>
+                          <th>Customer</th>
+                          <th>Location</th>
+                          <th>Customer PO No</th>
+                          <th>Customer PO Date</th>
+                          <th>Basic Value</th>
+                          <th>Total Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for invoice in pending_list %}
+                            <tr>
+                               <td>
+                                   <a href="/invoice/pending_ack/{{invoice.invoice_no}}/details/" data-toggle="tooltip" data-placement="top" title="Select this invoice"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td>{{invoice.invoice_no}}</td>
+                                <td>{{invoice.invoice_date}}</td>
+                                <td>{{invoice.customer__name}}</td>
+                                <td>{{invoice.customer__location}}</td>
+                                <td>{{invoice.po_reference}}</td>
+                                <td>{{invoice.po_date}}</td>
+                                <td>{{invoice.basic_value}}</td>
+                                <td>{{invoice.total_value}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No CPO Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+            <hr>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable();
+            } );
+            </script>     
+{% endblock content %}

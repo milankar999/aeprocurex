@@ -50,7 +50,9 @@ class InvoiceTracker(models.Model):
         total_value = models.FloatField(default = 0)
 
         generating_status = models.CharField(max_length = 200, default='creation_in_progress')
-        financial_year = models.CharField(max_length = 20, null = True, blank = True)        
+        financial_year = models.CharField(max_length = 20, null = True, blank = True) 
+
+        acknowledgement = models.CharField(max_length = 20, default = 'No')       
 
         def __str__(self):
                 return self.invoice_no + ' ' + self.customer.name + ' ' + str(self.total_value)
@@ -91,3 +93,15 @@ class InvoiceGRNLink(models.Model):
 
         def __str__(self):
                 return self.invoice_lineitem.invoice.invoice_no + ' ' + str(self.quantity)
+
+class AcknowledgeDocument(models.Model):
+        id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+        invoice = models.ForeignKey(InvoiceTracker, on_delete = models.CASCADE)
+        description = models.TextField(null=True, blank = True)
+        date = models.DateField()
+
+        document = models.FileField(upload_to='invoice_ack/')
+
+        def __str__(self):
+                return self.invoice.invoice_no + ' ' + str(self.date)
