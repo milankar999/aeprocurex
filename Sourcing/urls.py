@@ -4,6 +4,8 @@ from .views import *
 urlpatterns = [
     path('pending_list/',rfp_pending_list,name='rfp-pending-list'),
     path('<rfp_no>/lineitems/',rfp_pending_lineitems,name='rfp_pending_lineitems'),
+    path('<rfp_no>/apply_gst/',rfp_pending_apply_gst,name='rfp_pending_apply_gst'),
+    path('<rfp_no>/apply_hsn/',rfp_pending_apply_hsn,name='rfp_pending_apply_hsn'),
     path('<rfp_no>/lineitems/<lineitem_id>/edit-tax/',lineitem_edit_tax,name='lineitem-edit-tax'),
     path('<rfp_no>/lineitems/vendor_selection/',vendor_selection,name='vendor-selection'),
     path('<rfp_no>/lineitems/vendor_selection/single_price_request/',single_price_request,name='single-price-request'),
@@ -15,6 +17,11 @@ urlpatterns = [
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/rfq/generate_rfq/',rfq_generate,name='rfq-generate'),
     
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/',vendor_quotation_edit,name='vendor-quotation-edit'),
+
+    path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/add_other_charges/',vendor_quotation_add_other_cost,name='vendor-quotation-add-other-cost'),
+    path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/<cost_id>/delete/',vendor_quotation_other_cost_delete,name='vendor-quotation-other-cost-delete'),
+    path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/<document_id>/delete/',vendor_quotation_document_delete,name='vendor-quotation-document-delete'),
+    path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/all_price_delete/',vendor_quotation_all_price_delete,name='vendor-quotation-all-price-delete'),
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/price_upload/',vendor_quotation_price_upload,name='vendor-quotation-price-upload'),
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/delete/',vendor_quotation_delete,name='vendor-quotation-delete'),
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/view/',vendor_quotation_view,name='vendor-quotation-view'),

@@ -35,3 +35,15 @@ class COQLineitem(models.Model):
 
     def __str__(self):
         return self.product_title + ' ' + str(self.margin)
+
+
+class OtherCharges(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    rfp = models.ForeignKey(RFP, null=True, blank=True, on_delete=models.CASCADE)
+    cost_description = models.CharField(max_length=200,null=True,blank=True)
+
+    value = models.FloatField(default = 0)
+
+    def __str__(self):
+        return self.sourcing.id

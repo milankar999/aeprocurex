@@ -60,7 +60,7 @@
                            <label class="form-input" for="uom">UOM <a style="color: red">*</a></label>
                            <input type="text" class="form-control" id="uom" name="uom" required>
 
-                           <label class="form-input" for="target_price">Target Price </label>
+                           <label class="form-input" for="target_price">Target Price / PSP Price (Mandatory for PSP) </label>
                            <input type="number" class="form-control" id="target_price" step="0.01" name="target_price">
 
                            <label class="form-input" for="CLT">Customer Lead Time </label>
@@ -192,10 +192,10 @@
                 {% csrf_token %}
                 <div class="form-group">
 
-                        <label class="form-input" for="rfp_reference">RFP Reference <a style="color: red">*</a></label>
+                        <label class="form-input" for="rfp_reference">Enquiry Reference <a style="color: red">*</a></label>
                         <input type="text" class="form-control" id="rfp_reference" name="rfp_reference" required>
                         
-                        <label class="form-input" for="priority">Please Select the type of the RFP<a style="color: red">*</a></label>
+                        <label class="form-input" for="priority">Please Select the type of the Enquiry<a style="color: red">*</a></label>
                         <select class="form-control" id="rfp_type" name="rfp_type" required>
                             <option></option>
                             <option>PSP</option>
@@ -208,20 +208,18 @@
                             <option>1</option>
                         </select>
 
-                        <label class="form-input" for="supporting_document1">Supporting Document 1 </label>
+                        <hr>
+                        <label>These fields are Applicable only for PSP</label>
+                        <br>
+                        <label>Is there any Freight Charges Mentioned in Supplier Quotation </label>
+                        <input type="number" class="form-control" id="freight_charge" step="0.01" name="freight_charge">
+
+                        <label>Is there any P/F Charges Mentioned in Supplier Quotation </label>
+                        <input type="number" class="form-control" id="pf_charge" step="0.01" name="pf_charge">
+
+
+                        <label class="form-input" for="supporting_document1">Supporting Document</label>
                         <input type="file" id="supporting_document1" name="supporting_document1">
-
-                        <label class="form-input" for="supporting_document2">Supporting Document 2 </label>
-                        <input type="file" id="supporting_document2" name="supporting_document2">
-
-                        <label class="form-input" for="supporting_document3">Supporting Document 3 </label>
-                        <input type="file" id="supporting_document3" name="supporting_document3">
-
-                        <label class="form-input" for="supporting_document4">Supporting Document 4 </label>
-                        <input type="file" id="supporting_document4" name="supporting_document4">
-
-                        <label class="form-input" for="supporting_document5">Supporting Document 5 </label>
-                        <input type="file" id="supporting_document5" name="supporting_document5">
 
                 </div>
             </div>

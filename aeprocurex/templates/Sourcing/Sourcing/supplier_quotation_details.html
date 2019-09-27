@@ -3,10 +3,204 @@
 
 {% block content %}
     <div class="">
+
         <h2>Enter the received quotation details for {{supplier_name}}</h2>
+        
+        <div class="container">
+          <div class="col-sm-6">
+            <div class="card-header p-0">
+                <div class="bg-info text-white text-center py-2">
+                    <label>Add Supplier Quotation </label>
+                </div>
+            </div>
+          
+          <button class="btn btn-success" data-toggle="modal" data-target="#AddQuotation">Add Supplier Quotation document / screenshot&nbsp;<span class="glyphicon glyphicon-plus"></span></button>
+          <br>
+          <hr>
+
+
+
+          {% for attachment in sourcing_attachment %}
+          
+            {% ifnotequal attachment.attachment "" %}
+            <label>Supporting Document <a href="/api/media/{{attachment.attachment}}" target="-blank">Click Here</a></label><br>
+            {% endifnotequal %}
+
+
+            {% ifnotequal attachment.quotation_link "" %}
+            <label>Quotation Link <a href="{{attachment.quotation_link}}" target="-blank">{{attachment.quotation_link}}</a></label><br>
+            {% endifnotequal %}
+
+            <a class="btn btn-danger pull-right" href="{{attachment.id}}/delete/">Delete this document</a><br>
+
+          <hr>
+          {% empty %}
+          <label>No Attachment Found</label>
+          {% endfor %}
+
+          <hr>
+          </div>
+
+          <div class="col-sm-6">
+              <div class="card-header p-0">
+                  <div class="bg-info text-white text-center py-2">
+                      <label>Mention Other Charges applicable for this quotation</label>
+                  </div>
+              </div>
+              <button class="btn btn-success" data-toggle="modal" data-target="#AddCosts">Add Other Charges&nbsp;<span class="glyphicon glyphicon-plus"></span></button>
+          <br>
+          <hr>
+
+
+
+          {% for cost in other_cost %}
+          
+            <label>{{cost.cost_description}}</label><br>
+            <label>{{cost.value}}</label>
+
+            <a class="btn btn-danger pull-right" href="{{cost.id}}/delete/">Delete this cost</a><br>
+
+          <hr>
+          {% empty %}
+          <label>No cost Found</label>
+          {% endfor %}
+
+          <hr>
+          
+          </div>
+
+        </div>
+      
+
+
+
+
+
+
+
+
         <a href="/sourcing/{{rfp_no}}/lineitems/vendor_selection/" class="btn btn-danger"><span class="glyphicon glyphicon-backward"></span></a>
         <button class="btn btn-success" data-toggle="modal" data-target="#UploadProduct">Upload Product Price File &nbsp;<span class="glyphicon glyphicon-chevron-up"></span></button>
-          <!--Product Upload Modal -->
+        <button class="btn btn-danger" data-toggle="modal" data-target="#DeletePrice">Delete All the Entered Prices for this Vendor &nbsp;<span class="glyphicon glyphicon-trash"></span></button>
+
+
+
+
+ <!--other charges Model Add -->
+ <div class="modal fade" id="AddCosts" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">-- Add charge details --</h4>
+        </div>
+
+        <div class="modal-body">
+          <form method="POST" enctype="multipart/form-data" action="add_other_charges/">
+            {% csrf_token %}
+            <div class="form-group"> 
+              <br>
+
+              <label class="form-input"> Description </label>
+              <input type="text" class="form-control" id="description" name="description" required>
+              
+              <label class="form-input">Value </label>
+              <input type="number" class="form-control" id="amount" step="0.01" name="amount" required>
+
+            </div>
+            <div class="modal-footer">
+              <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+              <input type="submit" class="btn btn-success" value="Confirm">
+            </div>  
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--End of other charges Model-->
+
+
+
+
+
+
+
+        <!--Supplier Quotation Model Add -->
+        <div class="modal fade" id="AddQuotation" role="dialog">
+            <div class="modal-dialog">
+  
+              <!-- Modal content-->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title">-- Price Quotation Attachment --</h4>
+                </div>
+      
+                <div class="modal-body">
+                  <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group"> 
+                      <br>
+
+                      <label class="form-input">Attachment (pdf,image or any screenshot) </label>
+                      <input type="file" id="attachment" name="attachment">
+                      <h1>OR</h1>
+                      <label class="form-input">Link </label>
+                      <input type="text" class="form-control" id="link" name="link">
+
+                    </div>
+                    <div class="modal-footer">
+                      <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                      <input type="submit" class="btn btn-success" value="Confirm">
+                    </div>  
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--End of Supplier Quotation Model-->
+
+
+
+
+
+
+        <!-- Delete Price model -->
+        <div class="modal fade" id="DeletePrice" role="dialog">
+          <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Price Deletion</h4>
+              </div>
+    
+              <div class="modal-body">
+                <form method="POST" action="/sourcing/{{rfp_no}}/lineitems/vendor_quotation/{{sourcing_id}}/all_price_delete/">
+                  {% csrf_token %}
+                  <div class="form-group"> 
+                    <br>
+                    <label class="form-input" for="remarks">Are you sure want to delete all the entered prices ?</label>
+                  </div>
+                  <div class="modal-footer">
+                    <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                    <input type="submit" class="btn btn-success" value="Confirm">
+                  </div>  
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--End of delete price Model-->
+
+
+
+
+
+        <!--Product Upload Modal -->
           <div class="modal fade" id="UploadProduct" role="dialog">
             <div class="modal-dialog">
   

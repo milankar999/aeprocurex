@@ -46,6 +46,27 @@ class SourcingLineitem(models.Model):
     def __str__(self):
         return self.product_title + ' ' + str(self.price1)
 
+class SourcingAttachment(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    sourcing = models.ForeignKey(Sourcing, on_delete=models.CASCADE)
+    attachment = models.FileField(upload_to='supplier_quotation/',null=True,blank=True)
+    quotation_link = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.sourcing.id
+
+class SourcingCharges(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    sourcing = models.ForeignKey(Sourcing, on_delete=models.CASCADE)
+    cost_description = models.CharField(max_length=200,null=True,blank=True)
+
+    value = models.FloatField(default = 0)
+
+    def __str__(self):
+        return self.sourcing.id
+
 class RFQ(models.Model):
     id = models.CharField(max_length=200,primary_key=True)
     sourcing = models.ForeignKey(Sourcing, on_delete = models.CASCADE)

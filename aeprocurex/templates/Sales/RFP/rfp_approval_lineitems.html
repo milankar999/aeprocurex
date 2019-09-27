@@ -20,28 +20,14 @@
                       {% ifnotequal info.document1 "" %}
                         <label>Supporting Document <a href="/api/media/{{info.document1}}" target="-blank">Click Here</a></label><br>
                       {% endifnotequal %}
-
-                      {% ifnotequal info.document2 "" %}
-                        <label>Supporting Document <a href="/api/media/{{info.document2}}" target="-blank">Click Here</a></label><br>
-                      {% endifnotequal %}
-
-                      {% ifnotequal info.document3 "" %}
-                        <label>Supporting Document <a href="/api/media/{{info.document3}}" target="-blank">Click Here</a></label><br>
-                      {% endifnotequal %}
-
-                      {% ifnotequal info.document4 "" %}
-                        <label>Supporting Document <a href="/api/media/{{info.document4}}" target="-blank">Click Here</a></label><br>
-                      {% endifnotequal %}
-
-                      {% ifnotequal info.document5 "" %}
-                        <label>Supporting Document <a href="/api/media/{{info.document5}}" target="-blank">Click Here</a></label><br>
-                      {% endifnotequal %}
-
                   
                     <hr>
 
-                    <h6>&nbsp;&nbsp;RFP Type</h6>
+                    <h6>&nbsp;&nbsp;Enquiry Type</h6>
                     <h4>&nbsp;&nbsp;{{info.rfp_type}}</h4>
+                    <label>Vendor PF Charges : {{info.pf_charges}}</label><br>
+                    <label>Vendor Freight Charges : {{info.freight_charges}}</label>
+
                     <hr> 
                     <h6>&nbsp;&nbsp;Customer Name</h6>
                     <h4>&nbsp;&nbsp;{{info.customer__name}}</h4>
@@ -181,7 +167,7 @@
                                     <div class="modal-body">
                                         
                                             <div class="form-group">
-                                                <label class="form-input" for="assign1">Assign to 1 <a style="color: red">*</a></label>
+                                                <label class="form-input" for="assign1">Assign to <a style="color: red">*</a></label>
                                                 <select class="form-control" id="assign1" name="assign1" required>
                                                     <option></option>
                                                     {% for user in users %}
@@ -189,21 +175,7 @@
                                                     {% endfor %}
                                                 </select>
 
-                                                <label class="form-input" for="assign2">Assign to 2 (Optional) </label>
-                                                <select class="form-control" id="assign2" name="assign2">
-                                                    <option></option>
-                                                    {% for user in users %}
-                                                    <option>{{user.username}}</option>
-                                                    {% endfor %}
-                                                </select>
-
-                                                <label class="form-input" for="assign3">Assign to 3 (Optional) </label>
-                                                <select class="form-control" id="assign3" name="assign3">
-                                                    <option></option>.
-                                                    {% for user in users %}
-                                                    <option>{{user.username}}-{{user.first_name}}</option>
-                                                    {% endfor %}
-                                                </select>
+                                               
                                                 <hr>
                                                 <label class="form-input" for="keyPerson">Key Accounts Person <a style="color: red">*</a></label>
                                                 <select class="form-control" id="keyPerson" name="keyPerson" required>

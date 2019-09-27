@@ -224,7 +224,6 @@ def GRNSelectedLineitemRemove(request,grn_no=None,item=None):
 
                 return HttpResponseRedirect(reverse('grn-selected-lineitem',args=[grn_no]))
 
-
 #GRN Delete
 @login_required(login_url="/employee/login/")
 def GRNDelete(request,grn_no=None):
@@ -236,8 +235,13 @@ def GRNDelete(request,grn_no=None):
 
         if request.method == 'POST':
                 grn = GRNTracker.objects.get(grn_no = grn_no)
+                grn_lineitem = GRNLineitem.objects.filter(grn = grn)
+
                 grn.status = 'deleted'
                 grn.save()
+
+                for item in grn_lineitem:
+                        item.delete()
 
                 return HttpResponseRedirect(reverse('intransit-supplier-po-list'))
 
@@ -263,7 +267,6 @@ def GRNProcessFurther(request,grn_no=None):
                         return JsonResponse({"Message" : "No Lineitem Found"})
 
                 return render(request,"Accounts/GRN/VendorPO/grn_proceed.html",context)
-
 
 #GRN Document
 @login_required(login_url="/employee/login/")
@@ -601,7 +604,6 @@ def DirectGRNProductEntry(request, grn_no=None):
                 print(g.grn.grn_no)
                 return HttpResponseRedirect(reverse('direct-grn-product-entry',args=[grn_no]))
 
-
 #Deirect GRN Product edit
 @login_required(login_url="/employee/login/")
 def DirectGRNProductEdit(request, grn_no=None, lineitem_id=None):
@@ -675,9 +677,6 @@ def DirectGRNProductDelete(request, grn_no=None, lineitem_id=None):
                 grn_lineitem.delete()
 
                 return HttpResponseRedirect(reverse('direct-grn-product-entry',args=[grn_no]))
-
-
-
 
 ##-----------------------------------------------------------------------Manage Inwards---------------------------------------------------------------------
 
@@ -781,23 +780,37 @@ def InwardGRNDelete(request, grn_no=None):
 
         if request.method == 'POST':
                 grn = GRNTracker.objects.get(grn_no = grn_no)
+                grn_lineitem = GRNLineitem.objects.filter(grn = grn)
+
+                for item in grn_lineitem:
+                        if item.invoiced_quantity != 0:
+                                return JsonResponse({'message':'Some Material already dispatched for customer, cannot be deleted... '})
 
                 if grn.grn_type == 'regular':
-                        grn_lineitem = GRNLineitem.objects.filter(grn = grn)
                         for item in grn_lineitem:
-                                item.vpo_lineitem.receivable_quantity = item.vpo_lineitem.receivable_quantity + item.quantity
-                                item.vpo_lineitem.save()
+                                try:
+                                        item.vpo_lineitem.receivable_quantity = item.vpo_lineitem.receivable_quantity + item.quantity
+                                        item.vpo_lineitem.save()
+                                except:
+                                        pass
 
                         grn.status = 'deleted'
                         grn.save()
                         grn.vpo.status='Approved'
                         grn.vpo.order_status = 'Intransit'
                         grn.vpo.save()
+
+                        for item in grn_lineitem:
+                                item.delete()
                         return HttpResponseRedirect(reverse('intransit-supplier-po-list'))
                 
                 elif grn.grn_type == 'direct_material_received':
                         grn.status = 'deleted'
                         grn.save()
+                        
+                        for item in grn_lineitem:
+                                item.delete()
+                        
                         return HttpResponseRedirect(reverse('inwards-by-grn'))
 
 

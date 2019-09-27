@@ -127,8 +127,11 @@ def VPOVendorProductSegmentation(request,cpo_id=None):
                 vendor_po_lineitem = VendorPOLineitems.objects.filter(vpo__cpo = cpo)
                 context['vendor_po_lineitem'] = vendor_po_lineitem
 
-                unassigned_product = CPOLineitem.objects.filter(cpo=cpo,pending_po_releasing_quantity__gt=0)
+                unassigned_product = CPOLineitem.objects.filter(cpo=cpo,pending_po_releasing_quantity__gt=0,processing_type = 'direct')
                 print(vendor_po_lineitem)
+
+                direct_processing_product = CPOLineitem.objects.filter(cpo=cpo,indirect_processing_quantity__gt=0,processing_type = 'indirect')
+                context['direct_processing_product'] = direct_processing_product
                 
                 context['unassigned_product'] = unassigned_product
                 context['cpo_id'] = cpo_id
@@ -287,6 +290,55 @@ def VPOVendorProductSegmentationNewVendorConfirmation(request,cpo_id=None,vendor
                 )
 
                 return HttpResponseRedirect(reverse('vpo-vendor-product-segmentation',args=[cpo_id]))
+
+#Mark cpo lineitem as direct processing
+@login_required(login_url="/employee/login/")
+def VPOMarkProductDirectProcessing(request,cpo_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                data = request.POST
+                products = data['cpo_lineitems']
+                product_list = products.split(",")
+
+                for item in product_list:
+                        try:
+                                product = CPOLineitem.objects.get(id = item)
+                                product.processing_type = 'indirect'
+                                product.indirect_processing_quantity = product.indirect_processing_quantity + product.pending_po_releasing_quantity
+                                product.pending_po_releasing_quantity = 0
+                                product.save()
+                        except:
+                                pass
+                CPOCompletionStatusChecker(cpo_id)
+                
+                return JsonResponse({"message":"success"})
+
+
+#Mark cpo lineitem as direct processing item remove
+@login_required(login_url="/employee/login/")
+def DirectProcessingItemRemove(request,cpo_id=None,cpo_lineitem_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                cpo_lineitem = CPOLineitem.objects.get(id = cpo_lineitem_id)
+                cpo_lineitem.processing_type = 'direct'
+                cpo_lineitem.pending_po_releasing_quantity = cpo_lineitem.pending_po_releasing_quantity + cpo_lineitem.indirect_processing_quantity
+                cpo_lineitem.indirect_processing_quantity = 0
+                cpo_lineitem.save()
+
+                return HttpResponseRedirect(reverse('vpo-vendor-product-segmentation',args=[cpo_id]))
+
+
+                
 
 #VPO Assign Product
 @login_required(login_url="/employee/login/")
@@ -663,8 +715,10 @@ def CPOCompletionStatusChecker(cpo_id):
         
         if status == 'completed':
                 for item in cpo_lineitem:
-                        if item.pending_po_releasing_quantity > 0:
+                        if item.pending_po_releasing_quantity > 0 :
                                 status = 'not_completed'
+
+        
 
         if status == 'completed':
                 cpo.status = 'po_processed'

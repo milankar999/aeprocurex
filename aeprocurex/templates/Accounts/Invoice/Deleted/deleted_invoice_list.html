@@ -1,0 +1,46 @@
+{% extends '../../base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <label>All Deleted Invoice</label>
+            <div class="table-responsive">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Invoice No</th>
+                          <th>Invoice Date</th>
+                          <th>Customer</th>
+                          <th>Location</th>
+                          <th>Customer PO No</th>
+                          <th>Customer PO Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for invoice in deleted_list %}
+                            <tr>
+                               <td>
+                                   <a href="" data-toggle="tooltip" data-placement="top" title="Select this invoice"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td>{{invoice.invoice_no}}</td>
+                                <td>{{invoice.invoice_date}}</td>
+                                <td>{{invoice.customer__name}}</td>
+                                <td>{{invoice.customer__location}}</td>
+                                <td>{{invoice.po_reference}}</td>
+                                <td>{{invoice.po_date}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Invoices Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+            <hr>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable();
+            } );
+            </script>     
+{% endblock content %}

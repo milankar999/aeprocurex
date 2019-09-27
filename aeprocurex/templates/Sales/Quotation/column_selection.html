@@ -23,6 +23,12 @@
                     <hr>                          
                     <input type="checkbox" name="total_basic"> Total Basic Amount<br>
                     <input type="checkbox" name="total_basic_with_gst"> Total Basic Amount with GST<br>
+
+                    {% if rfp_type == "PSP" %}
+
+                    <input type="checkbox" name="display_breakup"> Display Price Breakup<br>
+
+                    {% endif %}
                     <br>                                     
                     <div class="text-center">
                         <input type="submit" value="Generate Quotation in PDF Format" class="btn btn-info btn-block rounded-0 py-2">

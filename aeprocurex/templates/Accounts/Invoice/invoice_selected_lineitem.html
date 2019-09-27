@@ -58,6 +58,7 @@
                  <thead>
                    <tr>
                      <th></th>
+                     <th></th>
                      <th>SL No</th>
                      <th>Product Title</th>
                      <th>Description</th>
@@ -70,6 +71,7 @@
                      <th>Unit Price</th>
                      <th>Total Basic Value</th>
                      <th>GST %</th>
+                     <th>HSN Code</th>
                      <th>Total Value</th>
                    </tr>
                  </thead>
@@ -79,6 +81,9 @@
                           <td>
                               <a href="/invoice/new_creation/{{invoice_no}}/selected_items/{{item.id}}/edit/" data-toggle="tooltip" data-placement="top" title="Edit"> <span class="glyphicon glyphicon-pencil" style="color: orange"></span></a>
                               <a href="/invoice/new_creation/{{invoice_no}}/selected_items/{{item.id}}/delete/" data-toggle="tooltip" data-placement="top" title="Delete"> <span class="glyphicon glyphicon-trash" style="color: red"></span></a> 
+                          </td>
+                          <td>
+                            <a href="/invoice/new_creation/{{invoice_no}}/selected_items/{{item.id}}/change_quantity/" data-toggle="tooltip" data-placement="top" title="Change Quantity"> <span class="glyphicon glyphicon-edit" style="color: red"></span></a>
                           </td>
                           <td>{{forloop.counter}}</td>
                           <td>{{item.product_title}}</td>
@@ -92,6 +97,7 @@
                           <td>{{item.unit_price}}</td>
                           <td>{{item.total_basic_price}}</td>
                           <td>{{item.gst}}</td>
+                          <td>{{item.hsn_code}}</td>
                           <td>{{item.total_price}}</td>
                        </tr>
                      {% empty %}
@@ -106,6 +112,54 @@
                <br>
                <button class="btn btn-info pull-right" data-toggle="modal" data-target="#ContinueModel">Continue </button>  
                <button class="btn btn-danger pull-left" data-toggle="modal" data-target="#DeleteModel">Delete This Invoice </button>
+
+            {% ifnotequal direct_processing_count 0 %}
+            <div class="container">
+              <hr>
+              <label>Direct Processing Items</label>
+              <table id="pending_items" class="table table-hover table-bordered table-sm" width="100%">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>SL No</th>
+                    <th>Product Title</th>
+                    <th>Description</th>
+                    <th>Model</th>
+                    <th>Brand</th>
+                    <th>Product Code</th>
+                    <th>Part No</th>
+                    <th>Quantity</th>
+                    <th>UOM</th>
+                    <th>Unit Price</th>
+                    <th>GST %</th>
+                  </tr>
+                </thead>
+                <tbody>   
+                    {% for item in direct_processing_items %}
+                      <tr>
+                         <td>
+                             <a href="direct_processing_item/{{item.cpo_lineitem.id}}/add_from_inventory/" data-toggle="tooltip" data-placement="top" title="add to invoice"> <span class="glyphicon glyphicon-flash" style="color: orange"></span></a>
+                         </td>
+                         <td>{{forloop.counter}}</td>
+                         <td>{{item.cpo_lineitem.product_title}}</td>
+                         <td>{{item.cpo_lineitem.description}}</td>
+                         <td>{{item.cpo_lineitem.model}}</td>
+                         <td>{{item.cpo_lineitem.brand}}</td>
+                         <td>{{item.cpo_lineitem.product_code}}</td>
+                         <td>{{item.cpo_lineitem.part_number}}</td>
+                         <td>{{item.pending_indirect_quantity}}</td>
+                         <td>{{item.cpo_lineitem.uom}}</td>
+                         <td>{{item.cpo_lineitem.unit_price}}</td>
+                         <td>{{item.cpo_lineitem.gst}}</td>
+                      </tr>
+                    {% empty %}
+                      <p>No End User Found</p>
+                    {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% endifnotequal %}
+
 
 <!--Delete Invoice Modal -->
     <div class="modal fade" id="DeleteModel" role="dialog">

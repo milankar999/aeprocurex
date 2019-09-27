@@ -103,13 +103,15 @@ def invoice_lineitem_selection(request,cpo_id=None):
                         'unit_price',
                         'total_basic_price',
                         'gst',
-                        'total_price'
+                        'total_price',
+                        'indirect_processing_quantity'
                 )
                 if cpo.lineitem_copy_status == False:
                         for item in cpo_lineitem:
                                 PendingDelivery.objects.create(
                                         cpo_lineitem = CPOLineitem.objects.get(id = item['id']),
-                                        pending_quantity = item['quantity']
+                                        pending_quantity = item['quantity'],
+                                        pending_indirect_quantity = item['indirect_processing_quantity']
                                 )
                         cpo.lineitem_copy_status = True
                         cpo.save()
@@ -196,10 +198,19 @@ def invoice_lineitem_selection(request,cpo_id=None):
                 if processing_count > 0:
                         return(JsonResponse({'message' : 'please complete previous invoice'}))
 
-
                 financial_year = get_financial_year(datetime.datetime.today().strftime('%Y-%m-%d'))
-                invoice_count = (InvoiceTracker.objects.filter(financial_year = financial_year).count()) + 1
-                invoice_no = 'AP' + financial_year + "{:04d}".format(invoice_count)
+
+                delete_invoice_count = InvoiceTracker.objects.filter(generating_status = 'Deleted',financial_year=financial_year).count()
+                if delete_invoice_count > 0:
+                        deleted_invoice_list = InvoiceTracker.objects.filter(generating_status = 'Deleted',financial_year=financial_year).order_by('invoice_no')
+                        invoice = deleted_invoice_list[0]
+                        invoice_no = invoice.invoice_no
+                        invoice.delete() 
+                
+                else:
+                        invoice_count = (InvoiceTracker.objects.filter(financial_year = financial_year).count()) + 1
+                        invoice_no = 'AP' + financial_year + "{:04d}".format(invoice_count)
+                
                 print(invoice_no)
                 invoice_obj = InvoiceTracker.objects.create(
                         invoice_no = invoice_no,
@@ -291,6 +302,7 @@ def invoice_selected_lineitem(request,invoice_no=None):
         context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if request.method == 'GET':
+                invoice_value_calculation(invoice_no)
                 invoice = InvoiceTracker.objects.get(invoice_no=invoice_no)
                 invoice_lineitem = InvoiceLineitem.objects.filter(invoice = invoice)
                 context['invoice_lineitem'] = invoice_lineitem
@@ -299,6 +311,16 @@ def invoice_selected_lineitem(request,invoice_no=None):
                 context['invoice_total_basic'] = invoice.basic_value
                 context['invoice_total_gst'] = round((invoice.total_value - invoice.basic_value),2)
                 context['invoice_total'] = invoice.total_value
+
+
+                direct_processing_items = PendingDelivery.objects.filter(
+                        cpo_lineitem__cpo = invoice.cpo,
+                        pending_indirect_quantity__gt = 0
+                )
+
+                direct_processing_count = direct_processing_items.count()
+                context['direct_processing_items'] = direct_processing_items
+                context['direct_processing_count'] = direct_processing_count
 
                 if type == 'Accounts':
                         return render(request,"Accounts/Invoice/invoice_selected_lineitem.html",context)
@@ -354,6 +376,254 @@ def invoice_delete(request,invoice_no=None):
                         invoice.delete()
                         return HttpResponseRedirect(reverse('invoice-creation-purchase-order-selection'))
 
+#select direct processing item from inventory
+@login_required(login_url="/employee/login/")
+def invoice_add_direct_processing_item_from_inventory(request,invoice_no=None,cpo_lineitem=None):
+        context={}
+        context['invoice'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                inventory_items = GRNLineitem.objects.filter(~Q(grn__status = 'deleted')).values(
+                        'id',
+                        'product_title',
+                        'description',
+                        'model',
+                        'brand',
+                        'product_code',
+                        'uom',
+                        'quantity',
+                        'invoiced_quantity',
+                        'unit_price',
+                        'gst',
+                        'grn__grn_no',
+                        'grn__date',
+                        'grn__vendor__name'
+                )
+                context['inventory_items'] = inventory_items
+                cpo_lineitem = CPOLineitem.objects.get(id= cpo_lineitem)
+                pending_delivery = PendingDelivery.objects.filter(cpo_lineitem=cpo_lineitem)
+
+                context['description'] = cpo_lineitem.description
+                context['product_title'] = cpo_lineitem.product_title
+                context['quantity'] = pending_delivery[0].pending_quantity
+                context['invoice_no'] = invoice_no
+                context['cpo_lineitem_id'] = cpo_lineitem
+ 
+                if type == 'Accounts':
+                        return render(request,"Accounts/Invoice/inventory_list.html",context)
+
+#add direct processing item from inventory
+@login_required(login_url="/employee/login/")
+def invoice_add_direct_processing_item_from_inventory_add(request,invoice_no=None,cpo_lineitem=None,grn_lineitem_id=None):
+        context={}
+        context['invoice'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        try:
+                grn_lineitem = GRNLineitem.objects.get(id = grn_lineitem_id)
+        except:
+                pass
+
+
+        if request.method == 'GET':
+                cpo_lineitem = CPOLineitem.objects.get(id= cpo_lineitem)
+                pending_delivery = PendingDelivery.objects.filter(cpo_lineitem=cpo_lineitem)
+
+                if grn_lineitem_id == 'aep_scope':
+                        context['pending_quantity'] = pending_delivery[0].pending_indirect_quantity
+                        context['available_quantity'] = pending_delivery[0].pending_indirect_quantity
+                        context['suggested_quantity'] = pending_delivery[0].pending_indirect_quantity
+
+                        if type == 'Accounts':
+                                return render(request,"Accounts/Invoice/add_indirect_quantity.html",context)
+
+
+                
+                
+
+                context['pending_quantity'] = pending_delivery[0].pending_indirect_quantity
+                context['available_quantity'] = grn_lineitem.quantity - grn_lineitem.invoiced_quantity
+
+                if float(pending_delivery[0].pending_indirect_quantity) < float(grn_lineitem.quantity - grn_lineitem.invoiced_quantity):
+                        suggested_quantity = pending_delivery[0].pending_indirect_quantity
+                else:
+                        suggested_quantity = grn_lineitem.quantity - grn_lineitem.invoiced_quantity
+
+                context['suggested_quantity'] = suggested_quantity
+
+                if type == 'Accounts':
+                        return render(request,"Accounts/Invoice/add_indirect_quantity.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+                invoice = InvoiceTracker.objects.get(invoice_no = invoice_no)        
+
+                cpo_lineitem = CPOLineitem.objects.get(id = cpo_lineitem)
+
+
+                if grn_lineitem_id == 'aep_scope':
+                        existing_item_count = InvoiceLineitem.objects.filter(invoice = invoice, customer_po_lineitem = cpo_lineitem).count()
+                        if existing_item_count > 0:
+                                existing_item = InvoiceLineitem.objects.filter(invoice = invoice,customer_po_lineitem = cpo_lineitem)
+                                item = existing_item[0]
+                                link_item = InvoiceGRNLink.objects.filter(
+                                        invoice_lineitem = item
+                                )
+
+                                indirect_count = 0
+                                direct_count = 0
+                                for l_item in link_item:
+                                        if l_item.grn_link_type == 'indirect':
+                                                indirect_count = indirect_count + l_item.quantity
+                                        else:
+                                                direct_count = direct_count + l_item.quantity
+
+                                pd = PendingDelivery.objects.filter(cpo_lineitem = cpo_lineitem)
+                                pending_delivery = pd[0]
+                        
+                                if (indirect_count + float(data['quantity'])) > pending_delivery.pending_quantity:
+                                        return JsonResponse({'Message' : 'quantity error'})
+
+                                item.quantity = item.quantity + float(data['quantity'])
+                                InvoiceGRNLink.objects.create(
+                                        invoice_lineitem = item,
+                                        grn_lineitem = grn_lineitem,
+                                        quantity = float(data['quantity']),
+                                        grn_link_type = 'indirect'
+                                )
+                                item.save()
+                                return HttpResponseRedirect(reverse('invoice-selected-lineitem',args=[invoice_no]))
+
+
+                        invoice_lineitem = InvoiceLineitem.objects.create(
+                                invoice = invoice,
+                                customer_po_lineitem = cpo_lineitem,
+                                product_title = cpo_lineitem.product_title,
+                                description = cpo_lineitem.description,
+                                model = cpo_lineitem.model,
+                                brand = cpo_lineitem.brand,
+                                product_code = cpo_lineitem.product_code,
+                                part_number = cpo_lineitem.part_no,
+                                hsn_code = cpo_lineitem.hsn_code,
+                                uom = cpo_lineitem.uom,
+                                unit_price = cpo_lineitem.unit_price,
+                                quantity = data['quantity']
+                        )
+                        InvoiceGRNLink.objects.create(
+                                invoice_lineitem = invoice_lineitem,
+                                quantity = float(data['quantity']),
+                                grn_link_type = 'indirect'
+                        )
+                        return HttpResponseRedirect(reverse('invoice-selected-lineitem',args=[invoice_no]))
+
+                
+                #checking existing item
+                existing_item_count = InvoiceLineitem.objects.filter(invoice = invoice, customer_po_lineitem = cpo_lineitem).count()
+                if existing_item_count > 0:
+                        existing_item = InvoiceLineitem.objects.filter(invoice = invoice,customer_po_lineitem = cpo_lineitem)
+                        item = existing_item[0]
+                        link_item = InvoiceGRNLink.objects.filter(
+                                invoice_lineitem = item
+                        )
+
+                        indirect_count = 0
+                        direct_count = 0
+                        for l_item in link_item:
+                                if l_item.grn_link_type == 'indirect':
+                                        indirect_count = indirect_count + l_item.quantity
+                                else:
+                                        direct_count = direct_count + l_item.quantity
+
+                        pd = PendingDelivery.objects.filter(cpo_lineitem = cpo_lineitem)
+                        pending_delivery = pd[0]
+                        
+                        if (indirect_count + float(data['quantity'])) > pending_delivery.pending_quantity:
+                                return JsonResponse({'Message' : 'quantity error'})
+                        
+                        item.quantity = item.quantity + float(data['quantity'])
+                        InvoiceGRNLink.objects.create(
+                                invoice_lineitem = item,
+                                grn_lineitem = grn_lineitem,
+                                quantity = float(data['quantity']),
+                                grn_link_type = 'indirect'
+                        )
+                        item.save()
+                        return HttpResponseRedirect(reverse('invoice-selected-lineitem',args=[invoice_no]))                          
+                                
+                        
+
+
+
+                pending_delivery = PendingDelivery.objects.filter(cpo_lineitem=cpo_lineitem)
+                if float(pending_delivery[0].pending_indirect_quantity) < float(grn_lineitem.quantity - grn_lineitem.invoiced_quantity):
+                        suggested_quantity = pending_delivery[0].pending_indirect_quantity
+                else:
+                        suggested_quantity = grn_lineitem.quantity - grn_lineitem.invoiced_quantity
+
+                if float(data['quantity']) > suggested_quantity:
+                        return JsonResponse({'message':'exceeding maximum quantity'})
+
+                
+                invoice_lineitem = InvoiceLineitem.objects.create(
+                        invoice = invoice,
+                        customer_po_lineitem = cpo_lineitem,
+                        product_title = cpo_lineitem.product_title,
+                        description = cpo_lineitem.description,
+                        model = cpo_lineitem.model,
+                        brand = cpo_lineitem.brand,
+                        product_code = cpo_lineitem.product_code,
+                        part_number = cpo_lineitem.part_no,
+                        hsn_code = cpo_lineitem.hsn_code,
+                        uom = cpo_lineitem.uom,
+                        unit_price = cpo_lineitem.unit_price,
+                        quantity = data['quantity']
+                )
+
+                invoice_value_calculation(invoice_no)
+
+                InvoiceGRNLink.objects.create(
+                        invoice_lineitem = invoice_lineitem,
+                        grn_lineitem = grn_lineitem,
+                        quantity = float(data['quantity']),
+                        grn_link_type = 'indirect'
+                )
+                return HttpResponseRedirect(reverse('invoice-selected-lineitem',args=[invoice_no]))
+
+#Add direct processing mterial to invoice
+@login_required(login_url="/employee/login/")
+def invoice_add_direct_processing_item(request,invoice_no=None,cpo_lineitem=None):
+        context={}
+        context['invoice'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                invoice = InvoiceTracker.objects.get(invoice_no = invoice_no)
+                cpo_lineitem = CPOLineitem.objects.filter(id = cpo_lineitem)
+
+                count = InvoiceTracker.objects.filter(invoice = invoice, customer_po_lineitem=cpo_lineitem).count()
+                if count > 0:
+                        return JsonResponse({'message':'item already exist in this invoice'})
+                
+                InvoiceLineitem.objects.create(
+                        invoice = invoice,
+                        customer_po_lineitem = cpo_lineitem,
+                        product_title = cpo_lineitem.product_title,
+                        description = cpo_lineitem.description,
+                        model = cpo_lineitem.model,
+                        brand = cpo_lineitem.brand,
+                        product_code = cpo_lineitem.product_code,
+                        part_number = cpo_lineitem.part_number,
+                        hsn_code = cpo_lineitem.hsn_code,
+                        uom = cpo_lineitem.uom,
+                        unit_price = cpo_lineitem.unit_price
+                )
 
 #Edit _lineitem
 @login_required(login_url="/employee/login/")
@@ -377,52 +647,136 @@ def invoice_selected_lineitem_edit(request,invoice_no=None,lineitem_id=None):
 
 
                 if item.product_title != 'added_by_accounts':
-                        item.product_title = data['product_title']
-                        item.model = data['model']
-                        item.brand = data['brand']
-                        item.product_code = data['product_code']
-                        item.part_number = data['part_number']
-
-                        igl = InvoiceGRNLink.objects.filter(invoice_lineitem=item)
-
-                        igl_quantity = 0
-                        for igl_item in igl:
-                                igl_quantity = igl_quantity + igl_item.quantity
-                        
-                        if float(data['quantity']) > igl_quantity:
-                                return JsonResponse({"message" : "Error, Maximum inventory " + str(igl_quantity)})
-                
+                        item.product_title = data['product_title']               
                 
                 item.description = data['description']
+                item.model = data['model']
+                item.brand = data['brand']
+                item.part_number = data['part_number']
                 item.hsn_code = data['hsn_code']
-                item.quantity = data['quantity']
+                
                 item.uom = data['uom']
                 item.unit_price = data['unit_price']
                 item.gst = data['gst']
-
-                total_basic_price = round((float(data['unit_price']) * float(data['quantity'])),2)
-                total_price = round((total_basic_price + (total_basic_price * float(data['gst'])/100)),2)
-
-                item.total_basic_price = total_basic_price
-                item.total_price = total_price
-
                 item.save()
 
-                invoice_obj = InvoiceTracker.objects.get(invoice_no=invoice_no)
-                invoice_lineitems = InvoiceLineitem.objects.filter(invoice = invoice_obj)
+                invoice_value_calculation(invoice_no)
+                return HttpResponseRedirect(reverse('invoice-selected-lineitem',args=[invoice_no]))
 
-                invoice_total_basic = 0
-                invoice_total = 0
+#Change quantity
+@login_required(login_url="/employee/login/")
+def invoice_selected_lineitem_chnage_quantity(request,invoice_no=None,lineitem_id=None):
+        context={}
+        context['invoice'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
-                for item in invoice_lineitems:
-                        invoice_total_basic = invoice_total_basic + item.total_basic_price
-                        invoice_total = invoice_total + item.total_price
+        if request.method == "GET":
+                invoice_lineitem = InvoiceLineitem.objects.get(id = lineitem_id)
+                link_items = InvoiceGRNLink.objects.filter(invoice_lineitem = invoice_lineitem)
 
-                invoice_obj.basic_value = round(invoice_total_basic,2)
-                invoice_obj.total_value = round(invoice_total,2)
+                context['link_items'] = link_items
+                context['product_title'] = invoice_lineitem.customer_po_lineitem.product_title
+                context['description'] = invoice_lineitem.customer_po_lineitem.description 
 
-                invoice_obj.save()
+                context['invoice_no'] = invoice_no               
 
+                if type == 'Accounts':
+                        return render(request,"Accounts/Invoice/change_quantity.html",context)
+
+#Edit source quantity
+@login_required(login_url="/employee/login/")
+def invoice_selected_lineitem_chnage_quantity_linked_edit(request,invoice_no=None,lineitem_id=None,linked_id=None):
+        context={}
+        context['invoice'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == "GET":
+
+                if type == 'Accounts':
+                        return render(request,"Accounts/Invoice/alter_quantity.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+                new_quantity = float(data['quantity'])
+
+                linked_grn_lineitem = InvoiceGRNLink.objects.get(id = linked_id)
+                available_quantity = linked_grn_lineitem.grn_lineitem.quantity - linked_grn_lineitem.grn_lineitem.invoiced_quantity
+                if new_quantity > available_quantity:
+                        return JsonResponse({'message':'Quantity exceeds, currently available quantity ' + str(available_quantity)})
+
+                invoice_lineitem = InvoiceLineitem.objects.get(id = lineitem_id)
+                pd = PendingDelivery.objects.filter(cpo_lineitem = invoice_lineitem.customer_po_lineitem)
+                pending_delivery = pd[0]
+                total_pending_quantity = pending_delivery.pending_quantity
+                pending_indirect_quantity = pending_delivery.pending_indirect_quantity
+
+                
+                all_linked_items = InvoiceGRNLink.objects.filter(invoice_lineitem = invoice_lineitem)
+
+                applied_pending_quantity = 0
+                applied_indirect_pending_quantity = 0
+
+                for item in all_linked_items:
+                        if item.grn_link_type == 'direct':
+                                applied_pending_quantity = applied_pending_quantity + item.quantity
+                        else:
+                                applied_indirect_pending_quantity = applied_indirect_pending_quantity + item.quantity
+
+                changed_quantity = new_quantity - linked_grn_lineitem.quantity
+                if changed_quantity <= 0:
+                        invoice_lineitem.quantity = invoice_lineitem.quantity + (changed_quantity)
+                        linked_grn_lineitem.quantity = new_quantity
+
+                        invoice_lineitem.save()
+                        linked_grn_lineitem.save()
+
+                        return HttpResponseRedirect(reverse('invoice-selected-lineitem-chnage-quantity',args=[invoice_no,lineitem_id]))
+
+                if linked_grn_lineitem.grn_link_type == 'direct':
+                        if (invoice_lineitem.quantity + changed_quantity) > total_pending_quantity :
+                                return JsonResponse({'message':'Quantity exceeds, currently available quantity ' + str(available_quantity)})
+                        
+                        invoice_lineitem.quantity = invoice_lineitem.quantity + (changed_quantity)
+                        linked_grn_lineitem.quantity = new_quantity
+
+                        invoice_lineitem.save()
+                        linked_grn_lineitem.save()
+                
+                        return HttpResponseRedirect(reverse('invoice-selected-lineitem-chnage-quantity',args=[invoice_no,lineitem_id]))
+
+                if linked_grn_lineitem.grn_link_type == 'indirect':
+                        if (invoice_lineitem.quantity + changed_quantity) > pending_indirect_quantity :
+                                return JsonResponse({'message':'Quantity exceeds, currently available quantity ' + str(available_quantity)})
+                        
+                        invoice_lineitem.quantity = invoice_lineitem.quantity + (changed_quantity)
+                        linked_grn_lineitem.quantity = new_quantity
+
+                        invoice_lineitem.save()
+                        linked_grn_lineitem.save()
+                
+                        return HttpResponseRedirect(reverse('invoice-selected-lineitem-chnage-quantity',args=[invoice_no,lineitem_id]))
+
+#Delete source quantity
+@login_required(login_url="/employee/login/")
+def invoice_selected_lineitem_chnage_quantity_linked_delete(request,invoice_no=None,lineitem_id=None,linked_id=None):
+        context={}
+        context['invoice'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                linked_item = InvoiceGRNLink.objects.get(id = linked_id)
+                invoice_lineitem = InvoiceLineitem.objects.get(id = lineitem_id)
+
+                invoice_lineitem.quantity = invoice_lineitem.quantity - linked_item.quantity
+                linked_item.delete()
+
+                invoice_lineitem.save()
                 return HttpResponseRedirect(reverse('invoice-selected-lineitem',args=[invoice_no]))
 
 #Delete Item
@@ -612,36 +966,61 @@ def invoice_generate(request,invoice_no=None):
 
                 pending_delivery_items = PendingDelivery.objects.filter(cpo_lineitem__cpo = customer_po)
                 invoice_lineitems = InvoiceLineitem.objects.filter(invoice = invoice)
-                grn_lineitems = GRNLineitem.objects.filter(cpo_lineitem__cpo = customer_po)
+                #grn_lineitems = GRNLineitem.objects.filter(cpo_lineitem__cpo = customer_po)
+                inv_grn_link = InvoiceGRNLink.objects.filter(invoice_lineitem__invoice = invoice)
 
+                #Deduct from inventory
+                for link_item in inv_grn_link:
+                        if not(link_item.grn_lineitem):
+                                pass
+                        else:
+                                link_item.grn_lineitem.invoiced_quantity = link_item.grn_lineitem.invoiced_quantity + link_item.quantity
+                                if link_item.grn_lineitem.invoiced_quantity > link_item.grn_lineitem.quantity:
+                                        return JsonResponse({'message' : 'Something wrong in quantity, please check manually and try again'})
+                        
+                        for pending_item in pending_delivery_items :
+                                if pending_item.cpo_lineitem == link_item.invoice_lineitem.customer_po_lineitem:
+                                        if link_item.grn_link_type == 'direct':
+                                                pending_item.pending_quantity = pending_item.pending_quantity - link_item.quantity
+                                        
+                                        else:
+                                                pending_item.pending_quantity = pending_item.pending_quantity - link_item.quantity
+                                                pending_item.pending_indirect_quantity = pending_item.pending_indirect_quantity - link_item.quantity
+                                                                                                
 
-                #Deduct from Pending Delivery
-                for pending_item in pending_delivery_items :
-                        for invoice_item in invoice_lineitems :
-                                if invoice_item.product_title != 'added_by_accounts':
-                                        if pending_item.cpo_lineitem == invoice_item.customer_po_lineitem :
-                                                pending_item.pending_quantity = pending_item.pending_quantity - invoice_item.quantity
+                #Deduct from pending_delivery
+                                
 
-                                                if pending_item.pending_quantity < 0 :
-                                                        return JsonResponse({'message' : 'Something wrong in quantity, please check manually and try again'})
+                ##Deduct from Pending Delivery
+                #for pending_item in pending_delivery_items :
+                #        for invoice_item in invoice_lineitems :
+                #                if invoice_item.product_title != 'added_by_accounts':
+                #                        if pending_item.cpo_lineitem == invoice_item.customer_po_lineitem :
+                #                                pending_item.pending_quantity = pending_item.pending_quantity - invoice_item.quantity
 
-                #Deduct from Inventory
-                for invoice_item in invoice_lineitems :
-                        if invoice_item.product_title != 'added_by_accounts':
-                                effective_quantity = invoice_item.quantity
+                #                                if pending_item.pending_quantity < 0 :
+                #                                        return JsonResponse({'message' : 'Something wrong in quantity, please check manually and try again'})
 
-                                for grn_item in grn_lineitems:
-                                        if grn_item.cpo_lineitem == invoice_item.customer_po_lineitem:
-                                                available_quantity = grn_item.quantity - grn_item.invoiced_quantity
-                                                if available_quantity > 0:
-                                                        if available_quantity >= effective_quantity:
-                                                                grn_item.invoiced_quantity = grn_item.invoiced_quantity + effective_quantity
-                                                                effective_quantity = 0
+                ##Deduct from Inventory
+                #for invoice_item in invoice_lineitems :
+                #        if invoice_item.product_title != 'added_by_accounts':
+                #                effective_quantity = invoice_item.quantity
+
+                #                for grn_item in grn_lineitems:
+                #                        if grn_item.cpo_lineitem == invoice_item.customer_po_lineitem:
+                #                                available_quantity = grn_item.quantity - grn_item.invoiced_quantity
+                #                                if available_quantity > 0:
+                #                                        if available_quantity >= effective_quantity:
+                #                                                grn_item.invoiced_quantity = grn_item.invoiced_quantity + effective_quantity
+                #                                                effective_quantity = 0
                                                         
-                                                        else:
-                                                                grn_item.invoiced_quantity = grn_item.invoiced_quantity + available_quantity
-                                                                effective_quantity = effective_quantity - available_quantity
+                #                                        else:
+                #                                                grn_item.invoiced_quantity = grn_item.invoiced_quantity + available_quantity
+                #                                                effective_quantity = effective_quantity - available_quantity
 
+                for link_item in inv_grn_link:
+                        link_item.grn_lineitem.save()
+                        
                 cpo_testing_flag = 'Yes'
                 for pending_item in pending_delivery_items :
                         if pending_item.pending_quantity > 0:
@@ -654,11 +1033,23 @@ def invoice_generate(request,invoice_no=None):
 
                 for pending_item in pending_delivery_items :
                         pending_item.save()
-                
-                for grn_item in grn_lineitems:
-                        grn_item.save()
 
                 
+
+                #for grn_item in grn_lineitems:
+                #        grn_item.save()
+
+                #inv_grn_link = InvoiceGRNLink.objects.filter(invoice_lineitem__invoice = invoice)
+                
+                #for invoice_item in invoice_lineitems:
+                #        effective_quantity = invoice_item.quantity
+                #        for link_item in inv_grn_link:
+                #                if link_item.invoice_lineitem == invoice_item:
+                #                        if effective_quantity > link_item.quantity:
+                #                                effective_quantity = effective_quantity - link_item.quantity
+                #                        else:
+                #                                link_item.quantity = effective_quantity
+                #                                link_item.save()
 
                 invoice.generating_status = 'Generated'
                 invoice.save()
@@ -1298,8 +1689,18 @@ def direct_invoice_number_generate(request, customer_id = None, contact_person_i
                         return(JsonResponse({'message' : 'please complete previous invoice'}))
 
                 financial_year = get_financial_year(datetime.datetime.today().strftime('%Y-%m-%d'))
-                invoice_count = (InvoiceTracker.objects.filter(financial_year = financial_year).count()) + 1
-                invoice_no = 'AP' + financial_year + "{:04d}".format(invoice_count)
+
+                delete_invoice_count = InvoiceTracker.objects.filter(generating_status = 'Deleted',financial_year=financial_year).count()
+                if delete_invoice_count > 0:
+                        deleted_invoice_list = InvoiceTracker.objects.filter(generating_status = 'Deleted',financial_year=financial_year).order_by('invoice_no')
+                        invoice = deleted_invoice_list[0]
+                        invoice_no = invoice.invoice_no
+                        invoice.delete() 
+                
+                else:
+                        invoice_count = (InvoiceTracker.objects.filter(financial_year = financial_year).count()) + 1
+                        invoice_no = 'AP' + financial_year + "{:04d}".format(invoice_count)
+                
                 print(invoice_no)
 
                 customer = CustomerProfile.objects.get(id = customer_id)
@@ -1552,7 +1953,7 @@ def invoice_list(request):
         context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if request.method == 'GET':
-                invoice_list = InvoiceTracker.objects.all().values(
+                invoice_list = InvoiceTracker.objects.filter(generating_status='Generated').values(
                         'invoice_no',
                         'invoice_date',
                         'customer__name',
@@ -1599,9 +2000,246 @@ def invoice_lineitems(request,invoice_no = None):
                 context['invoice_lineitem'] = invoice_lineitems
                 context['invoice'] = invoice
                 context['invoice_no'] = invoice_no
+                context['cpo'] = invoice.cpo
                 
                 if type == 'Accounts':
                         return render(request,"Accounts/Invoice/ManageInvoice/invoice_selected_lineitem.html",context)
+
+#Invoice Lineitems slice edit
+@login_required(login_url="/employee/login/")
+def invoice_lineitems_slice_edit(request,invoice_no = None):
+        context={}
+        context['invoice'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                invoice = InvoiceTracker.objects.get(invoice_no = invoice_no)
+                invoice_lineitems = InvoiceLineitem.objects.filter(invoice = invoice).values(
+                        'id',
+                        'product_title',
+                        'description',
+                        'model',
+                        'brand',
+                        'product_code',
+                        'part_number',
+                        'hsn_code',
+                        'quantity',
+                        'uom',
+                        'unit_price',
+                        'total_basic_price',
+                        'gst',
+                        'total_price'
+                )
+
+                context['invoice_lineitem'] = invoice_lineitems
+                context['invoice'] = invoice
+                context['invoice_no'] = invoice_no
+                context['cpo'] = invoice.cpo
+                
+                if type == 'Accounts':
+                        return render(request,"Accounts/Invoice/ManageInvoice/slice_edit/invoice_lineitem_slice_edit.html",context)
+
+#Invoice Lineitems slice edit -- > lineitem edit
+@login_required(login_url="/employee/login/")
+def invoice_lineitems_slice_edit_lineitem(request,invoice_no = None, lineitem_id = None):
+        context={}
+        context['invoice'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                invoice = InvoiceTracker.objects.get(invoice_no = invoice_no)
+                
+                cpo = 'null'
+                if(not(invoice.cpo)):
+                        cpo = 'not_null'
+
+                invoice_lineitem = InvoiceLineitem.objects.get(id = lineitem_id)
+                context['item'] = invoice_lineitem
+                context['cpo'] = cpo
+
+                if type == 'Accounts':
+                        return render(request,"Accounts/Invoice/ManageInvoice/slice_edit/edit_item.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+
+                lnvoice_lineitem = InvoiceLineitem.objects.get(id = lineitem_id)
+                
+                lnvoice_lineitem.description = data['description']
+                lnvoice_lineitem.model = data['model']
+                lnvoice_lineitem.brand = data['brand']
+                lnvoice_lineitem.product_code = data['product_code']
+                lnvoice_lineitem.part_number = data['part_number']
+                lnvoice_lineitem.hsn_code = data['hsn_code']
+                lnvoice_lineitem.quantity = float(data['quantity'])
+                lnvoice_lineitem.uom = data['uom']
+                lnvoice_lineitem.unit_price = float(data['unit_price'])
+                lnvoice_lineitem.gst = float(data['gst'])
+
+                lnvoice_lineitem.save()
+
+                invoice_value_calculation(invoice_no)
+                return HttpResponseRedirect(reverse('invoice-lineitems-slice-edit',args=[invoice_no]))
+
+#Invoice continue slice --editing
+@login_required(login_url="/employee/login/")
+def invoice_lineitems_slice_edit_continue(request,invoice_no = None):
+        context={}
+        context['invoice'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                i = InvoiceTracker.objects.get(invoice_no=invoice_no)
+
+                context['billing_address'] = i.billing_address
+                context['shipping_address'] = i.shipping_address
+                context['gst_number'] = i.customer.gst_number
+                context['requester'] = i.requester
+                context['requester_ph_no'] = i.requester_phone_no
+                
+                
+                context['receiver'] = i.receiver
+                context['receiver_department'] = i.receiver_department
+                context['receiver_ph_no'] = i.receiver_phone_no
+                        
+                context['cpo_no'] = i.po_reference
+                context['cpo_date'] = i.po_date
+                context['vendor_code'] = i.customer.vendor_code
+
+
+                context['remarks'] = i.remarks
+                context['other_info1'] = i.other_info1
+                context['other_info2'] = i.other_info2
+                context['other_info3'] = i.other_info3
+                context['other_info4'] = i.other_info4
+                context['other_info5'] = i.other_info5
+                context['other_info6'] = i.other_info6
+                context['other_info7'] = i.other_info7
+
+                if type == 'Accounts':
+                        return render(request,"Accounts/Invoice/ManageInvoice/slice_edit/invoice_info_edit.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+
+                invoice = InvoiceTracker.objects.get(invoice_no = invoice_no)
+                invoice.billing_address = data['billing_address']
+                invoice.shipping_address = data['shipping_address']
+                invoice.customer.gst_number = data['gst_number']
+                invoice.customer.vendor_code = data['vendor_code']
+                invoice.customer.save()
+
+                invoice.requester = data['requester']
+                invoice.requester_phone_no = data['requester_ph_no']
+
+                invoice.receiver = data['receiver']
+                invoice.receiver_department = data['receiver_department']
+                invoice.receiver_phone_no = data['receiver_ph_no']
+
+                invoice.remarks = data['remarks']
+                invoice.other_info1 = data['other_info_1']
+                invoice.other_info2 = data['other_info_2']
+                invoice.other_info3 = data['other_info_3']
+                invoice.other_info4 = data['other_info_4']
+                invoice.other_info5 = data['other_info_5']
+                invoice.other_info6 = data['other_info_6']
+                invoice.other_info7 = data['other_info_7']
+
+                invoice.save()
+
+                context['invoice_no'] = invoice_no
+                context['invoice_date'] = invoice.invoice_date
+
+                if type == 'Accounts':
+                        return render(request,"Accounts/Invoice/ManageInvoice/slice_edit/invoice_date_selection.html",context)
+
+#Direct Generate Invoice
+@login_required(login_url="/employee/login/")
+def invoice_lineitems_slice_edit_get_copy(request,invoice_no=None):
+        context={}
+        context['invoice'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                invoice = InvoiceTracker.objects.get(invoice_no = invoice_no)
+                if(not(invoice.customer.bank_account)):
+                        return JsonResponse({'message':'bank details not found'})
+                data = request.POST
+
+                try:
+                        invoice.invoice_date = data['invoice_date']            
+                        invoice.save()
+                except:
+                        pass
+
+                Invoice_Generator(invoice_no)
+
+                if type == 'Accounts':
+                        context['invoice_no'] = invoice_no
+                        return render(request,"Accounts/Invoice/ManageInvoice/slice_edit/get_invoice_copy.html",context)
+
+##################################### Delete Generated Invoice
+@login_required(login_url="/employee/login/")
+def generated_invoice_delete(request,invoice_no=None):
+        context={}
+        context['invoice'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                invoice = InvoiceTracker.objects.get(invoice_no = invoice_no)
+                invoice_lineitem  = InvoiceLineitem.objects.filter(invoice = invoice)
+
+                if(not(invoice.cpo)):
+                        invoice.generating_status = 'Deleted'
+                        invoice.save()
+
+                        for item in invoice_lineitem:
+                                item.delete()
+                        
+                        return JsonResponse({'Message':'Success'})
+
+                for item in invoice_lineitem:
+                        item_quantity = item.quantity
+                        if(not(item.customer_po_lineitem)):
+                                item.delete()
+                        
+                        else:
+                                inv_grn_link = InvoiceGRNLink.objects.filter(invoice_lineitem = item)
+                                for link_item in inv_grn_link:
+                                        print('link item quantity ' + str(link_item.quantity))
+                                        link_item.grn_lineitem.invoiced_quantity = link_item.grn_lineitem.invoiced_quantity - link_item.quantity
+                                        link_item.grn_lineitem.save()
+                                        item_quantity = item_quantity - link_item.quantity
+
+                                pending_delivery = PendingDelivery.objects.filter(cpo_lineitem = item.customer_po_lineitem)
+                                pending_delivery = pending_delivery[0]
+                                pending_delivery.pending_quantity = pending_delivery.pending_quantity + item.quantity
+                                pending_delivery.save() 
+
+                                if invoice.cpo.processing_type == 'direct':
+                                        invoice.cpo.status = 'po_processed'
+                                        invoice.cpo.save()
+                                
+                                if invoice.cpo.processing_type == 'indirect':
+                                        invoice.cpo.status = 'direct_processing'
+                                        invoice.cpo.save()
+                                
+                                invoice.generating_status = 'Deleted'
+                                invoice.save()
+
+                                return JsonResponse({'Message':'Success'})
+
+
 
 
 ##-------------------------------Generate Invoice-----------------------------------------------------------
@@ -1812,7 +2450,7 @@ def Add_To(pdf,billing_address,shipping_address,gst_number,requester,requester_p
         if requester != '' and requester != 'None':
                 req = req + 'Requester : ' + requester
 
-                if requester_ph_no != '' and receiver_phone_no != 'None':
+                if requester_ph_no != '' and requester_ph_no != 'None':
                         req = req +' ,' + requester_ph_no
         
                 if req != '':
@@ -1956,7 +2594,7 @@ def add_lineitem(pdf,y,i,invoice_no,product_title,description,model,brand,produc
         item_description = ''
 
         if description != '' and description != 'None':
-                item_description = item_description + ', ' + description
+                item_description = description
 
         if model != '' and model != 'None':
                 item_description = item_description + ', ' + model
@@ -1976,6 +2614,10 @@ def add_lineitem(pdf,y,i,invoice_no,product_title,description,model,brand,produc
 
         print(item_description)
         if state == 'Karnataka':
+                if y < 50:
+                        y = add_new_page(pdf,invoice_no,tax_type)
+                        y = Add_Table_Header(pdf,y,state)
+                        pdf.setFont('Helvetica', 8)
                 pdf.drawString(22,y,str(i))
 
                 material_wrapper = textwrap.TextWrapper(width=45)
@@ -2002,7 +2644,11 @@ def add_lineitem(pdf,y,i,invoice_no,product_title,description,model,brand,produc
                 description_word_list = material_wrapper.wrap(item_description)
                 flag = 0
                 y = y - 11
-
+                if y < 50:
+                        y = add_new_page(pdf,invoice_no,tax_type)
+                        y = Add_Table_Header(pdf,y,state)
+                        pdf.setFont('Helvetica', 8)
+                
                 for element in description_word_list:
                         #Page Break
                         if flag == 1:
@@ -2031,6 +2677,11 @@ def add_lineitem(pdf,y,i,invoice_no,product_title,description,model,brand,produc
                 pdf.rect(20,y,560, 0.1, stroke=1, fill=1)
   
         else:
+                if y < 50:
+                        y = add_new_page(pdf,invoice_no,tax_type)
+                        y = Add_Table_Header(pdf,y,state)
+                        pdf.setFont('Helvetica', 8)
+                
                 pdf.drawString(22,y,str(i))
 
                 material_wrapper = textwrap.TextWrapper(width=45)
@@ -2055,6 +2706,12 @@ def add_lineitem(pdf,y,i,invoice_no,product_title,description,model,brand,produc
                 description_word_list = material_wrapper.wrap(item_description)
                 flag = 0
                 y = y - 11
+
+                if y < 50:
+                        y = add_new_page(pdf,invoice_no,tax_type)
+                        y = Add_Table_Header(pdf,y,state)
+                        pdf.setFont('Helvetica', 8)
+                
 
                 for element in description_word_list:
                         #Page Break
@@ -2212,7 +2869,7 @@ def add_tc(pdf,y,invoice_no,tax_type):
         pdf.drawString(20,y,'Declaration')
         y = y - 9
         pdf.setFont('Helvetica', 7)
-        pdf.drawString(20,y,'We decleare that this invoice shows the actual price of the goods described and that all particulars are true and correct.')
+        pdf.drawString(20,y,'We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.')
         y = y - 10
 
         return(y)
@@ -2338,13 +2995,21 @@ def invoice_pending_ack_details(request, invoice_no):
                 data = request.POST
                 invoice = InvoiceTracker.objects.get(invoice_no = invoice_no)
 
-                AcknowledgeDocument.objects.create(
-                        invoice = invoice,
-                        description = data['document_description'],
-                        date = data['document_date'],
-                        document = request.FILES['attachment']
-                )
-                return HttpResponseRedirect(reverse('invoice-pending-ack-list',args=[invoice_no]))
+                try:
+                        AcknowledgeDocument.objects.create(
+                                invoice = invoice,
+                                description = data['document_description'],
+                                date = data['document_date'],
+                                document = request.FILES['attachment']
+                        )
+                except:
+                        AcknowledgeDocument.objects.create(
+                                invoice = invoice,
+                                description = data['document_description'],
+                                date = data['document_date']
+                        )
+
+                return HttpResponseRedirect(reverse('invoice-pending-ack-details',args=[invoice_no]))
 
 #Acknowledge invoice
 @login_required(login_url="/employee/login/")
@@ -2446,3 +3111,28 @@ def invoice_ack_edit(request, invoice_no):
                 invoice.save()
 
                 return JsonResponse({'Message' : 'Success'})
+
+
+##--------------------------Manage Deleted Invoices--------------------------
+#Pending Acknowledgement list
+@login_required(login_url="/employee/login/")
+def deleted_invoice_list(request):
+        context={}
+        context['invoice'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                deleted_list = InvoiceTracker.objects.filter(generating_status='Deleted').values(
+                        'invoice_no',
+                        'invoice_date',
+                        'customer__name',
+                        'customer__location',
+                        'po_reference',
+                        'po_date'
+                )
+                context['deleted_list'] = deleted_list
+
+                if type == 'Accounts':
+                        return render(request,"Accounts/Invoice/Deleted/deleted_invoice_list.html",context)

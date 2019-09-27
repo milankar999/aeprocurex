@@ -129,37 +129,37 @@
               <h4>&nbsp;&nbsp;{{info.rfp_type}}</h4>
               <hr> 
               <h6>&nbsp;&nbsp;Customer Name</h6>
-              <h4>&nbsp;&nbsp;{{info.customer__name}}</h4>
+              <h4>&nbsp;&nbsp;{{info.customer.name}}</h4>
               <hr> 
               <h6>&nbsp;&nbsp;Customer Location</h6>
-              <h4>&nbsp;&nbsp;{{info.customer__location}}</h4>
+              <h4>&nbsp;&nbsp;{{info.customer.location}}</h4>
               <hr> 
               <h6>&nbsp;&nbsp;Contact Person</h6>
-              <h4>&nbsp;&nbsp;{{info.customer_contact_person__name}}</h4>
+              <h4>&nbsp;&nbsp;{{info.customer_contact_person.name}}</h4>
               <hr> 
               <h6>&nbsp;&nbsp;Contact No</h6>
-              <h4>&nbsp;&nbsp;{{info.customer_contact_person__mobileNo1}}</h4>
+              <h4>&nbsp;&nbsp;{{info.customer_contact_person.mobileNo1}}</h4>
               <hr> 
               <h6>&nbsp;&nbsp;Email</h6>
-              <h4>&nbsp;&nbsp;{{info.customer_contact_person__email1}}</h4>
+              <h4>&nbsp;&nbsp;{{info.customer_contact_person.email1}}</h4>
               <hr> 
               <h6>&nbsp;&nbsp;End User</h6>
-              <h4>&nbsp;&nbsp;{{info.end_user__user_name}}</h4>
+              <h4>&nbsp;&nbsp;{{info.end_user.user_name}}</h4>
               <hr> 
               <h6>&nbsp;&nbsp;Department</h6>
-              <h4>&nbsp;&nbsp;{{info.end_user__department_name}}</h4>
+              <h4>&nbsp;&nbsp;{{info.end_user.department_name}}</h4>
               <hr> 
               <h6>&nbsp;&nbsp;Contact No</h6>
-              <h4>&nbsp;&nbsp;{{info.end_user__mobileNo1}}</h4>
+              <h4>&nbsp;&nbsp;{{info.end_user.mobileNo1}}</h4>
               <hr> 
               <h6>&nbsp;&nbsp;Email</h6>
-              <h4>&nbsp;&nbsp;{{info.end_user__email1}}</h4>
+              <h4>&nbsp;&nbsp;{{info.end_user.email1}}</h4>
               <hr> 
               <h6>&nbsp;&nbsp;RFP Creation Date</h6>
-              <h4>&nbsp;&nbsp;{{info.rfp_creation_details__creation_date}}</h4>
+              <h4>&nbsp;&nbsp;{{info.rfp_creation_details.creation_date}}</h4>
               <hr> 
               <h6>&nbsp;&nbsp;Created By</h6>
-              <h4>&nbsp;&nbsp;{{info.rfp_creation_details__created_by__username}}</h4>
+              <h4>&nbsp;&nbsp;{{info.rfp_creation_details.created_by.username}}</h4>
               {% if info.priority == 1 %}
               <hr> 
               <h6>&nbsp;&nbsp;Priority</h6>
@@ -223,6 +223,8 @@
       </div>
 
   <div class="container">
+
+    {% ifnotequal status "Closed" %}
       <button class="btn btn-danger" data-toggle="modal" data-target="#reject">Mark As Duplicate &nbsp;<span class="glyphicon glyphicon-remove"></span></button>
       <div class="modal fade" id="reject" role="dialog">
           <div class="modal-dialog">
@@ -270,6 +272,54 @@
                 </form>
             </div>
       </div>
+    {% endifnotequal %}
+
+    {% ifequal status "Closed" %}
+    <button class="btn btn-success" data-toggle="modal" data-target="#restore">Restore Enquiry &nbsp;<span class="glyphicon glyphicon-ok"></span></button>
+    <div class="modal fade" id="restore" role="dialog">
+        <div class="modal-dialog">
+        
+          <!-- Modal content-->
+          <form method="POST" action="/enquiry_tracker/rfp/{{rfp_no}}/restore/">   
+            {% csrf_token %}
+                <div class="modal-content">
+                        <div class="modal-header">
+                          <label>Are You Sure Want restore this enquiry ?</label>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="submit" class="btn btn-success" value="Submit">
+                            <input type="button" class="btn btn-info" data-dismiss="modal" value="Cancel">
+                        </div>
+                                         
+                </div>
+          </form>
+      </div>
+    </div>
+    {% endifequal %}
+
+      {% if editing_permission == 'yes' %}
+      <button class="btn btn-success pull-right" data-toggle="modal" data-target="#editEnquiry">Edit Enquiry &nbsp;<span class="glyphicon glyphicon-pencil"></span></button>
+
+      <div class="modal fade" id="editEnquiry" role="dialog">
+        <div class="modal-dialog">
+        
+          <!-- Modal content-->
+          <form method="GET" action="/enquiry_tracker/rfp/{{rfp_no}}/edit_enquiry/">   
+            {% csrf_token %}
+                <div class="modal-content">
+                        <div class="modal-header">
+                          <label>Are You Sure Want to edit this enquiry ?</label>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="submit" class="btn btn-success" value="Submit">
+                            <input type="button" class="btn btn-info" data-dismiss="modal" value="Cancel">
+                        </div>
+                                         
+                </div>
+          </form>
+        </div>
+      </div>
+      {% endif %}
   </div><br>
 </div>
   <script type="text/javascript">

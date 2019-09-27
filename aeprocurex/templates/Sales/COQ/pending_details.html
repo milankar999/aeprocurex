@@ -24,6 +24,85 @@
           </div> 
         </div>
     </div>  
+
+
+
+
+
+
+    <div class="container">
+        <div class="col-sm-6">
+          <div class="card-header p-0">
+              <div class="bg-info text-white text-center py-2">
+                  <label>Supplier Quotation Reference</label>
+              </div>
+          </div>
+        
+        <br>
+        <hr>
+
+
+
+        {% for attachment in sourcing_attachment %}
+        
+          {% ifnotequal attachment.attachment "" %}
+          <label>Supporting Document <a href="/api/media/{{attachment.attachment}}" target="-blank">Click Here</a></label><br>
+          {% endifnotequal %}
+
+
+          {% ifnotequal attachment.quotation_link "" %}
+          <label>Quotation Link <a href="{{attachment.quotation_link}}" target="-blank">{{attachment.quotation_link}}</a></label><br>
+          {% endifnotequal %}
+
+        <hr>
+        {% empty %}
+        <label>No Attachment Found</label>
+        {% endfor %}
+
+        <hr>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="card-header p-0">
+                <div class="bg-info text-white text-center py-2">
+                    <label>Other Charges applicable for quotation</label>
+                </div>
+            </div>
+            <br>
+        <hr>
+
+
+
+        {% for cost in other_cost %}
+          
+          <label>Vendor : {{cost.sourcing.supplier.name}} &nbsp;//&nbsp; {{cost.cost_description}} &nbsp;//&nbsp; {{cost.value}}</label><br>          
+
+        <hr>
+        {% empty %}
+        <label>No cost Found</label>
+        {% endfor %}
+
+        <hr>
+        
+        </div>
+
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <button type="submit" data-toggle="modal" data-target="#resourcing" class="btn btn-info">RESOURCING &nbsp;<span class="glyphicon glyphicon-screenshot"></span></button>
     <h3>Please mark the selected price</h3>
     <button type="button" class="btn btn-info navbar-btn" data-toggle="modal" data-target="#AutoCOQ">Auto COQ &nbsp;<span class="glyphicon glyphicon-send"></span></button>

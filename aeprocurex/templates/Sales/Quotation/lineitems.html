@@ -8,6 +8,119 @@
         <button type="submit" data-toggle="modal" data-target="#resourcing" class="btn btn-info">RESOURCING &nbsp;<span class="glyphicon glyphicon-screenshot"></span></button>
         <button type="submit" data-toggle="modal" data-target="#recoq" class="btn btn-info">RE COQ &nbsp;<span class="glyphicon glyphicon-screenshot"></span></button>
     </h3>
+
+
+
+
+
+
+    <div class="container">
+      <div class="col-sm-6">
+        <div class="card-header p-0">
+            <div class="bg-info text-white text-center py-2">
+                <label>Supplier Quotation Reference</label>
+            </div>
+        </div>
+      
+      <br>
+      <hr>
+
+
+
+      {% for attachment in sourcing_attachment %}
+      
+        {% ifnotequal attachment.attachment "" %}
+        <label>Supporting Document <a href="/api/media/{{attachment.attachment}}" target="-blank">Click Here</a></label><br>
+        {% endifnotequal %}
+
+
+        {% ifnotequal attachment.quotation_link "" %}
+        <label>Quotation Link <a href="{{attachment.quotation_link}}" target="-blank">{{attachment.quotation_link}}</a></label><br>
+        {% endifnotequal %}
+
+      <hr>
+      {% empty %}
+      <label>No Attachment Found</label>
+      {% endfor %}
+
+      <hr>
+      </div>
+
+      <div class="col-sm-6">
+          <div class="card-header p-0">
+              <div class="bg-info text-white text-center py-2">
+                  <label>Other Charges applicable for quotation</label>
+              </div>
+          </div>
+          <button class="btn btn-success" data-toggle="modal" data-target="#AddCosts">Add Other Charges&nbsp;<span class="glyphicon glyphicon-plus"></span></button>
+          <br>
+      <hr>
+
+
+
+      {% for cost in other_charges %}
+        
+        <label> {{cost.cost_description}} &nbsp;//&nbsp; {{cost.value}}</label>          
+        <a class="btn btn-danger" href="{{cost.id}}/delete/"><span class="glyphicon glyphicon-trash"></span></a>
+      <hr>
+      {% empty %}
+      <label>No cost Found</label>
+      {% endfor %}
+
+      <hr>
+      
+      </div>
+
+    </div>
+
+
+
+
+
+
+<!--other charges Model Add -->
+ <div class="modal fade" id="AddCosts" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">-- Add charge details --</h4>
+      </div>
+
+      <div class="modal-body">
+        <form method="POST" action="add_other_charges/">
+          {% csrf_token %}
+          <div class="form-group"> 
+            <br>
+
+            <label class="form-input"> Description </label>
+            <input type="text" class="form-control" id="description" name="description" required>
+            
+            <label class="form-input">Value </label>
+            <input type="number" class="form-control" id="amount" step="0.01" name="amount" required>
+
+          </div>
+          <div class="modal-footer">
+            <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+            <input type="submit" class="btn btn-success" value="Confirm">
+          </div>  
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!--End of other charges Model-->
+
+
+
+
+
+
+
+
+
     <div class="modal fade" id="resourcing" role="dialog">
         <div class="modal-dialog">  
           <!-- Modal content-->
@@ -181,6 +294,54 @@
           </div>
       </div>  
 
+
+
+
+
+      <button type="submit" data-toggle="modal" data-target="#ApplyOtherCharges" class="btn btn-success pull-right">Apply other charges in Mergin &nbsp;<span class="glyphicon glyphicon-screenshot"></span></button>
+
+
+      <div class="modal fade" id="ApplyOtherCharges" role="dialog">
+        <div class="modal-dialog">
+        
+          <!-- Modal content-->
+          <div class="modal-content">
+            <form method="POST" action="apply_other_charges/">
+            {% csrf_token %}
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Warning  <span class="glyphicon glyphicon-fire"></span></h4>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure want apply other charges add in mergin  </p>
+              
+            </div>
+             <div class="modal-footer">
+                <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                <input type="submit" class="btn btn-success" value="Continue">
+            </div>
+            </form>
+          </div>
+          
+        </div>
+    </div>
+
+
+
+
+
+
+    </div>
+    <br>
+    <div class="container">
+      <div class="col-sm-6">
+        <label>Total Basic Quoted Value :: {{s_basic_value}}</label><br>
+        <label>Total Quoted Value with GST:: {{s_total_value}}</label>
+      </div>
+      <div class="col-sm-6">
+        <label>Supplier Total Basic Quoted Value :: {{b_basic_value}}</label><br>
+        <label>Supplier Total Quoted Value with GST :: {{b_total_value}}</label>
+      </div>
     </div>
     <br>
     <div class="table-responsive">          

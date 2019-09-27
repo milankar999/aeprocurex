@@ -132,7 +132,78 @@
                  </tbody>
                </table>
                <a class="btn btn-success pull-right" href="/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/select_new_vendor/">Select a New Vendor&nbsp; <span class="glyphicon glyphicon-plus"></span></a>
-       </div><br>
+               <button class="btn btn-success pull-left" data-toggle="modal" data-target="#directProcessing">Mark as Direct Processing &nbsp;<span class="glyphicon glyphicon-flag"></span></button>
+
+              <div class="modal fade" id="directProcessing" role="dialog">
+                 <div class="modal-dialog">
+                 
+                   <!-- Modal content-->
+                   <form>   
+                     {% csrf_token %}
+                         <div class="modal-content">
+                                 <div class="modal-header">
+                                   <label>Are You Sure Want to mark this selected items as Direct Processing ?</label>
+                                 </div>
+                                 <div class="modal-footer">
+                                    <button class="btn btn-success" onclick="MarkDirectProcessing('cpo_lineitem')">Confirm</button>
+                                    <input type="button" class="btn btn-info" data-dismiss="modal" value="Cancel">
+                                 </div>
+                                                  
+                         </div>
+                   </form>
+                 </div>
+              </div>
+        </div><br>
+
+
+        <hr>
+        <div class="card-header p-0">
+          <div class="bg-info text-white text-center py-2">
+              <h3>Direct Processing Items of this order</h3>
+          </div>
+        </div>
+        <div class="table-responsive">          
+          <table id="product" class="table table-hover table-bordered table-sm" width="100%">
+            <thead>
+              <tr>
+                <th>Check</th>
+                <th>Sl No</th>
+                <th>Product Title</th>
+                <th>Description</th>
+                <th>Model</th>
+                <th>Brand</th>
+                <th>Product Code</th>
+                <th>HSN Code</th>
+                <th>UOM</th>
+                <th>Quantity</th>
+              </tr>
+            </thead>
+            <tbody>
+                   
+                {% for item in direct_processing_product %}
+                  <tr>
+                     <td>
+                         <a href="{{item.id}}/remove/"><span class="glyphicon glyphicon-eject" style="color: red"></span></a>
+                     </td>
+                     <td>{{forloop.counter}}</td>
+                     <td>{{item.product_title}}</td>
+                     <td>{{item.description}}</td>
+                     <td>{{item.model}}</td>
+                     <td>{{item.brand}}</td>
+                     <td>{{item.product_code}}</td>      
+                     <td>{{item.hsn_code}}</td>
+                     <td>{{item.uom}}</td>
+                     <td>{{item.indirect_processing_quantity}}</td>
+                  </tr>
+                {% empty %}
+                  <p>No Lineitem Found</p>
+                {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+
+
 
    </div>   
 <script type="text/javascript">
@@ -171,6 +242,38 @@
          );
        }
      }
+
+    function MarkDirectProcessing(checkboxName){
+      var checkboxes = document.querySelectorAll('input[name="' + checkboxName + '"]:checked'), values = [];
+         Array.prototype.forEach.call(checkboxes, function(el) {
+           values = values + ',' + el.value;
+       });
+       
+       if(values.length==0){
+         alert('Minimum one item You Have To Select');
+       }
+       else{
+        $('body').append('<div id="requestOverlay" class="request-overlay"></div>'); /*Create overlay on demand*/
+        $("#requestOverlay").show();
+         data = {
+             'cpo_lineitems' : values,
+             'csrfmiddlewaretoken': '{{ csrf_token }}'
+             }
+             $.ajax({
+               type: "POST",
+               url: "/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/mark_direct_processing/",
+               data: data,
+               success: function() {
+                 redirect();
+               },
+               failure: function(){
+                 window.alert('Some Error Occurred, Please Try Again');
+                 document.getElementById("btnAbsorve").disabled = false;
+               }
+           }
+         );
+       }
+    }
 </script> 
 <style>
     .request-overlay {

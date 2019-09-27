@@ -967,6 +967,26 @@ def cpo_quotation_no_search(request):
                 context['quotation_lineitem'] = quotation_lineitem
                 return render(request,"CRM/PO/quotation_no_search.html",context)
 
+#Calculate Total Value
+def calculate_cpo(cpo_id):
+        cpo = CustomerPO.objects.get(id = cpo_id)
+        total_basic = 0
+        all_total = 0
+
+        cpo_lineitem = CPOLineitem.objects.filter(cpo = cpo)
+        for item in cpo_lineitem:
+                item.total_basic_price = round((item.quantity * item.unit_price),2)
+                item.total_price = round((item.total_basic_price + (item.total_basic_price * item.gst / 100)),2)
+                item.save()
+
+                total_basic = total_basic + item.total_basic_price
+                all_total = all_total + item.total_price
+        
+        cpo.total_basic_value = round(total_basic,2)
+        cpo.total_value = round(all_total,2)
+        cpo.save()
+
+
 
 #Cpo create lineitem selection
 @login_required(login_url="/employee/login/")
@@ -979,6 +999,7 @@ def cpo_create_selected_lineitem(request, cpo_id=None):
         context['login_user_name'] = u.first_name + ' ' + u.last_name
 
         if request.method == 'GET':
+                calculate_cpo(cpo_id)
                 cpo = CustomerPO.objects.get(id=cpo_id)
                 cpo_lineitem = CPOLineitem.objects.filter(cpo = cpo)
                 print(cpo_lineitem)
@@ -1001,6 +1022,8 @@ def cpo_create_selected_lineitem(request, cpo_id=None):
 
                 context['inco_term'] = inco_term
                 context['payment_term'] = payment_term
+                context['cpo'] = cpo
+                
 
                 if type == 'CRM':
                         return render(request,"CRM/PO/quotation_selected_lineitem.html",context)

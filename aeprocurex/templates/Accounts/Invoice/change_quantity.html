@@ -1,0 +1,70 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block content %}
+{% load mathfilters %}
+
+
+
+<div class="container-well">
+  <label>Product Title : {{product_title}}</label><br>
+  <label>Description : {{description}}</label><br>
+  <hr>
+  <a class="btn btn-success pull-left" href="/invoice/new_creation/{{invoice_no}}/selected_items/"> Back</a>
+  <br><br><hr>
+       <label>Linked Items</label>
+       <div class="table-responsive">  
+
+               <table id="inventory_items" class="table table-hover table-bordered table-sm" width="100%">
+                 <thead>
+                   <tr>
+                     <th>Select</th>
+                     <th>Product Title</th>
+                     <th>Description</th>
+                     <th>Model</th>
+                     <th>Brand</th>
+                     <th>Product Code</th>
+                     <th>Quantity</th>
+                     <th>UOM</th>
+                     <th>Vendor</th>
+                     <th>GRN No</th>
+                     <th>GRN Date</th>
+                   </tr>
+                 </thead>
+                 <tbody>   
+                     {% for item in link_items %}
+                       <tr>
+                           
+                           <td>
+                            <a href="{{item.id}}/edit/" data-toggle="tooltip" data-placement="top" title="edit quantity from this source"> <span class="glyphicon glyphicon-edit" style="color: green"></span></a>
+                            <a href="{{item.id}}/delete/" data-toggle="tooltip" data-placement="top" title="delete from this source"> <span class="glyphicon glyphicon-trash" style="color: red"></span></a>
+                           </td>
+                           <td>{{item.grn_lineitem.product_title}}</td>
+                           <td>{{item.grn_lineitem.description}}</td>
+                           <td>{{item.grn_lineitem.model}}</td>
+                           <td>{{item.grn_lineitem.brand}}</td>
+                           <td>{{item.grn_lineitem.product_code}}</td>
+                           <td>{{item.quantity}}</td>
+                           <td>{{item.grn_lineitem.uom}}</td>
+                           <td>{{item.grn_lineitem.grn.vendor.name}}</td>
+                           <td>{{item.grn_lineitem.grn.grn_no}}</td>
+                           <td>{{item.grn_lineitem.grn.date}}</td>
+                       </tr>
+                     {% empty %}
+                       <p>No End User Found</p>
+                     {% endfor %}
+                 </tbody>
+               </table>               
+       
+              </div>
+</div>
+
+
+<hr>
+
+<script type="text/javascript">
+  $(document).ready( function () {
+      $('#inventory_items').DataTable();
+  } );
+</script>
+
+{% endblock content %}

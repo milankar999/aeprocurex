@@ -85,6 +85,11 @@ class RFP(models.Model):
     current_sourcing_status = models.CharField(max_length = 200, default = 'Not Mentioned')
     up_time = models.FloatField(default = 0)
 
+    pf_charges =  models.FloatField(default = 0, null = True, blank = True)
+    freight_charges =  models.FloatField(default = 0, null = True, blank = True)
+
+    merge_status = models.BooleanField(default=False)
+
     #attachment
     document1 = models.FileField(upload_to='rfp/',null=True,blank=True)
     document2 = models.FileField(upload_to='rfp/',null=True,blank=True)

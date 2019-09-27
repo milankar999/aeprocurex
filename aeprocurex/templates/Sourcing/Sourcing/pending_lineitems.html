@@ -18,22 +18,6 @@
                         <label>Supporting Document <a href="/api/media/{{rfp.document1}}" target="-blank">Click Here</a></label><br>
                       {% endifnotequal %}
 
-                      {% ifnotequal rfp.document2 "" %}
-                        <label>Supporting Document <a href="/api/media/{{rfp.document2}}" target="-blank">Click Here</a></label><br>
-                      {% endifnotequal %}
-
-                      {% ifnotequal rfp.document3 "" %}
-                        <label>Supporting Document <a href="/api/media/{{rfp.document3}}" target="-blank">Click Here</a></label><br>
-                      {% endifnotequal %}
-
-                      {% ifnotequal rfp.document4 "" %}
-                        <label>Supporting Document <a href="/api/media/{{rfp.document4}}" target="-blank">Click Here</a></label><br>
-                      {% endifnotequal %}
-
-                      {% ifnotequal rfp.document5 "" %}
-                        <label>Supporting Document <a href="/api/media/{{rfp.document5}}" target="-blank">Click Here</a></label><br>
-                      {% endifnotequal %}
-
                       <label>Update Status of This Enquiry</label>
                       <button class="btn btn-info" data-toggle="modal" data-target="#UpdateOrderStatus">Update Status &nbsp;<span class="glyphicon glyphicon-pencil"></span></button>
          
@@ -91,9 +75,61 @@
 <!--End of Update Order Status Model-->
 
 
+<hr>
+<div class="container">
+  <button class="btn btn-info" data-toggle="modal" data-target="#UpdateGST">Apply GST % to all items &nbsp;<span class="glyphicon glyphicon-pencil"></span></button>
+  <button class="btn btn-info" data-toggle="modal" data-target="#UpdateHSN">Apply HSN Code to all items &nbsp;<span class="glyphicon glyphicon-pencil"></span></button>
+</div>
 
+<!--Update GST Modal -->
+<div class="modal fade" id="UpdateGST" role="dialog">
+  <div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+     <button type="button" class="close" data-dismiss="modal">&times;</button>
+     <h4 class="modal-title">This GST will be applied to all the items</span></h4>
+   </div>
+   <div class="modal-body">
+    <form type="submit" id="customer-form" method="POST" action="/sourcing/{{rfp_no}}/apply_gst/">
+      {% csrf_token %}
+      <div class="form-group">      
+        <label class="form-input" for="rfp_reference">Mention GST (% Not required) <a style="color: red">*</a></label>
+        <input type="number" class="form-control" step="0.01" id="gst" name="gst">
+          <br>
+        <input type="submit" class="btn btn-success pull-right" value="Update">
+      </div>
+    </form>
+    <br>
+   </div>
+ </div>
+</div>
+</div>
+<!--End GST Model-->
 
-
+<!--Update HSN Modal -->
+<div class="modal fade" id="UpdateHSN" role="dialog">
+  <div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+     <button type="button" class="close" data-dismiss="modal">&times;</button>
+     <h4 class="modal-title">This HSN Code will be applied to all the items</span></h4>
+   </div>
+   <div class="modal-body">
+    <form type="submit" id="customer-form" method="POST" action="/sourcing/{{rfp_no}}/apply_hsn/">
+      {% csrf_token %}
+      <div class="form-group">      
+        <label class="form-input" for="rfp_reference">Mention HSN Code <a style="color: red">*</a></label>
+        <input type="number" class="form-control" id="hsn_code" name="hsn_code">
+          <br>
+        <input type="submit" class="btn btn-success pull-right" value="Update">
+      </div>
+    </form>
+    <br>
+   </div>
+ </div>
+</div>
+</div>
+<!--End GST Model-->
 
 
             <div class="table-responsive">          
@@ -144,6 +180,8 @@
                       </tbody>
                     </table>
             </div>
+
+
 <div class="container">
     <form method="GET" action="vendor_selection/">
         <button type="submit" class="btn btn-success">Add Quotation from Vendor &nbsp;<span class="glyphicon glyphicon-forward"></span></button>

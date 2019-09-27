@@ -447,35 +447,26 @@ def rfp_generate(request, rfp_no=None):
                         rfp.document1 = request.FILES['supporting_document1']
                 except:
                         pass
-
-                try:
-                        rfp.document2 = request.FILES['supporting_document2']
-                except:
-                        pass                
                 
-                try:
-                        rfp.document3 = request.FILES['supporting_document3']
-                except:
-                        pass                
+                if data['pf_charge'] == '':
+                        pf_charge = 0
+                else:
+                        pf_charge = data['pf_charge']
+
+                if data['freight_charge'] == '':
+                        freight_charge = 0
+                else:
+                        freight_charge = data['freight_charge']
                 
-                try:
-                        rfp.document4 = request.FILES['supporting_document4']
-                except:
-                        pass                
-                        
-                try:
-                        rfp.document5 = request.FILES['supporting_document5']
-                except:
-                        pass
-
-
+                rfp.pf_charges = pf_charge
+                rfp.freight_charges = freight_charge
                 rfp.save()
 
-                email_list = []
-                sales_team_email = Profile.objects.filter(type='Sales').values('user__email')
-                for email in sales_team_email:
-                        email_list.append(email['user__email']) 
-                print(email_list)
+                #email_list = []
+                #sales_team_email = Profile.objects.filter(type='Sales').values('user__email')
+                #for email in sales_team_email:
+                #        email_list.append(email['user__email']) 
+                #print(email_list)
 
                 lineitems = RFPLineitem.objects.filter(rfp_no=rfp)
                 #Sending mail Notification
@@ -534,9 +525,9 @@ def rfp_generate(request, rfp_no=None):
                 email_body = email_body + '</table>'\
                 '<p><span style="color: #ff0000;">Please Assign this RFP to a sourcing Person</span></p>'\
                 '</body>'
-                msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL, to = email_list, bcc = ['sales.p@aeprocurex.com','milan.kar@aeprocurex.com'])
-                msg.content_subtype = "html"  # Main content is now text/html
-                msg.send()
+                #msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL, to = email_list, bcc = ['milan.kar@aeprocurex.com'])
+                #msg.content_subtype = "html"  # Main content is now text/html
+                #msg.send()
         
                 if type == 'CRM':
                         context['rfp_no'] = rfp_no
@@ -557,7 +548,7 @@ def rfp_approval_list(request):
 
         if type == 'Sales':
                 if request.method == "GET":
-                        rfp = RFP.objects.filter(opportunity_status='Open',enquiry_status='Created').values('rfp_no','customer__name','customer__location','customer_contact_person__name','rfp_creation_details__creation_date','priority')    
+                        rfp = RFP.objects.filter(opportunity_status='Open',enquiry_status='Created').values('rfp_no','customer__name','customer__location','customer_contact_person__name','rfp_creation_details__creation_date','priority','rfp_type')    
                         context['rfp_list'] = rfp
                         return render(request,"Sales/RFP/rfp_approval_list.html",context)
 
@@ -589,10 +580,8 @@ def rfp_approval_lineitems(request, rfp_no=None):
                                 'rfp_type',
                                 'rfp_creation_details__created_by__username',
                                 'document1',
-                                'document2',
-                                'document3',
-                                'document4',
-                                'document5')                  
+                                'pf_charges',
+                                'freight_charges')                  
                         context['rfp_no'] = rfp_no
                         context['lineitems'] = rfp_lineitems
                         context['rfp_details'] = rfp
@@ -700,20 +689,20 @@ def rfp_approve(request, rfp_no=None):
                         key_instance = User.objects.get(username=data['keyPerson'])    
                         keyaccounts = RFPKeyAccountsDetail.objects.create(id=rfp_no+str(random.randint(1000,99999)),key_accounts_manager = key_instance)
                         assign1 = RFPAssign1.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to1=User.objects.get(username=data['assign1']))
-                        if data['assign2'] != '' :
-                                assign2 = RFPAssign2.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to2=User.objects.get(username=data['assign2']))
-                        if data['assign3'] != '' :
-                                assign3 = RFPAssign3.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to3=User.objects.get(username=data['assign3']))
+                        #if data['assign2'] != '' :
+                        #        assign2 = RFPAssign2.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to2=User.objects.get(username=data['assign2']))
+                        #if data['assign3'] != '' :
+                        #        assign3 = RFPAssign3.objects.create(id=rfp_no+str(random.randint(1000,99999)),assign_to3=User.objects.get(username=data['assign3']))
                         rfp = RFP.objects.get(rfp_no=rfp_no)
                         rfpapprovaldetail = RFPApprovalDetail.objects.create(id=rfp_no+str(random.randint(1000,99999)),approved_by=user)
                         rfp.enquiry_status = 'Approved'
                         rfp.rfp_approval_details = rfpapprovaldetail
                         rfp.rfp_keyaccounts_details = keyaccounts
                         rfp.rfp_assign1 = assign1
-                        if data['assign2'] != '' :
-                                rfp.rfp_assign2 = assign2
-                        if data['assign3'] != '' :
-                                rfp.rfp_assign3 = assign3
+                        #if data['assign2'] != '' :
+                        #        rfp.rfp_assign2 = assign2
+                        #if data['assign3'] != '' :
+                        #        rfp.rfp_assign3 = assign3
                         rfp.save()
 
                         #Sending mail Notification
@@ -774,7 +763,7 @@ def rfp_approve(request, rfp_no=None):
                                 i = i + 1
                         email_body = email_body + '</table>'\
                         '</body>'
-                        msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver], bcc = ['crm.p@aeprocurex.com','sales.p@aeprocurex.com','milan.kar@aeprocurex.com'])
+                        msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver])
                         msg.content_subtype = "html"  # Main content is now text/html
                         msg.send()
                         context['message'] = 'RFP No ' + rfp_no + ' has been approved successfully'

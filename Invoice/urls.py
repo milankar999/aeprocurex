@@ -6,7 +6,20 @@ urlpatterns = [
     path('new_creation/<cpo_id>/lineitem_selection/',invoice_lineitem_selection,name='invoice-lineitem-selection'),
     path('new_creation/<invoice_no>/selected_items/',invoice_selected_lineitem,name='invoice-selected-lineitem'),
     path('new_creation/<invoice_no>/delete/',invoice_delete,name='invoice-delete'),
+
+    #Add direct processing item to invoice
+    path('new_creation/<invoice_no>/selected_items/direct_processing_item/<cpo_lineitem>/add_from_inventory/',invoice_add_direct_processing_item_from_inventory,name='invoice-add-direct-processing-item-from-inventory'),
+    path('new_creation/<invoice_no>/selected_items/direct_processing_item/<cpo_lineitem>/add_from_inventory/<grn_lineitem_id>/add/',invoice_add_direct_processing_item_from_inventory_add,name='invoice-add-direct-processing-item-from-inventory-add'),
+    path('new_creation/<invoice_no>/selected_items/<cpo_lineitem>/add_to_invoice/',invoice_add_direct_processing_item,name='invoice-add-direct-processing-item'),
+
+
     path('new_creation/<invoice_no>/selected_items/<lineitem_id>/edit/',invoice_selected_lineitem_edit,name='invoice-selected-lineitem-edit'),
+
+    #Change Quantity
+    path('new_creation/<invoice_no>/selected_items/<lineitem_id>/change_quantity/',invoice_selected_lineitem_chnage_quantity,name='invoice-selected-lineitem-chnage-quantity'),
+    path('new_creation/<invoice_no>/selected_items/<lineitem_id>/change_quantity/<linked_id>/edit/',invoice_selected_lineitem_chnage_quantity_linked_edit,name='invoice-selected-lineitem-chnage-quantity-linked-edit'),
+    path('new_creation/<invoice_no>/selected_items/<lineitem_id>/change_quantity/<linked_id>/delete/',invoice_selected_lineitem_chnage_quantity_linked_delete,name='invoice-selected-lineitem-chnage-quantity-linked-delete'),
+
     path('new_creation/<invoice_no>/selected_items/<lineitem_id>/delete/',invoice_selected_lineitem_delete,name='invoice-selected-lineitem-delete'),
     path('new_creation/<invoice_no>/continue/',invoice_continue,name='invoice-continue'),
     path('new_creation/<invoice_no>/generate_invoice/',invoice_generate,name='invoice-generate'),
@@ -43,8 +56,13 @@ urlpatterns = [
     #Manage Invoices
     path('invoice_list/',invoice_list,name='invoice-list'),
     path('invoice_list/<invoice_no>/lineitems/',invoice_lineitems,name='invoice-lineitems'),
+    path('invoice_list/<invoice_no>/lineitems/slice_edit/',invoice_lineitems_slice_edit,name='invoice-lineitems-slice-edit'),
+    path('invoice_list/<invoice_no>/lineitems/slice_edit/<lineitem_id>/chnage/',invoice_lineitems_slice_edit_lineitem,name='invoice-lineitems-slice-edit-lineitem'),
+    path('invoice_list/<invoice_no>/lineitems/slice_edit/continue_editing/',invoice_lineitems_slice_edit_continue,name='invoice-lineitems-slice-edit-continue'),
+    path('invoice_list/<invoice_no>/lineitems/slice_edit/get_copy/',invoice_lineitems_slice_edit_get_copy,name='invoice-lineitems-slice-edit-get-copy'),
 
-
+    #Delete Invoice
+    path('generated_invoice/<invoice_no>/delete/',generated_invoice_delete,name='generated-invoice-delete'),
 
     #Invoice Acknowledgement
     path('pending_ack_list/',invoice_pending_ack_list,name='invoice-pending-ack-list'),
@@ -54,5 +72,8 @@ urlpatterns = [
     path('ack_list/',invoice_ack_list,name='invoice-ack-list'),
     path('ack/<invoice_no>/details/',invoice_ack_details,name='invoice-ack-details'),
     path('ack/<invoice_no>/details/edit/',invoice_ack_edit,name='invoice-ack-edit'),
+
+    #manage deleted invoices
+    path('deleted_invoice_list/',deleted_invoice_list,name='deleted-invoice-list'),
 
 ]   

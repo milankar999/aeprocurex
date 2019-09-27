@@ -83,6 +83,15 @@
 
                                         <label class="form-input" for="tax_type">Tax Type </label>
                                         <input type="text" class="form-control" id="tax_type" name="tax_type" value="{{Customer.tax_type}}"><br>
+
+                                        <label class="form-input" for="bank">Our Bank Account <a style="color: red">*</a> </label>
+                                        <select class="form-control" id="bank" name="bank" required>
+                                            <option value="{{Customer.bank_account.id}}">{{Customer.bank_account}}</option>
+                                            <option></option>
+                                            {% for account in bank_list %}
+                                            <option value="{{account.id}}">{{account}}</option>
+                                            {% endfor %}
+                                        </select><br>
                                     
     
                                     <div class="text-center">

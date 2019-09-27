@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseRedirect,HttpResponse
+from django.http import HttpResponseRedirect,HttpResponse,JsonResponse
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
@@ -138,6 +138,7 @@ def rfp_lineitem(request,rfp_no=None):
     context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if request.method == "GET":
+        
         rfp_lineitems = RFPLineitem.objects.filter(rfp_no=RFP.objects.get(rfp_no=rfp_no)).values(
             'product_title',
             'description',
@@ -164,6 +165,7 @@ def rfp_lineitem(request,rfp_no=None):
                                 'priority',
                                 'reference',
                                 'enquiry_status',
+                                'opportunity_status',
                                 'rfp_type',
                                 'rfp_creation_details__created_by__username',
                                 'document1',
@@ -184,6 +186,9 @@ def rfp_lineitem(request,rfp_no=None):
 
         rfp_status_list = RFPStatus.objects.filter(rfp = RFP.objects.get(rfp_no=rfp_no))
         context['rfp_status_list'] = rfp_status_list
+
+        context['editing_permission'] = u.profile.rfp_editing 
+        context['status'] = rfp[0]['opportunity_status']
 
         if type == 'Sales':
             return render(request,"Sales/EnquiryTracker/rfp_lineitems.html",context)
@@ -241,7 +246,7 @@ def rfp_mark_closed(request,rfp_no=None):
         rfp = RFP.objects.get(rfp_no = rfp_no)
 
         if rfp.enquiry_status != "Quoted":
-            rfp.enquiry_status = 'Closed'
+            #rfp.enquiry_status = 'Closed'
             rfp.opportunity_status = 'Closed'
             rfp.save()
 
@@ -250,6 +255,142 @@ def rfp_mark_closed(request,rfp_no=None):
         else:
             context['error'] = "This is Already Quoted , Cannot be mark as Duplicate"
             return render(request,"Sales/error.html",context)
+
+#RFP Edit
+@login_required(login_url="/employee/login/")
+def rfp_edit(request,rfp_no=None):
+    context={}
+    context['enquiry_tracker'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+    if u.profile.rfp_editing == 'no':
+        return JsonResponse({"message":"access denied"})
+    
+    if request.method == 'GET':
+        rfp_lineitems = RFPLineitem.objects.filter(rfp_no=rfp_no)
+        rfp = RFP.objects.get(rfp_no=rfp_no)
+        context['rfp'] = rfp                 
+        context['rfp_no'] = rfp_no
+        context['lineitems'] = rfp_lineitems
+        context['rfp_details'] = rfp
+        users = User.objects.filter(profile__type='Sourcing')
+        context['users'] = users
+        keyaccounts = User.objects.all()
+        context['keyaccounts'] = keyaccounts
+        return render(request,"CRM/EnquiryTracker/enquiry_lineitems.html",context)
+    
+    if request.method == 'POST':
+        lineitemID = rfp_no + str(random.randint(100000,9999999))
+        data = request.POST
+        
+        if data['gst'] == '':
+            gst = 0
+        else:
+            gst = data['gst']
+        
+        if data['CLT'] == '':
+            CLT = 0
+        else:
+            CLT = data['CLT']
+
+        if data['target_price'] == '':
+            target_price = 0
+        else:
+            target_price = data['target_price']
+                
+        
+        RFPLineitem.objects.create(rfp_no=RFP.objects.get(rfp_no=rfp_no),lineitem_id=lineitemID,product_title = data['product_title'],description=data['description'],model=data['model'],brand=data['brand'],product_code=data['product_code'],part_no=data['part_no'],category = data['category'],hsn_code=data['hsn_code'],gst=gst,uom=data['uom'],quantity=data['quantity'],target_price=target_price,customer_lead_time=CLT,remarks=data['remarks'])
+        return HttpResponseRedirect(reverse('rfp_edit',args=[rfp_no]))  
+
+    if request.method == 'PUT':
+        data = request.PUT
+        print('success')   
+
+#RFP Save Changes
+@login_required(login_url="/employee/login/")
+def rfp_save_changes(request,rfp_no=None,lineitem = None):
+    context={}
+    context['enquiry_tracker'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+    if u.profile.rfp_editing == 'no':
+        return JsonResponse({"message":"access denied"})
+
+    if request.method == 'POST':
+        data = request.POST
+        rfp = RFP.objects.get(rfp_no = rfp_no)
+        rfp.reference = data['rfp_reference']
+        rfp.rfp_type = data['rfp_type']
+        rfp.priority = data['priority']
+        rfp.save()
+
+        return HttpResponseRedirect(reverse('tracker_rfp_lineitem',args=[rfp_no]))
+   
+
+
+
+#RFP lineitem Edit
+@login_required(login_url="/employee/login/")
+def rfp_lineitem_edit(request,rfp_no=None,lineitem = None):
+    context={}
+    context['enquiry_tracker'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+    if u.profile.rfp_editing == 'no':
+        return JsonResponse({"message":"access denied"})
+
+    if request.method == 'GET':
+        context['rfp_no'] = rfp_no
+
+        lineitems = RFPLineitem.objects.get(lineitem_id=lineitem)
+        context['lineitems'] = lineitems
+        print(lineitems)
+        if type == 'CRM':
+            return render(request,"CRM/EnquiryTracker/rfp_lineitem_edit.html",context)
+
+    if request.method == 'POST':
+        lineitem = RFPLineitem.objects.get(lineitem_id=lineitem)
+        data = request.POST
+        
+        if data['gst'] == '':
+            gst = 0
+        else:
+            gst = data['gst']
+        
+        if data['CLT'] == '':
+            CLT = 0
+        else:
+            CLT = data['CLT']
+
+        if data['target_price'] == '':
+            target_price = 0
+        else:
+            target_price = data['target_price']
+
+        lineitem.product_title = data['product_title']
+        lineitem.description=data['description']
+        lineitem.model=data['model']
+        lineitem.brand=data['brand']
+        lineitem.product_code=data['product_code']
+        lineitem.part_no=data['part_no']
+        lineitem.category = data['category']
+        lineitem.hsn_code=data['hsn_code']
+        lineitem.gst=gst
+        lineitem.uom=data['uom']
+        lineitem.quantity=data['quantity']
+        lineitem.target_price=target_price
+        lineitem.customer_lead_time=CLT
+        lineitem.remarks=data['remarks']
+        lineitem.save()
+
+        return HttpResponseRedirect(reverse('rfp_edit',args=[rfp_no]))
+        
 
 #RFP Reassign
 @login_required(login_url="/employee/login/")
@@ -409,3 +550,18 @@ def pending_enquiry_slider(request):
         if type == 'Sales':
             return render(request,"Sales/EnquiryTracker/pending_enquiry_slider.html",context)
 
+ 
+#Restore enquiry
+@login_required(login_url="/employee/login/")
+def rfp_restore(request,rfp_no=None):
+    context={}
+    context['enquiry_tracker'] = 'active'
+    u = User.objects.get(username=request.user)
+    type = u.profile.type
+    context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+    if request.method == 'POST':
+        rfp = RFP.objects.get(rfp_no = rfp_no)
+        rfp.opportunity_status = 'Open'
+        rfp.save()
+        return HttpResponseRedirect(reverse('tracker_rfp_lineitem',args=[rfp_no]))

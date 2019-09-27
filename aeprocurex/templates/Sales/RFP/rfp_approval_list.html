@@ -15,6 +15,7 @@
                           <th>Contact Person</th>
                           <th>Creation Date</th>
                           <th>Priority</th>
+                          <th>Enquiry Type</th>
                         </tr>
                       </thead>
                       <tbody>   
@@ -29,6 +30,7 @@
                                 <td>{{rfp.customer_contact_person__name}}</td>
                                 <td>{{rfp.rfp_creation_details__creation_date}}</td>
                                 <td>{{rfp.priority}}</td>
+                                <td>{{rfp.rfp_type}}</td>
                             </tr>
                           {% empty %}
                             <p>No Pending RFP Approval Found</p>

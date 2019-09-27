@@ -10,6 +10,7 @@ class PendingDelivery(models.Model):
         cpo_lineitem = models.ForeignKey(CPOLineitem,on_delete = models.CASCADE)
 
         pending_quantity = models.FloatField(null=True,blank=True)
+        pending_indirect_quantity = models.FloatField(null=True,blank=True, default = 0)
 
         def __str__(self):
                 return self.cpo_lineitem.product_title + ' ' + str(self.pending_quantity)
@@ -89,6 +90,8 @@ class InvoiceGRNLink(models.Model):
         invoice_lineitem = models.ForeignKey(InvoiceLineitem, null=True, blank=True, on_delete = models.CASCADE)
         grn_lineitem = models.ForeignKey(GRNLineitem, null=True, blank=True, on_delete=models.CASCADE)
 
+        grn_link_type = models.CharField(max_length = 10, default = 'direct')
+
         quantity = models.FloatField(default = 0.0)
 
         def __str__(self):
@@ -105,3 +108,4 @@ class AcknowledgeDocument(models.Model):
 
         def __str__(self):
                 return self.invoice.invoice_no + ' ' + str(self.date)
+

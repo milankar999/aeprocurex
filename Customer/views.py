@@ -23,15 +23,17 @@ def customers(request):
         state = StateList.objects.all()
         context['StateList'] = state
         context['login_user_name'] = u.first_name + ' ' + u.last_name
+        bank_account_list = BankAccountList.objects.all()
+        context['bank_account_list'] = bank_account_list
         
         if type == 'CRM':
                 return render(request,"CRM/Customer/customer.html",context)
-
 
     if request.method == "POST":
         user = User.objects.get(username=request.user)
         data = request.POST
         customer_id = 'C1' + str(format(CustomerProfile.objects.count() + 1, '04d'))
+        bank = BankAccountList.objects.get(id=data['bank'])
         cust = CustomerProfile.objects.create(
                 id=customer_id,name=data['name'],
                 location=data['location'],
@@ -52,7 +54,8 @@ def customers(request):
                 payment_term=data['PaymentTerm'],
                 inco_term=data['IncoTerm'],
                 tax_type=data['tax_type'],
-                created_by=user
+                created_by=user,
+                bank_account = bank
         )
         if cust:
                 u = User.objects.get(username=request.user)
@@ -109,6 +112,9 @@ def customer_edit(request, id=None):
         context['Customer'] = customer
         state = StateList.objects.all()
         context['StateList'] = state
+        bank_list = BankAccountList.objects.all()
+        context['bank_list'] = bank_list
+
         
         if type == 'CRM':
                 return render(request,"CRM/Customer/customer_edit.html",context)
@@ -116,6 +122,8 @@ def customer_edit(request, id=None):
     if request.method=="POST":
         custData = CustomerProfile.objects.get(id=id)
         data = request.POST
+
+        bank = BankAccountList.objects.get(id = data['bank'])
         custData.name = data['name']
         custData.location = data['location']
         custData.code = data['code']
@@ -135,21 +143,10 @@ def customer_edit(request, id=None):
         custData.payment_term = data['PaymentTerm']
         custData.inco_term = data['IncoTerm']
         custData.tax_type = data['tax_type']
+        custData.bank_account = bank
         custData.save()
         
-        context['message'] = "Updated Successfully"
-        context['message_type'] = 'success' 
-        
-        u = User.objects.get(username=request.user)
-        type = u.profile.type
-        context['login_user_name'] = u.first_name + ' ' + u.last_name
-        customer = CustomerProfile.objects.get(id=id)
-        context['Customer'] = customer
-        state = StateList.objects.all()
-        context['StateList'] = state
-        
-        if type == 'CRM':
-                return render(request,"CRM/Customer/customer_edit.html",context)
+        return HttpResponseRedirect(reverse('customer_details',args=[id]))
 
 @login_required(login_url="/employee/login/")
 def contact_person(request,id=None):

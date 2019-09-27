@@ -57,10 +57,21 @@ def generate_quotation_lineitem(request,rfp_no=None):
         
     if type == 'Sales':
         if request.method == "GET":
+
+            other_charges = OtherCharges.objects.filter(rfp__rfp_no = rfp_no).values(
+                'id',
+                'cost_description',
+                'value'
+            )
+            context['other_charges'] = other_charges
+
+            sourcing_attachment = SourcingAttachment.objects.filter(sourcing__rfp__rfp_no = rfp_no)
+            context['sourcing_attachment'] = sourcing_attachment
+
             coq_lineitems = COQLineitem.objects.filter(rfp_no=rfp_no).annotate(
                 basic_value=F('unit_price') + (F('unit_price') * F('margin') / 100),
-                total_basic_value = F('unit_price') + (F('unit_price') * F('margin') / 100) * F('quantity'),
-                total_with_gst = (F('unit_price') + (F('unit_price') * F('margin') / 100) * F('quantity')) + ((F('unit_price') + (F('unit_price') * F('margin') / 100) * F('quantity'))*F('gst')/100), 
+                total_basic_value = (F('unit_price') + (F('unit_price') * F('margin') / 100)) * F('quantity'),
+                total_with_gst =  ((F('unit_price') + (F('unit_price') * F('margin') / 100)) * F('quantity')) + (((F('unit_price') + (F('unit_price') * F('margin') / 100)) * F('quantity')) * F('gst') / 100), 
                 total_buying_price = F('unit_price') * F('quantity'),
                 total_buying_price_with_gst = (F('unit_price') * F('quantity')) + ((F('unit_price') * F('quantity')) * F('gst') / 100)
                 ).values(
@@ -90,7 +101,27 @@ def generate_quotation_lineitem(request,rfp_no=None):
                 'total_buying_price',
                 'total_buying_price_with_gst'
             )
-            print(coq_lineitems)
+
+            s_basic_value = 0
+            s_total_value = 0
+
+            b_basic_value = 0
+            b_total_value = 0
+
+            for item in coq_lineitems:
+                s_basic_value = s_basic_value + item['total_basic_value']
+                s_total_value = s_total_value + item['total_with_gst']
+
+                b_basic_value = b_basic_value + item['total_buying_price']
+                b_total_value = b_total_value + item['total_buying_price_with_gst']
+            
+            context['s_basic_value'] = s_basic_value
+            context['s_total_value'] = s_total_value
+
+            context['b_basic_value'] = b_basic_value
+            context['b_total_value'] = b_total_value
+
+            
             context['coq_lineitems'] = coq_lineitems
 
             return render(request,"Sales/Quotation/lineitems.html",context)
@@ -100,6 +131,71 @@ def generate_quotation_lineitem(request,rfp_no=None):
             rfp_obj.enquiry_status = 'COQ Done'
             rfp_obj.save()
             return HttpResponseRedirect(reverse('coq_pending_list'))
+
+
+#apply other charges to mergin
+@login_required(login_url="/employee/login/")
+def generate_quotation_lineitem_apply_other_charges(request,rfp_no=None):
+
+    if request.method == 'POST':
+        other_charges = OtherCharges.objects.filter(rfp__rfp_no = rfp_no).values(
+            'id',
+            'cost_description',
+            'value'
+        )
+
+        extra_cost = 0
+        for item in other_charges:
+            extra_cost = extra_cost + item['value']
+
+        coq_lineitems = COQLineitem.objects.filter(rfp_no=rfp_no)
+
+        total_quantity = 0
+
+        for item in coq_lineitems:
+            total_quantity = total_quantity + item.quantity
+
+        distributed_value = extra_cost / total_quantity
+
+        for item in coq_lineitems:
+            updated_unit_value = item.unit_price + distributed_value
+            basic_value = updated_unit_value + (updated_unit_value * item.margin / 100)
+
+            margin = (float(basic_value) - float(item.unit_price)) * 100 / float(item.unit_price)
+            item.margin = margin
+            item.save()
+
+        return HttpResponseRedirect(reverse('generate-quotation-lineitem', args=[rfp_no]))
+        
+
+#Add other charges
+@login_required(login_url="/employee/login/")
+def generate_quotation_lineitem_add_other_charges(request,rfp_no=None):
+
+    if request.method == 'POST':
+        data = request.POST
+
+        rfp = RFP.objects.get(rfp_no = rfp_no)
+        OtherCharges.objects.create(
+            rfp = rfp,
+            cost_description = data['description'],
+            value = data['amount']
+        )
+        print('success')
+        return HttpResponseRedirect(reverse('generate-quotation-lineitem', args=[rfp_no]))
+
+
+#Delete other cost
+@login_required(login_url="/employee/login/")
+def generate_quotation_lineitem_cost_delete(request,rfp_no=None,cost_id=None):
+        
+    if request.method == 'GET':
+        doc = OtherCharges.objects.get(id = cost_id)
+        doc.delete()
+
+        return HttpResponseRedirect(reverse('generate-quotation-lineitem', args=[rfp_no]))
+
+
 
 @login_required(login_url="/employee/login/")
 def generate_quotation_resourcing(request,rfp_no=None):
@@ -648,6 +744,8 @@ def generate_quotation_column_selection(request,rfp_no=None,quotation_no=None):
         
     if type == 'Sales':
         if request.method == 'GET':
+            rfp = RFP.objects.get(rfp_no = rfp_no)
+            context['rfp_type'] = rfp.rfp_type
             return render(request,"Sales/Quotation/column_selection.html",context)
 
         if request.method == 'POST':
@@ -657,6 +755,7 @@ def generate_quotation_column_selection(request,rfp_no=None,quotation_no=None):
             image = ''
             total_basic = ''
             total_basic_with_gst = ''
+            price_breakup = ''
 
             for item in data:
                 if item == 'gst_price':
@@ -667,8 +766,10 @@ def generate_quotation_column_selection(request,rfp_no=None,quotation_no=None):
                     total_basic = 'Yes'
                 if item == 'total_basic_with_gst':
                     total_basic_with_gst = 'Yes'
+                if item == 'display_breakup':
+                    price_breakup = 'Yes'
 
-            Quotation_Generator(quotation_no,gst_price,image,total_basic,total_basic_with_gst)
+            Quotation_Generator(quotation_no,rfp_no,gst_price,image,total_basic,total_basic_with_gst,price_breakup)
             try:
                 filepath = 'static/doc/quotation/' + quotation_no + '.pdf'
                 quotation_obj = QuotationTracker.objects.get(quotation_no=quotation_no)
@@ -1119,6 +1220,58 @@ def add_total_with_gst(pdf,basic_amount,gst_amount,quotation_no,y):
         y = add_new_page(pdf,quotation_no)
     return(y)
 
+def add_price_breakup(pdf,y,quotation_no,basic_buying,extra_charges):
+    pdf.rect(10,y-3,570,0.1, stroke=1, fill=1)
+    pdf.setFont('Helvetica-Bold', 8)
+    if y < 50:
+        y = add_new_page(pdf,quotation_no)
+        pdf.setFont('Helvetica-Bold', 8)
+    pdf.drawString(10,y-12,'Quotation Price Breakup')
+    y = y - 9
+    pdf.setFont('Helvetica', 8)
+    pdf.drawString(10,y-12,'Basic Vendor Quotation Value : ' + currencyInIndiaFormat(str(basic_buying)))
+    y = y - 9
+
+    extra = 0
+    for item in extra_charges:
+        if y < 50:
+            y = add_new_page(pdf,quotation_no)
+            pdf.setFont('Helvetica', 8)
+        pdf.drawString(10,y-12,item['cost_description'] + ' : ' + currencyInIndiaFormat(str(item['value'])))
+        extra = extra + float(item['value'])
+        y = y - 9
+    if y < 50:
+        y = add_new_page(pdf,quotation_no)
+    pdf.setFont('Helvetica-Bold', 8)
+    total = float(basic_buying) + float(extra)
+
+    pdf.drawString(10,y-12, 'Total Basic Value : ' + currencyInIndiaFormat(str(total)))
+    y = y - 9
+    if y < 50:
+        y = add_new_page(pdf,quotation_no)
+    if basic_buying <= 250000:
+        pdf.drawString(10,y-12, 'Our Mergin : 2% ')
+        quoted_value = total * 1.02
+
+    else:
+        pdf.drawString(10,y-12, 'Our Mergin : 1% ')
+        quoted_value = total * 1.01
+
+    y = y - 9
+    if y < 50:  
+        y = add_new_page(pdf,quotation_no)
+
+    pdf.drawString(10,y-12, 'Our Basic Quoted Value : ' + str(quoted_value))
+    y = y - 13
+    pdf.rect(10,y-3,570,0.1, stroke=1, fill=1)
+    y = y - 4
+
+
+
+
+    return(y)
+
+
 def add_tc(pdf,tc1,tc2,tc3,tc4,tc5,tc6,tc7,tc8,tc9,tc10,quotation_no,y):
     if y < 50:
         y = add_new_page(pdf,quotation_no)
@@ -1280,7 +1433,7 @@ def add_new_page(pdf,quotation_no):
     pdf.line(10,748,580,748)
     return(730)
 
-def Quotation_Generator(quotation_no,gst_price,image,total_basic,total_basic_with_gst):
+def Quotation_Generator(quotation_no,rfp_no,gst_price,image,total_basic,total_basic_with_gst,price_breakup):
 
     #Extract Quotation Data
     quotation_obj = QuotationTracker.objects.get(quotation_no=quotation_no)
@@ -1355,7 +1508,20 @@ def Quotation_Generator(quotation_no,gst_price,image,total_basic,total_basic_wit
                 y = add_new_page(pdf,quotation_obj.quotation_no)
         y = y - 15
 
+    if price_breakup == 'Yes':
+        rfp = RFP.objects.get(rfp_no = rfp_no)
+        coq_lineitem = COQLineitem.objects.filter(sourcing_lineitem__sourcing__rfp = rfp)
+        other_charges = OtherCharges.objects.filter(rfp = rfp).values('cost_description','value')
+        basic_buying_value = 0
+
+        for cq_item in coq_lineitem:
+            basic_buying_value = basic_buying_value + (cq_item.unit_price * cq_item.quantity)
+
+        y = add_price_breakup(pdf,y,quotation_no,basic_buying_value,other_charges)
+    
     y = y - 12
+
+
     #Commercial terms & Conditions
     add_tc(pdf,quotation_obj.tc1,quotation_obj.tc2,quotation_obj.tc3,quotation_obj.tc4,quotation_obj.tc5,quotation_obj.tc6,quotation_obj.tc7,quotation_obj.tc8,quotation_obj.tc9,quotation_obj.tc10,quotation_obj.quotation_no,y)
         

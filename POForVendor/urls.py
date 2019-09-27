@@ -71,6 +71,11 @@ urlpatterns = [
     path('vendor_po_prepare/pending_list/',VPOPreparePendingList,name='vpo-prepare-pending-list'),
     path('vendor_po_prepare/<cpo_id>/lineitems/',VPOPreparePendingLineitems,name='vpo-prepare-pending-lineitems'),
     path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/',VPOVendorProductSegmentation,name='vpo-vendor-product-segmentation'),
+
+    #Remove from direct processing list
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<cpo_lineitem_id>/remove/',DirectProcessingItemRemove,name='direct-processing-item-remove'),
+
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/mark_direct_processing/',VPOMarkProductDirectProcessing,name='vpo-vendor-product-segmentation-mark-direct-processing'),
     path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/select_new_vendor/',VPOVendorProductSegmentationSelectNewVendor,name='vpo-vendor-product-segmentation-select-new-vendor'),
     path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/vendor/<vendor_id>/select_contact_person/',VPOVendorProductSegmentationSelectVendorContactPerson,name='vpo-vendor-product-segmentation-select-new-vendor-contact-person'),
     path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/vendor/<vendor_id>/contact_person/<contact_person_id>/confirmation/',VPOVendorProductSegmentationNewVendorConfirmation,name='vpo-vendor-product-segmentation-new-vendor-conformation'),

@@ -97,5 +97,8 @@ class CPOLineitem(models.Model):
 
         pending_delivery_quantity = models.FloatField(null=True, blank=True, default=0)
 
+        processing_type = models.CharField(max_length = 200, default = 'direct')
+        indirect_processing_quantity = models.FloatField(default = 0)
+
         def __str__(self):
                 return self.product_title + ' ' + str(self.quantity) + ' ' + str(self.unit_price)

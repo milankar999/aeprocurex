@@ -82,6 +82,15 @@
                         <label class="form-input" for="tax_type">Tax Type </label>
                         <input type="text" class="form-control" id="tax_type" name="tax_type"><br>
 
+                        <label class="form-input" for="bank">Our Bank Account <a style="color: red">*</a> </label>
+                        <select class="form-control" id="bank" name="bank" required>
+                          <option></option>
+                          {% for account in bank_account_list %}
+                            <option value="{{account.id}}">{{account}}</option>
+                          {% endfor %}
+                        </select>
+                        
+
                 </div>
             </div>
             <div class="modal-footer">
@@ -106,6 +115,9 @@
                   <th>State</th>
                   <th>Office Email ID</th>
                   <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>   
@@ -120,9 +132,15 @@
                         <td>{{customer.office_email1}}</td>
                         <td class="list-inline">
                             <a href="/customer/{{customer.id}}/details/" data-toggle="tooltip" data-placement="top" title="View Details"> <span class="glyphicon glyphicon-eye-open" style="color: blue"></span></a> &nbsp;    
-                            <a href="/customer/{{customer.id}}/edit/" data-toggle="tooltip" data-placement="top" title="Edit Customer Details"> <span class="glyphicon glyphicon-pencil" style="color: orange"></span></a> &nbsp;
-                            <a href="/customer/{{customer.id}}/contact-person/" data-toggle="tooltip" data-placement="top" title="Contact Person Details"> <span class="glyphicon glyphicon-phone" style="color: green"></span></a> &nbsp;
-                            <a href="/customer/{{customer.id}}/enduser/" data-toggle="tooltip" data-placement="top" title="End User Details"> <span class="glyphicon glyphicon-user" style="color: orange"></span></a>
+                        </td>
+                        <td>
+                             <a href="/customer/{{customer.id}}/edit/" data-toggle="tooltip" data-placement="top" title="Edit Customer Details"> <span class="glyphicon glyphicon-pencil" style="color: orange"></span></a> &nbsp;
+                        </td>    
+                        <td>
+                          <a href="/customer/{{customer.id}}/contact-person/" data-toggle="tooltip" data-placement="top" title="Contact Person Details"> <span class="glyphicon glyphicon-phone" style="color: green"></span></a> &nbsp;
+                        </td>
+                        <td>  
+                          <a href="/customer/{{customer.id}}/enduser/" data-toggle="tooltip" data-placement="top" title="End User Details"> <span class="glyphicon glyphicon-user" style="color: orange"></span></a>
                         </td>
                     </tr>
                   {% empty %}

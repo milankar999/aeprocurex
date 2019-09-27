@@ -33,6 +33,8 @@ from num2words import num2words
 from datetime import timedelta, datetime
 import pytz
 
+import urllib
+
 @login_required(login_url="/employee/login/")
 def rfp_pending_list(request):
         context={}
@@ -51,7 +53,8 @@ def rfp_pending_list(request):
                                 'rfp_creation_details__creation_date',
                                 'rfp_keyaccounts_details__key_accounts_manager__first_name',
                                 'priority','current_sourcing_status',
-                                'up_time') 
+                                'up_time',
+                                'rfp_type') 
                         utc=pytz.UTC
                         for item in rfp:
                                 diff = utc.localize(datetime.now()) - item['rfp_creation_details__creation_date']
@@ -97,6 +100,50 @@ def rfp_pending_lineitems(request,rfp_no=None):
                                 updated_by = u
                         )
                         return HttpResponseRedirect(reverse('rfp_pending_lineitems',args=[rfp_no]))
+
+#apply GST
+@login_required(login_url="/employee/login/")
+def rfp_pending_apply_gst(request,rfp_no=None):
+        context={}
+        context['sourcing'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                data = request.POST
+                rfp = RFP.objects.get(rfp_no = rfp_no)
+                rfp_lineitem = RFPLineitem.objects.filter(rfp_no = rfp)
+
+                gst = float(data['gst'])
+                for item in rfp_lineitem:
+                         item.gst = gst
+                         item.save()
+                
+                return HttpResponseRedirect(reverse('rfp_pending_lineitems', args=[rfp_no]))
+
+#apply HSN
+@login_required(login_url="/employee/login/")
+def rfp_pending_apply_hsn(request,rfp_no=None):
+        context={}
+        context['sourcing'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                data = request.POST
+                rfp = RFP.objects.get(rfp_no = rfp_no)
+                rfp_lineitem = RFPLineitem.objects.filter(rfp_no = rfp)
+
+                hsn_code = data['hsn_code']
+                for item in rfp_lineitem:
+                         item.hsn_code = hsn_code
+                         item.save()
+                
+                return HttpResponseRedirect(reverse('rfp_pending_lineitems', args=[rfp_no]))
 
 @login_required(login_url="/employee/login/")
 def lineitem_edit_tax(request,rfp_no=None,lineitem_id=None):
@@ -236,10 +283,25 @@ def offer_reference(request,rfp_no=None,vendor_id=None,contact_person_id=None):
                 if request.method == "POST":
                         data = request.POST
                         sourcing_id = rfp_no + vendor_id
-                        Sourcing.objects.create(id=sourcing_id,rfp=RFP.objects.get(rfp_no=rfp_no),supplier=SupplierProfile.objects.get(id=vendor_id),supplier_contact_person=SupplierContactPerson.objects.get(id=contact_person_id),offer_reference=data['reference'],offer_date=data['oDate'],created_by=user)
+                        sourcing = Sourcing.objects.create(id=sourcing_id,rfp=RFP.objects.get(rfp_no=rfp_no),supplier=SupplierProfile.objects.get(id=vendor_id),supplier_contact_person=SupplierContactPerson.objects.get(id=contact_person_id),offer_reference=data['reference'],offer_date=data['oDate'],created_by=user)
                         rfp = RFP.objects.get(rfp_no = rfp_no)
                         
                         if rfp.rfp_type == 'PSP':
+                                if rfp.pf_charges != 0:
+                                        SourcingCharges.objects.create(
+                                                sourcing = sourcing,
+                                                cost_description = 'PF Charges',
+                                                value = rfp.pf_charges
+                                        )
+                                
+                                if rfp.freight_charges != 0:
+                                        SourcingCharges.objects.create(
+                                                sourcing = sourcing,
+                                                cost_description = 'Freight Charges',
+                                                value = rfp.freight_charges
+                                        )
+                                
+
                                 rfp_lineitem = RFPLineitem.objects.filter(rfp_no = rfp)
                                 
                                 for item in rfp_lineitem:
@@ -1076,6 +1138,7 @@ def vendor_quotation_edit(request,rfp_no=None,sourcing_id=None):
         if type == 'Sourcing':
                 if request.method == "GET":
                         context['rfp_no'] = rfp_no
+                        context['sourcing_id'] = sourcing_id
                         rfp_lineitems = RFPLineitem.objects.filter(rfp_no=rfp_no)
                         context['lineitems'] = rfp_lineitems
 
@@ -1083,7 +1146,115 @@ def vendor_quotation_edit(request,rfp_no=None,sourcing_id=None):
                         context['sourcing_lineitems'] = sourcing_lineitems
 
                         context['supplier_name'] = Sourcing.objects.filter(id=sourcing_id).values('supplier__name')[0]['supplier__name']
+
+
+                        sourcing_attachment = SourcingAttachment.objects.filter(sourcing__id = sourcing_id)
+                        context['sourcing_attachment'] = sourcing_attachment
+
+                        other_cost = SourcingCharges.objects.filter(sourcing__id = sourcing_id)
+                        context['other_cost'] = other_cost
+                        print(other_cost)
                         return render(request,"Sourcing/Sourcing/supplier_quotation_details.html",context)
+
+                
+                if request.method == 'POST':
+                        data = request.POST
+                        sourcing = Sourcing.objects.get(id = sourcing_id)
+
+                        try:
+                                document = request.FILES['attachment']
+                        except:
+                                try:
+                                        if data['link'] == '':
+                                                return JsonResponse({'Message':'There is no Valid Link and attachment1'})
+
+                                        SourcingAttachment.objects.create(
+                                                sourcing = sourcing,
+                                                quotation_link = data['link']
+                                        )
+                                        return HttpResponseRedirect(reverse('vendor-quotation-edit', args=[rfp_no,sourcing_id]))
+                                except:
+                                        return JsonResponse({'Message':'There is no Valid Link and attachment1'})
+
+                        
+                        document = request.FILES['attachment']
+                        SourcingAttachment.objects.create(
+                                sourcing = sourcing,
+                                quotation_link = data['link'],
+                                attachment = document
+                        )
+                        return HttpResponseRedirect(reverse('vendor-quotation-edit', args=[rfp_no,sourcing_id]))
+
+#Add other charges
+@login_required(login_url="/employee/login/")
+def vendor_quotation_add_other_cost(request,rfp_no=None,sourcing_id=None):
+        context={}
+        context['sourcing'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        type = u.profile.type
+
+        if request.method == 'POST':
+                data = request.POST
+                sourcing = Sourcing.objects.get(id = sourcing_id)
+                SourcingCharges.objects.create(
+                        sourcing = sourcing,
+                        cost_description = data['description'],
+                        value = data['amount']
+                )
+
+                return HttpResponseRedirect(reverse('vendor-quotation-edit', args=[rfp_no,sourcing_id]))
+
+#Delete other cost
+@login_required(login_url="/employee/login/")
+def vendor_quotation_other_cost_delete(request,rfp_no=None,sourcing_id=None,cost_id=None):
+        context={}
+        context['sourcing'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        type = u.profile.type                        
+
+        if request.method == 'GET':
+                doc = SourcingCharges.objects.get(id = cost_id)
+                doc.delete()
+
+                return HttpResponseRedirect(reverse('vendor-quotation-edit', args=[rfp_no,sourcing_id]))
+
+@login_required(login_url="/employee/login/")
+def vendor_quotation_document_delete(request,rfp_no=None,sourcing_id=None,document_id=None):
+        context={}
+        context['sourcing'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        type = u.profile.type                        
+
+        if request.method == 'GET':
+                doc = SourcingAttachment.objects.get(id = document_id)
+                doc.delete()
+
+                return HttpResponseRedirect(reverse('vendor-quotation-edit', args=[rfp_no,sourcing_id]))
+
+#delete all vendor price
+@login_required(login_url="/employee/login/")
+def vendor_quotation_all_price_delete(request,rfp_no=None,sourcing_id=None):
+        context={}
+        context['sourcing'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        type = u.profile.type
+
+        if request.method == 'POST':
+                sourcing = Sourcing.objects.get(id = sourcing_id)
+                sourcing_lineitem = SourcingLineitem.objects.filter(sourcing = sourcing)
+
+                for item in sourcing_lineitem:
+                        item.delete()
+                
+                return HttpResponseRedirect(reverse('vendor-quotation-edit', args=[rfp_no,sourcing_id]))
 
 @login_required(login_url="/employee/login/")
 def vendor_quotation_price_upload(request,rfp_no=None,sourcing_id=None):
@@ -1363,6 +1534,9 @@ def sourcing_completed(request,rfp_no=None):
         if type == 'Sourcing':
                 if request.method == "POST":
 
+                        rfp = RFP.objects.get(rfp_no=rfp_no)
+
+
                         single_vendor_approval = RFP.objects.get(rfp_no=rfp_no)
                         sva = 'No'
                         if single_vendor_approval.single_vendor_approval == 'Approved':
@@ -1374,7 +1548,7 @@ def sourcing_completed(request,rfp_no=None):
 
                         #Checking GST & HSN
                         
-                        rfp_lineitem = RFPLineitem.objects.filter(rfp_no=RFP.objects.get(rfp_no=rfp_no))
+                        rfp_lineitem = RFPLineitem.objects.filter(rfp_no=rfp)
                         for item in rfp_lineitem:
 
                                 if item.gst < 1  or item.hsn_code == '':
@@ -1392,6 +1566,13 @@ def sourcing_completed(request,rfp_no=None):
                         if sourcing_count == 0:
                                 context['error'] = "No Price found"
                                 return render(request,"Sourcing/Sourcing/error.html",context)
+
+                        ##Document checking for psp
+                        if rfp.rfp_type == 'PSP':
+                                attach_count = SourcingAttachment.objects.filter(sourcing__rfp = rfp).count()
+                                if attach_count == 0:
+                                        context['error'] = "Please attach the negotiated vendor quotation, as this is a PSP Enquiry"
+                                        return render(request,"Sourcing/Sourcing/error.html",context)
 
                         ##Price CHeck by lineitem
                         rfp_lineitems = RFPLineitem.objects.filter(rfp_no=rfp_no)
@@ -1511,9 +1692,14 @@ def sourcing_completed(request,rfp_no=None):
                                         email_body = email_body + '</table>'\
                     
                                 email_body = email_body + '</body>'
-                                msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = email_list, bcc = ['sales.p@aeprocurex.com','milan.kar@aeprocurex.com'])
+                                msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = ['shauvik@aeprocurex.com'])
                                 msg.content_subtype = "html"  # Main content is now text/html
-                                msg.send()
+                                
+                                try:
+                                        msg.send()
+                                except:
+                                        pass
+
                                 context['message'] = 'RFP No ' + rfp_no + ' has been maked as sourcing completed successfully'
                                 return render(request,"Sourcing/Sourcing/success.html",context)
                         else:
@@ -1556,3 +1742,5 @@ def sourcing_item_wise(request,rfp_no=None):
 
                 if type == 'Sales':
                         return render(request,"Sales/Sourcing/History/item_list.html",context)
+
+                        

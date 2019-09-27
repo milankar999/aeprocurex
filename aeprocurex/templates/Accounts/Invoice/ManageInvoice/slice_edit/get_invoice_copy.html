@@ -1,0 +1,25 @@
+{% extends 'Accounts/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+<div class="row justify-content-center">
+    
+    
+        <!--Form with header-->
+
+            <div class="card border-primary rounded-0">
+                <div class="card-header p-0">
+                    <div class="bg-info text-white text-center py-2">
+                        <h3>Click The Following Link To Download the PDF File</h3>
+                    </div>
+                </div>
+            <div class="card-body p-3">
+                <a href="/api/media/invoice/{{invoice_no}}.pdf" download="{{invoice_no}}.pdf" target="_blank">Download Updated Invoice</a>
+            </div>
+            <div class="card-body p-3">
+                <a href="/api/media/invoice/{{invoice_no}}.pdf" target="_blank">View Updated Invoice</a>
+            </div><br>        
+</div>
+</div>
+{% endblock %}
