@@ -68,6 +68,8 @@ class RFP(models.Model):
     rejection_reason = models.TextField(null=True, blank=True)
     priority = models.IntegerField(null=True, blank=True)
 
+    product_heading = models.CharField(max_length = 50, null=True, blank = True)
+
     rfp_creation_details = models.ForeignKey(RFPCreationDetail,on_delete = models.CASCADE,null=True, blank=True)
     rfp_approval_details = models.ForeignKey(RFPApprovalDetail,on_delete = models.SET_NULL,null=True, blank=True)
     rfp_keyaccounts_details = models.ForeignKey(RFPKeyAccountsDetail,on_delete = models.SET_NULL,null=True, blank=True)

@@ -12,7 +12,111 @@
         {% endif %}
 
         <div class="row justify-content-center">
+            <div class="col">
+                <div class="card-header p-0">
+                    <div class="bg-info text-white text-center py-2">
+                        <label>Attach Supplier Quotation </label>
+                    </div>
+                </div>
+              
+              <button class="btn btn-success pull-right" data-toggle="modal" data-target="#AddQuotation">Add Supplier Quotation document / screenshot&nbsp;<span class="glyphicon glyphicon-plus"></span></button>
+              <br>
+              <hr>
     
+    
+    
+              {% for attachment in sourcing_attachment %}
+              
+                {% ifnotequal attachment.attachment "" %}
+                <label>Supporting Document <a href="/api/media/{{attachment.attachment}}" target="-blank">Click Here</a></label><br>
+                {% endifnotequal %}
+    
+    
+                {% ifnotequal attachment.quotation_link "" %}
+                <label>Quotation Link <a href="{{attachment.quotation_link}}" target="-blank">{{attachment.quotation_link}}</a></label><br>
+                {% endifnotequal %}
+    
+                <a class="btn btn-danger pull-right" href="{{attachment.id}}/delete/">Delete this document</a><br>
+    
+                <hr>
+              {% empty %}
+                <label>No Attachment Found</label>
+              {% endfor %}
+    
+              <hr>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+        <!--Supplier Quotation Model Add -->
+        <div class="modal fade" id="AddQuotation" role="dialog">
+            <div class="modal-dialog">
+  
+              <!-- Modal content-->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title">-- Price Quotation Attachment --</h4>
+                </div>
+      
+                <div class="modal-body">
+                  <form method="POST" action="add_negotiated_quotation/" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group"> 
+                      <br>
+
+                      <label class="form-input">Attachment (pdf,image or any screenshot) </label>
+                      <input type="file" id="attachment" name="attachment">
+                      <h1>OR</h1>
+                      <label class="form-input">Link </label>
+                      <input type="text" class="form-control" id="link" name="link">
+
+                    </div>
+                    <div class="modal-footer">
+                      <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                      <input type="submit" class="btn btn-success" value="Confirm">
+                    </div>  
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--End of Supplier Quotation Model-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
                         <!--Form with header-->
     
@@ -100,6 +204,7 @@
                                             <label>Department <a style="color:red"> *</a></label>
                                             <input type="text" class="form-control" id="receiver_dept" name="receiver_dept" required value="{{vendor_po.receiver_dept}}">
                                         </div>
+                                        <a class="pull-right" href="cpo_contact_details/" target="-b">Find Customer Contact Person & Requester Details</a>
                                     </div>
 
                                     <br>
@@ -132,6 +237,8 @@
                                                 <option>{{item.text}}</option>
                                                 {% endfor %}
                                             </select>
+                                            
+                                            <a href="payment_terms_history/" target="-b">Check Payment Terms History of this vendor</a>
                                             
                                         </div>
                                         <div class="col-md-4">

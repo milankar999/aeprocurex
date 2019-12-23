@@ -8,8 +8,7 @@ urlpatterns = [
     path('generate/<rfp_no>/lineitems/apply_other_charges/',generate_quotation_lineitem_apply_other_charges,name='generate-quotation-lineitem-apply-other-charges'),
 
     path('generate/<rfp_no>/lineitems/add_other_charges/',generate_quotation_lineitem_add_other_charges,name='generate-quotation-lineitem-add-other-charges'),
-    path('generate/<rfp_no>/lineitems/<cost_id>/delete/',generate_quotation_lineitem_cost_delete,name='generate-quotation-lineitem-cost-delete'),
-
+    path('generate/<rfp_no>/lineitems/<cost_id>/delete_cost/',generate_quotation_lineitem_cost_delete,name='generate-quotation-lineitem-cost-delete'),
 
     path('generate/<rfp_no>/lineitems/resourcing/',generate_quotation_resourcing,name='generate-quotation-lineitem-resourcing'),
     path('generate/<rfp_no>/lineitems/recoq/',generate_quotation_recoq,name='generate-quotation-lineitem-recoq'),

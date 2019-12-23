@@ -37,6 +37,7 @@ def enquiry_list(request):
         enquiry = RFP.objects.all().values(
             'rfp_no',
             'rfp_creation_details__creation_date',
+            'product_heading',
             'customer__name',
             'customer__location',
             'customer_contact_person__name',
@@ -63,8 +64,9 @@ def pending_enquiry_list(request):
     context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if request.method == "GET":
-        enquiry = RFP.objects.filter(Q(enquiry_status='Created') | Q(enquiry_status='Approved') | Q(enquiry_status='Sourcing_Completed') | Q(enquiry_status='COQ Done')).values(
+        enquiry = RFP.objects.filter(Q(enquiry_status='Created', opportunity_status = 'Open') | Q(enquiry_status='Approved', opportunity_status = 'Open') | Q(enquiry_status='Sourcing_Completed', opportunity_status = 'Open') | Q(enquiry_status='COQ Done', opportunity_status = 'Open')).values(
             'rfp_no',
+            'product_heading',
             'rfp_creation_details__creation_date',
             'customer__name',
             'customer__location',
@@ -495,7 +497,7 @@ def pending_enquiry_slider(request):
     context['login_user_name'] = u.first_name + ' ' + u.last_name
         
     if request.method == "GET":
-        enquiry = RFP.objects.filter(Q(enquiry_status='Approved') | Q(enquiry_status='Sourcing_Completed') | Q(enquiry_status='COQ Done')).values(
+        enquiry = RFP.objects.filter(Q(enquiry_status='Approved', opportunity_status = 'Open') | Q(enquiry_status='Sourcing_Completed', opportunity_status = 'Open') | Q(enquiry_status='COQ Done', opportunity_status = 'Open')).values(
             'rfp_no',
             'rfp_creation_details__creation_date',
             'customer__name',
@@ -515,12 +517,12 @@ def pending_enquiry_slider(request):
             hrs = round((((diff.days) * 24) + (diff.seconds/3600)),2)
             item['up_time'] = hrs
 
-        enquiry_counter = RFP.objects.filter(Q(enquiry_status='Approved') | Q(enquiry_status='Sourcing_Completed') | Q(enquiry_status='COQ Done')).values(
+        enquiry_counter = RFP.objects.filter(Q(enquiry_status='Approved', opportunity_status = 'Open') | Q(enquiry_status='Sourcing_Completed', opportunity_status = 'Open') | Q(enquiry_status='COQ Done', opportunity_status = 'Open')).values(
             'rfp_assign1__assign_to1__first_name',
             'rfp_assign1__assign_to1__last_name',
             'rfp_assign1__assign_to1__username').annotate(count=Count('rfp_assign1__assign_to1__username'))
         
-        pending_enquiry = RFP.objects.filter(Q(enquiry_status='Approved') | Q(enquiry_status='Sourcing_Completed') | Q(enquiry_status='COQ Done')).values(
+        pending_enquiry = RFP.objects.filter(Q(enquiry_status='Approved', opportunity_status = 'Open') | Q(enquiry_status='Sourcing_Completed', opportunity_status = 'Open') | Q(enquiry_status='COQ Done', opportunity_status = 'Open')).values(
             'rfp_assign1__assign_to1__username',
             'rfp_no',
             'rfp_creation_details__creation_date'       

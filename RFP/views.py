@@ -7,8 +7,12 @@ from Employee.models import *
 from .models import *
 from State.models import *
 from Customer.models import *
+from Supplier.models import *
+from Sourcing.models import *
 from django.core.mail import send_mail, EmailMessage
 from django.core import mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 import random
 from django.conf import settings
 import openpyxl
@@ -217,6 +221,7 @@ def rfp_creation_inprogress(request):
                 if type == 'CRM':
                         rfp = RFP.objects.filter(enquiry_status='',rfp_creation_details__created_by=u).values(
                                 'rfp_no',
+                                'product_heading',
                                 'customer__name',
                                 'customer__location',
                                 'customer_contact_person__name',
@@ -229,6 +234,7 @@ def rfp_creation_inprogress(request):
                         rfp = RFP.objects.filter(enquiry_status='',rfp_creation_details__created_by=u).values(
                                 'rfp_no',
                                 'customer__name',
+                                'product_heading',
                                 'customer__location',
                                 'customer_contact_person__name',
                                 'rfp_creation_details__creation_date'
@@ -441,7 +447,8 @@ def rfp_generate(request, rfp_no=None):
                 rfp.priority = data['priority']
                 rfp.rfp_type = data['rfp_type']
                 rfp.opportunity_status = 'Open'
-                rfp.enquiry_status = 'Created'
+                rfp.product_heading = data['product_heading']
+                ##rfp.enquiry_status = 'Created'
 
                 try:
                         rfp.document1 = request.FILES['supporting_document1']
@@ -462,6 +469,22 @@ def rfp_generate(request, rfp_no=None):
                 rfp.freight_charges = freight_charge
                 rfp.save()
 
+                if rfp.rfp_type == 'PSP':
+                        s = SupplierProfile.objects.all().values(
+                                'id',
+                                'name',
+                                'location',
+                                'city',
+                                'state'
+                        )
+                        context['supplier_list'] = s
+
+                        if type == 'CRM':
+                                return render(request,"CRM/RFP/PSP/psp_vendor_selection.html",context)
+
+                
+                rfp.enquiry_status = 'Created'
+                rfp.save()
                 #email_list = []
                 #sales_team_email = Profile.objects.filter(type='Sales').values('user__email')
                 #for email in sales_team_email:
@@ -525,9 +548,12 @@ def rfp_generate(request, rfp_no=None):
                 email_body = email_body + '</table>'\
                 '<p><span style="color: #ff0000;">Please Assign this RFP to a sourcing Person</span></p>'\
                 '</body>'
-                #msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL, to = email_list, bcc = ['milan.kar@aeprocurex.com'])
-                #msg.content_subtype = "html"  # Main content is now text/html
-                #msg.send()
+                msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL, to = ['shauvik.das@aeprocurex.com'], bcc = ['milan.kar@aeprocurex.com'])
+                msg.content_subtype = "html"  # Main content is now text/html
+                try:
+                        msg.send()
+                except:
+                        pass
         
                 if type == 'CRM':
                         context['rfp_no'] = rfp_no
@@ -536,6 +562,193 @@ def rfp_generate(request, rfp_no=None):
                 if type == 'Sourcing':
                         context['rfp_no'] = rfp_no
                         return render(request,"Sourcing/RFP/success.html",context)
+
+
+#PSP Vendor Contact Person selection
+@login_required(login_url="/employee/login/")
+def psp_contact_person_selection(request, rfp_no=None,vendor_id=None):
+        context={}
+        context['rfp'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                vendor = SupplierProfile.objects.get(id = vendor_id)
+                contact_person_list = SupplierContactPerson.objects.filter(supplier_name = vendor)
+
+                context['contact_person_list'] = contact_person_list
+
+                if type == 'CRM':
+                        return render(request,"CRM/RFP/PSP/contact_person_selection.html",context)
+
+        if request.method == 'POST':
+                data = request.POST
+                vendor = SupplierProfile.objects.get(id = vendor_id)
+                SupplierContactPerson.objects.create(
+                        id =  vendor_id +'VP' + str(SupplierContactPerson.objects.count() + 1),
+                        name=data['name'],
+                        mobileNo1=data['phone1'],
+                        mobileNo2=data['phone2'],
+                        email1=data['email1'],
+                        email2=data['email2'],
+                        supplier_name=vendor,
+                        created_by=user
+                )
+                return HttpResponseRedirect(reverse('rfp_generate_psp_vendor_contact_person_selection',args=[rfp_no,vendor_id]))
+
+#PSP Vendor Selection Confirmation
+@login_required(login_url="/employee/login/")
+def psp_vendor_selection_confirmation(request, rfp_no=None,vendor_id=None,contact_person_id=None):
+        context={}
+        context['rfp'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                contact_person = SupplierContactPerson.objects.get(id = contact_person_id)
+
+                if contact_person.email1 == '' or contact_person.email1 == 'None' or not(contact_person.email1):
+                        return JsonResponse({'message':'Contact Person email not found'})
+
+                vendor = SupplierProfile.objects.get(id = vendor_id)
+                contact_person = SupplierContactPerson.objects.get(id = contact_person_id)
+
+                context['vendor'] = vendor
+                context['contact_person'] = contact_person
+
+                if type == 'CRM':
+                        return render(request,"CRM/RFP/PSP/vendor_selection_confirmation.html",context)
+
+        if request.method == 'POST':
+                vendor = SupplierProfile.objects.get(id = vendor_id)
+                contact_person = SupplierContactPerson.objects.get(id = contact_person_id)
+
+                rfp = RFP.objects.get(rfp_no = rfp_no)
+
+
+                sourcing_id = rfp_no + vendor_id
+
+                try:
+                        sourcing = Sourcing.objects.create(
+                                id=sourcing_id,
+                                rfp=rfp,
+                                supplier=vendor,
+                                supplier_contact_person=contact_person,
+                                offer_reference='Not Defined',
+                                created_by=request.user
+                                )
+                except:
+                        pass
+                if rfp.rfp_type == 'PSP':
+                        if rfp.pf_charges != 0:
+                                SourcingCharges.objects.create(
+                                        sourcing = sourcing,
+                                        cost_description = 'PF Charges',
+                                        value = rfp.pf_charges
+                                )
+                                
+                        if rfp.freight_charges != 0:
+                                SourcingCharges.objects.create(
+                                        sourcing = sourcing,
+                                        cost_description = 'Freight Charges',
+                                        value = rfp.freight_charges
+                                )
+                                
+
+                        rfp_lineitem = RFPLineitem.objects.filter(rfp_no = rfp)
+                                
+                        for item in rfp_lineitem:
+                                sourcing_lineitem_id = sourcing_id + str(random.randint(100000,9999999))
+
+                                try:
+                                        SourcingLineitem.objects.create(
+                                                id=sourcing_lineitem_id,
+                                                sourcing=Sourcing.objects.get(id=sourcing_id),
+                                                rfp_lineitem=item,
+                                                product_title=item.product_title,
+                                                description=item.description,
+                                                model=item.model,
+                                                brand=item.brand,
+                                                product_code=item.product_code,
+                                                price1 = item.target_price,
+                                                creation_time = item.creation_time
+                                        )
+
+                                except:
+                                        pass
+                        
+                        rfp.enquiry_status = 'Created'
+                        rfp.save()
+                        lineitems = RFPLineitem.objects.filter(rfp_no=rfp)
+                        email_body = '<head>'\
+                        '<style>'\
+                        'table {'\
+                        'width:100%;'\
+                        '}'\
+                        'table, th, td {'\
+                        'border: 1px solid black;'\
+                        'border-collapse: collapse;'\
+                        '}'\
+                        'th, td {'\
+                        'padding: 15px;'\
+                        'text-align: left;'\
+                        '}'\
+                        'table#t01 tr:nth-child(even) {'\
+                        'background-color: #eee;'\
+                        '}'\
+                        'table#t01 tr:nth-child(odd) {'\
+                        'background-color: #fff;'\
+                        '}'\
+                        'table#t01 th {'\
+                        'background-color: #1E2DFF;'\
+                        'color: white;'\
+                        '}'\
+                        '</style>'\
+                        '</head>'\
+                        '<body>'\
+                        '<h1 style="text-align: center;"><span style="color: #0000ff;"><strong>AEPROCUREX ERP</strong></span></h1>'\
+                        '<p><span style="color: #0000ff;"><strong>A New Enquiry Has Been Created By :' + rfp.rfp_creation_details.created_by.first_name + ' ' + rfp.rfp_creation_details.created_by.last_name + ' | '\
+                        ' At : ' + str(rfp.rfp_creation_details.creation_date) + ' '\
+                        '</strong></span><span style="color: #0000ff;">'\
+                        '<p><span style="color: #0000ff;"><strong>RFP No : '+ rfp_no +'</strong></span></p>'\
+                        '<p><span style="color: #0000ff;"><strong>Enquiry Type : '+ rfp.rfp_type +'</strong></span></p>'\
+                        '<p><span style="color: #0000ff;"><strong>Customer : '+ rfp.customer.name +'</strong></span></p>'\
+                        '<p><span style="color: #0000ff;"><strong>Requester : '+ rfp.customer_contact_person.name +'</strong></span></p>'\
+                        '<table id="t01">'\
+                        '<tr>'\
+                        '<th align="Centre">Sl #</th>'\
+                        '<th align="Centre">Product Title</th>'\
+                        '<th align="Centre">Description</th>' \
+                        '<th align="Centre">Quantity</th>'\
+                        '<th align="Centre">UOM</th>'\
+                        '</tr>'
+                        i = 1
+                        for items in lineitems:      
+                                email_body = email_body + '<tr>'\
+                                '<td>'+ str(i) +'</td>'\
+                                '<td>'+ items.product_title +'</td>'\
+                                '<td>'+ items.description +'</td>'\
+                                '<td>'+ str(items.quantity) +'</td>'\
+                                '<td>'+ items.uom +'</td>'\
+                                '</tr>'
+                                i = i + 1
+                        email_body = email_body + '</table>'\
+                        '<p><span style="color: #ff0000;">Please Assign this RFP to a sourcing Person</span></p>'\
+                        '</body>'
+                        msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL, to = ['shauvik.das@gmail.com'], bcc = ['milan.kar@aeprocurex.com'])
+                        msg.content_subtype = "html"  # Main content is now text/html
+                        try:
+                                msg.send()
+                        except:
+                                pass
+
+                        if type == 'CRM':
+                                context['rfp_no'] = rfp_no
+                                return render(request,"CRM/RFP/success.html",context)
 
 @login_required(login_url="/employee/login/")
 def rfp_approval_list(request):
@@ -548,7 +761,7 @@ def rfp_approval_list(request):
 
         if type == 'Sales':
                 if request.method == "GET":
-                        rfp = RFP.objects.filter(opportunity_status='Open',enquiry_status='Created').values('rfp_no','customer__name','customer__location','customer_contact_person__name','rfp_creation_details__creation_date','priority','rfp_type')    
+                        rfp = RFP.objects.filter(opportunity_status='Open',enquiry_status='Created').values('rfp_no','product_heading','customer__name','customer__location','customer_contact_person__name','rfp_creation_details__creation_date','priority','rfp_type')    
                         context['rfp_list'] = rfp
                         return render(request,"Sales/RFP/rfp_approval_list.html",context)
 
@@ -589,6 +802,13 @@ def rfp_approval_lineitems(request, rfp_no=None):
                         context['users'] = users
                         keyaccounts = User.objects.all()
                         context['keyaccounts'] = keyaccounts
+
+                        rfp_obj = RFP.objects.get(rfp_no = rfp_no)
+                        sourcing = Sourcing.objects.filter(rfp = rfp_obj)
+                        try:
+                                context['psp_vendor_details'] = sourcing[0]
+                        except:
+                                pass
                         return render(request,"Sales/RFP/rfp_approval_lineitems.html",context)
 
 @login_required(login_url="/employee/login/")
@@ -765,8 +985,22 @@ def rfp_approve(request, rfp_no=None):
                         '</body>'
                         msg = EmailMessage(subject=rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [email_receiver])
                         msg.content_subtype = "html"  # Main content is now text/html
-                        msg.send()
+                        
+                        try:
+                                #p=1
+                                msg.send()
+                        except:
+                                pass
+                        
                         context['message'] = 'RFP No ' + rfp_no + ' has been approved successfully'
+
+                        #Sending Enquiry
+                        try:
+                                if data['mark'] == 'mark':
+                                        psp_enquiry_sender(rfp_no)
+                        except:
+                                pass
+
                         return render(request,"Sales/RFP/success.html",context)
 
 
@@ -783,6 +1017,7 @@ def rfp_rejected_list(request):
                 if request.method == "GET":
                         rfp = RFP.objects.filter(opportunity_status='Open',enquiry_status='Reject',rfp_creation_details__created_by=user).values(
                                 'rfp_no',
+                                'product_heading',
                                 'customer__name',
                                 'customer__location',
                                 'customer_contact_person__name',
@@ -792,3 +1027,65 @@ def rfp_rejected_list(request):
                         context['rfp_list'] = rfp
                         print(rfp)
                         return render(request,"CRM/RFP/rfp_rejected_list.html",context)
+
+
+def psp_enquiry_sender(rfp_no):
+        print('fujcjcj')
+        rfp = RFP.objects.get(rfp_no = rfp_no)
+        rfp_lineitem = RFPLineitem.objects.filter(rfp_no = rfp)
+        email_body = '<p>Hello Sir / Madam,</p>'\
+        '<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Greetings from Aeprocurex...</p>'\
+        '<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;We are Procurement service provider(PSP ) to BOSCH INDIA. </p>'\
+        '<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Please find below  requirement shared  by you to Bosch as in the attachment .Kindly share the Fresh Quotation with Best Discounted Price for the ,&nbsp;</p>'\
+        '<p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</p>'\
+        '<br>'\
+        '<br>'\
+        '<p>For this enquiry '+ rfp.rfp_assign1.assign_to1.first_name +'&nbsp;'+ rfp.rfp_assign1.assign_to1.last_name +' will contact you soon. Kindly provide your best price to '+ rfp.rfp_assign1.assign_to1.email +'</p>'\
+        '<br>'\
+        '<label>Terms and conditions:</label><br>'\
+        '<p>1) Price Basis: Firm and FOR M/s Bosch Limited, India.</p>'\
+        '<p>2) Payment term: 60 days</p>'\
+        '<p>3) Delivery: As per lead time</p>'\
+        '<p>4) Manual quotation</p><br><br>'\
+        '<p><span style="color: #ff0000;">Note : This is a aeprocurex system generated email, so do not reply on this email ID. Kindly reply to the mentioned Buyer</span></p>'\
+        '<table style="height: 53px; width: 753px; float: left;" border="black" cellspacing="2" cellpadding="3">'\
+        '<tbody>'\
+        '<tr>'\
+        '<td style="width: 29px; text-align: center;"><strong>SL No</strong></td>'\
+        '<td style="width: 503px; text-align: center;"><strong>Item</strong></td>'\
+        '<td style="width: 93px; text-align: center;"><strong>Quantity</strong></td>'\
+        '<td style="width: 55px; text-align: center;"><strong>UOM</strong></td>'\
+        '</tr>'
+
+        row = ''
+        c = 1
+        for item in rfp_lineitem:
+                row = row + '<tr>'\
+                '<td style="width: 29px;">&nbsp;'+ str(c) +'</td>'\
+                '<td style="width: 503px;">&nbsp;'+ item.description +'</td>'\
+                '<td style="width: 93px;">&nbsp;'+ str(item.quantity) +'</td>'\
+                '<td style="width: 55px;">'+ item.uom +'</td>'\
+                '</tr>'
+                c = c + 1
+        
+
+        email_body = email_body + row + '</tbody>'\
+        '</table>'
+        buyer_email = rfp.rfp_assign1.assign_to1.email
+        sourcing = Sourcing.objects.filter(rfp = rfp)
+        source = sourcing[0]
+        vendor_email = source.supplier_contact_person.email1
+        print(buyer_email)
+        print(vendor_email)
+        msg = EmailMessage(subject='RFQ : ' + rfp.product_heading + ' : ' + rfp.rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = [vendor_email],cc=[buyer_email],bcc=['shauvik.das@aeprocurex.com','milan.kar@aeprocurex.com'])
+        #msg = EmailMessage(subject='RFQ : ' + rfp.product_heading + ' : ' + rfp.rfp_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = ['milan.kar@aeprocurex.com'])
+        try:
+                msg.attach_file('media/' + str(rfp.document1))
+        except:
+                pass
+        print(email_body)
+        msg.content_subtype = "html"
+        msg.send()
+        print('end')
+
+        

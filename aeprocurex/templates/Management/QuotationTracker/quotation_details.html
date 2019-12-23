@@ -1,0 +1,157 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Management Panel</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+</head>
+<body>
+
+
+    <div class="container-fluid">
+    <a class="btn btn-success" href="/reporting/enquiry/{{quotation.rfp.rfp_no}}/details/">Back</a>
+      
+        <div class="card border-primary rounded-0">
+            <div class="card-header p-0">
+                <div class="bg-info text-white text-center py-2">
+                    <h2><b>Generated Quotation Details for RFP No : <a href="/reporting/enquiry/{{quotation.rfp.rfp_no}}/details/">{{quotation.rfp.rfp_no}}</a></b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="card border-primary rounded-0">
+            <div class="card-header p-0">
+                <div class="bg-success text-white py-2">
+                    <p><b>Quotation No : {{quotation.quotation_no}}</b></p>
+                    <p><b>Quotation Date : {{quotation.quotation_date}}</b></p>
+                    <p>Customer : {{quotation.customer.name}}</p>
+                    <p>Customer Contact Person : {{quotation.customer_contact_person.name}} / {{quotation.customer_contact_person.email1}}</p>
+                    <p>Current Status : {{quotation.status}}</p>
+                    <p>Total Basic Value : {{quotation.total_basic_price}}</p>
+                    <p>Total Value (Including GST) : {{quotation.total_price}}</p>
+                    
+                    
+
+                    <hr>
+                    <label>Our PDF Quotation : <a href="/api/media/quotation/{{quotation.quotation_no}}.pdf" target="-b">Get Here !</a></label>
+
+                    
+                </div>
+            </div>
+        </div>
+
+            <div class="table-responsive">          
+                    <table id="lineitems" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                            <th></th>
+                            <th>Product Title</th>
+                            <th>Quantity</th>
+                            <th>Buying Price</th>
+                            <th>Margin (%)</th>
+                            <th>Basic Price</th>
+                            <th>Total Basic Price</th>
+                            <th>GST (%)</th>
+                            <th>Total Price with GST</th>
+                            <th>Lead Time</th>
+                            <th>Description</th>
+                            <th>Model</th>
+                            <th>Brand</th>
+                            <th>Product Code</th>
+                            <th>Part no</th>
+                            <th>Pack Size</th>
+                            <th>MOQ</th>
+                            <th>HSN Code</th>
+                            <th>UOM</th>
+                            <th>Supplier Name</th>
+                            <th>Supplier City</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                
+                          {% for item in quotation_lineitem %}
+                            
+                            <tr>
+                                                  
+                      {% if item.margin < 10 %}
+                      <tr style="background-color:darksalmon">
+                    {% elif item.margin < 15 %}
+                      <tr style="background-color:azure">
+                    {% elif item.margin < 20 %}
+                      <tr style="background-color:aqua">
+                    {% elif item.margin < 25 %}
+                      <tr style="background-color:lightskyblue">
+                    {% elif item.margin < 30 %}
+                      <tr style="background-color:lavender">
+                    {% else %}
+                      <tr style="background-color:gainsboro">
+                    {% endif %}
+                    
+                        <td>{{forloop.counter}}</td>                         
+                        <td>{{item.product_title}}</td>
+                        <td align="right">{{item.quantity|floatformat:2}}</td>                          
+                        <td align="right">{{item.unit_price|floatformat:2}}</td>
+                        <td align="right">{{item.margin}}</td>
+                       
+                        <td align="right">{{item.basic_price|floatformat:2}}</td>
+                          
+                        <td align="right">{{item.total_basic_price|floatformat:2}}</td>
+                        <td align="right">{{item.gst|floatformat:2}}</td>
+                            
+                        <td align="right">{{item.total_price|floatformat:2}}</td>
+
+                              
+                        <td>{{item.lead_time}}</td>
+                        <td>{{item.description}}</td>
+                        <td>{{item.model}}</td>
+                        <td>{{item.brand}}</td>
+                        <td>{{item.product_code}}</td>
+                        <td>{{item.part_no}}</td>
+                        <td>{{item.pack_size}}</td>
+                        <td>{{item.moq}}</td>
+                        <td>{{item.hsn_code}}</td>                          
+                        <td>{{item.uom}}</td>
+                        <td>{{item.sourcing_lineitem.sourcing.supplier.name}}</td>
+                        <td>{{item.sourcing_lineitem.sourcing.supplier.location}}</td>
+                            </tr>
+                           
+                          {% empty %}
+                            <p>OOPS ! No Item Found. Something is wrong !</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+       <br>
+
+       <br><br><br><hr>
+    </div>
+
+
+
+        
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        <style>
+          html *
+          {
+             font-size: 12px !important;
+          }
+      </style>
+        
+</body>
+</html>

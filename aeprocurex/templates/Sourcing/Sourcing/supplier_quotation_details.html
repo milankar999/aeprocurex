@@ -7,6 +7,23 @@
         <h2>Enter the received quotation details for {{supplier_name}}</h2>
         
         <div class="container">
+          <div class="row">
+              
+              <form method="POST" action="change_unloading_point/">
+                  {% csrf_token %}
+                  <label>Material / Services Unloading Point ::  </label>
+                  <select id="unloading_point" name="unloading_point" required>
+                    <option>{{unloading_point}}</option>
+                    <option></option>
+                    <option>Aeprocurex</option>
+                    <option>Customer Shipping Address</option>
+                  </select>
+                  <input class="btn btn-success" type="submit" value="Update" />
+              </form>
+          </div>
+          
+
+        <div class="row">
           <div class="col-sm-6">
             <div class="card-header p-0">
                 <div class="bg-info text-white text-center py-2">
@@ -68,7 +85,7 @@
           <hr>
           
           </div>
-
+        </div>
         </div>
       
 
@@ -300,7 +317,7 @@
                                               <tr>
                                                   <td>
                                                           <a href="{{price.id}}/edit/" data-toggle="tooltip" data-placement="top" title="Edit"> <span class="glyphicon glyphicon-pencil" style="color: green"></span></a>
-                                                          <a href="{{price.id}}/delete/" data-toggle="tooltip" data-placement="top" title="Delete"> <span class="glyphicon glyphicon-trash" style="color: red"></span></a>
+                                                          <a href="{{price.id}}/price_delete/" data-toggle="tooltip" data-placement="top" title="Delete"> <span class="glyphicon glyphicon-trash" style="color: red"></span></a>
                                                   </td>
                                                   <td>
                                                     <a href="{{price.id}}/round2/" data-toggle="tooltip" data-placement="top" title="Add Round 2 Negotiated price"> <span class="glyphicon glyphicon-gift" style="color:blue"></span></a>

@@ -1,0 +1,113 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Management Panel</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+</head>
+<body>
+
+
+    <div class="container-fluid">
+        <div class="card border-primary rounded-0">
+            <div class="card-header p-0">
+                <div class="bg-info text-white text-center py-2">
+                    <h2><b>Our Quotation Details for Customer Purchase Order : <a href="/reporting/cpo/{{cpo.id}}/details/">{{cpo.customer_po_no}}</a></b></h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-primary rounded-0">
+            <div class="card-header p-0">
+                <div class="bg-success text-white py-2">
+
+                    
+                </div>
+            </div>
+        </div>
+        
+        <div class="container">
+                {% if message %}
+                <div class="alert alert-{{message_type}}">
+                    <strong>{{message}}</strong>
+                </div>
+                {% endif %}
+ 
+        </div>
+            <div class="table-responsive">          
+                    <table id="lineitems" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th>Sl No</th>
+                          <th>Customer</th>
+                          <th>Location</th>
+                          <th>RFP No</th>
+                          <th>Enquiry Date</th>
+                          <th>Quotation No</th>
+                          <th>Quotation Date</th>
+                          <th>Quotation Link</th>
+                          <th>Quotation Details</th>
+                          <th>Enquiry Details</th>
+                       </tr>
+                      </thead>
+                      <tbody>   
+                          {% for item in selected_quotation_list %}
+                            <tr>
+
+                                <td>{{forloop.counter}}</td>
+                                <td>{{item.quotation.customer.name}}</td>
+                                <td>{{item.quotation.customer.location}}</td>
+                                <td>{{item.quotation.rfp.rfp_no}}</td>
+                                <td>{{item.quotation.rfp.rfp_creation_details.creation_date}}</td>
+                                <td>{{item.quotation.quotation_no}}</td>
+                                <td>{{item.quotation.quotation_date}}</td>
+                                <td><a target="-b" href="/api/media/quotation/{{item.quotation.quotation_no}}.pdf">Click Here</a></td>
+                                <td><a href="/reporting/quotation/{{item.quotation.quotation_no}}/details/">Check Quotation Details</a></td>
+                                <td><a href="/reporting/enquiry/{{item.quotation.rfp.rfp_no}}/details/">Check Customer Enquiry Details</a></td>
+                            </tr>
+                          {% empty %}
+                          <div class="card border-primary rounded-0">
+                            <div class="card-header p-0">
+                                <div class="bg-danger text-white py-2">
+                                <label>No Customer Quotation Found</label>      
+                                </div>
+                            </div>
+                        </div>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+       <br>
+      
+  </div>
+
+
+
+        
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+ 
+        <style>
+          html *
+          {
+             font-size: 12px !important;
+          }
+      </style>
+        
+</body>
+</html>

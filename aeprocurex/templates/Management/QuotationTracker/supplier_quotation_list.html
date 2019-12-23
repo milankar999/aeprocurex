@@ -1,0 +1,73 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="">
+        <div class="card border-primary rounded-0">
+            <div class="card-header p-0">
+                <div class="bg-info text-white text-center py-2">
+                  <br>
+                    <h2><b>RECEIVED SUPPLIER QUOTATION LIST</b></h2>
+                  <br>
+                </div>
+            </div>
+        </div>
+            <div class="table-responsive">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th>
+
+                          </th>
+                          <th>SL #</th>
+                          <th>RFP No</th>
+                          <th>Supplier Name</th>
+                          <th>Supplier Location</th>
+                          <th>Contact Person</th>
+                          <th>Offer Reference</th>
+                          <th>Offer Date</th>
+                          <th>Product Heading</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for item in sourcing %}
+                            <tr>
+                                <td>
+                                    <a
+                                    data-toggle="tooltip"
+                                    data-placement="top"
+                                    title="View Quotation Details"
+                                    onclick="window.open(
+                                   '/reporting/received_quotation/{{item.id}}/details/', 
+                                   'newwindow', 
+                                   'height=1600,width=1800,resizable=yes,scrollbars=yes,toolbar=yes,menubar=yes,location=yes'); 
+                                   return false;"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td>{{forloop.counter}}</td>                               
+                                <td>{{item.rfp__rfp_no}}</td>
+                                <td>{{item.supplier__name}}</td>
+                                <td>{{item.supplier__location}}</td>
+                                <td>{{item.supplier_contact_person__name}}</td>
+                                <td>{{item.offer_reference}}</td>
+                                <td>{{item.offer_date}}</td>
+                                <td>{{item.rfp__product_heading}}</td>
+                            </tr>
+                          {% empty %}
+                          <div class="card border-primary rounded-0">
+                              <div class="card-header p-0">
+                                  <div class="bg-info text-white text-center py-2">
+                                      <h2><b>NO ITEMS FOUND</b></h2>
+                                  </div>
+                              </div>
+                          </div>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable();
+            } );
+            </script>     
+{% endblock content %}

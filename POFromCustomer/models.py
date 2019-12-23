@@ -46,6 +46,8 @@ class CustomerPO(models.Model):
 
         rejection_reason = models.TextField(null=True, blank = True)
 
+        product_heading = models.CharField(max_length = 50, null=True, blank = True)
+
         cpo_creation_detail = models.ForeignKey(CPOCreationDetail,on_delete = models.CASCADE,null=True, blank=True)
         cpo_approval_detail = models.ForeignKey(CPOApprovalDetail,on_delete = models.CASCADE,null=True, blank=True)
         cpo_assign_detail = models.ForeignKey(CPOAssign, on_delete = models.CASCADE,null=True, blank=True)

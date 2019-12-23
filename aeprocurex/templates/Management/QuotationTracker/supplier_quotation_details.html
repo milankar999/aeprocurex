@@ -1,0 +1,135 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Management Panel</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+</head>
+<body>
+
+
+    <div class="container-fluid">
+      
+        <div class="card border-primary rounded-0">
+            <div class="card-header p-0">
+                <div class="bg-info text-white text-center py-2">
+                    <h2><b>SUPPLIER QUOTATION DETAILS</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="card border-primary rounded-0">
+            <div class="card-header p-0">
+                <div class="bg-success text-white py-2">
+                    <p><b>Supplier Name : {{sourcing.supplier.name}}</b></p>
+                    <p><b>Contact Person : {{sourcing.supplier_contact_person.name}} // {{sourcing.supplier_contact_person.email1}}</b></p>
+                    <p>Offer Reference : {{sourcing.offer_reference}}</p>
+                    <p>Offer Date : {{sourcing.offer_date}}</p>
+                    <p>Delivery Point : {{sourcing.delivery_point}}</p>
+
+                    <a href="/reporting/enquiry/{{sourcing.rfp.rfp_no}}/details/">Check Customer Enquiry Details</a>
+                    <hr>
+                    <p>Sourcing Person Deatils : {{sourcing.rfp.rfp_assign1.assign_to1.first_name}} {{sourcing.rfp.rfp_assign1.assign_to1.last_name}}</p>
+
+                    <hr>
+                    <label>Supplier Quotation Attachment</label>
+                    {% for attach in supplier_quotation %}
+                        {% ifnotequal atattach.attachment "" %}
+                          <br><a href="/api/media/{{attach.attachment}}" target="-b">Click Here</a>
+                        {% endifnotequal %}
+                        {% ifnotequal atattach.quotation_link "" %}
+                          <br><a href="{{attach.quotation_link}}" target="-b">{{attach.quotation_link}}</a>
+                        {% endifnotequal %}
+                    {% empty %}
+                      <label>Not Found</label>
+                    {% endfor %}
+                    <hr>
+                    <label>Other Charges from Supplier End</label>
+                    {% for charges in other_charges %}
+                        <p>{{charges.cost_description}} : {{charges.value}}</p>
+                    {% empty %}
+                      <label>Not Found</label>
+                    {% endfor %}
+                    <br>
+                    
+
+                    
+                </div>
+            </div>
+        </div>
+
+            <div class="table-responsive">          
+                    <table id="lineitems" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                            <th></th>
+                            <th>Product Title</th>
+                            <th>Description</th>
+                            <th>Model</th>
+                            <th>Brand</th>
+                            <th>Product Code</th>
+                            <th>Part no</th>
+                            <th>Round 1 Price</th>
+                            <th>Round 2 Price</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                
+                          {% for item in sourcing_lineitem %}
+                            
+                      <tr>
+                                                                      
+                          <td>
+                            {{forloop.counter}}
+                          </td>
+                          <td>{{item.product_title}}</td>
+                          <td>{{item.description}}</td>
+                          <td>{{item.model}}</td>
+                          <td>{{item.brand}}</td>
+                          <td>{{item.product_code}}</td>
+                          <td>{{item.part_no}}</td>
+                          <td>{{item.price1}}</td>
+                          <td>{{item.price2}}</td>
+                      
+                      </tr>
+                           
+                          {% empty %}
+                            <p>OOPS ! No Item Found. Something is wrong !</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+       <br>
+
+       <br><br><br><hr>
+    </div>
+
+
+
+        
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        <style>
+          html *
+          {
+             font-size: 12px !important;
+          }
+      </style>
+        
+</body>
+</html>

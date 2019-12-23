@@ -8,6 +8,44 @@
             <strong>{{message}}</strong>
         </div>
         {% endif %}
+
+
+        <div class="container">
+          <div class="card-header p-0">
+              <div class="bg-info text-white text-center py-2">
+                  <label>Attached Supplier Quotation </label>
+              </div>
+          </div>
+        
+        <br>
+        <hr>
+
+
+
+        {% for attachment in sourcing_attachment %}
+        
+          {% ifnotequal attachment.attachment "" %}
+          <label>Supporting Document <a href="/api/media/{{attachment.attachment}}" target="-blank">Click Here</a></label><br>
+          {% endifnotequal %}
+
+
+          {% ifnotequal attachment.quotation_link "" %}
+          <label>Quotation Link <a href="{{attachment.quotation_link}}" target="-blank">{{attachment.quotation_link}}</a></label><br>
+          {% endifnotequal %}
+
+          <hr>
+        {% empty %}
+          <label>No Attachment Found</label>
+        {% endfor %}
+
+        <hr>
+        </div>
+
+
+
+
+
+
         <h2>Vendor PO Lineitem
           <button class="btn btn-success pull-right" data-toggle="modal" data-target="#ViewDetails">View Customer Order Details &nbsp;<span class="glyphicon glyphicon-zoom-in"></span></button>
           <button class="btn btn-info pull-right" data-toggle="modal" data-target="#ViewOrderDetails">View Details of this Order &nbsp;<span class="glyphicon glyphicon-resize-full"></span></button>

@@ -10,6 +10,7 @@
                         <tr>
                           <th></th>
                           <th>RFP No</th>
+                          <th>Product Heading</th>
                           <th>Customer</th>
                           <th>Location</th>
                           <th>Contact Person</th>
@@ -28,6 +29,7 @@
                                    <a href="/quotation/quoted/{{item.rfp__rfp_no}}/{{item.quotation_no}}/lineitems/" data-toggle="tooltip" data-placement="top" title="Select this Quotation"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
                                 </td>
                                 <td>{{item.rfp__rfp_no}}</td>
+                                <td>{{item.rfp__product_heading}}</td>
                                 <td>{{item.customer__name}}</td>
                                 <td>{{item.customer__location}}</td>
                                 <td>{{item.customer_contact_person__name}}</td>

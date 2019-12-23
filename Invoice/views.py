@@ -1019,7 +1019,10 @@ def invoice_generate(request,invoice_no=None):
                 #                                                effective_quantity = effective_quantity - available_quantity
 
                 for link_item in inv_grn_link:
-                        link_item.grn_lineitem.save()
+                        try:
+                                link_item.grn_lineitem.save()
+                        except:
+                                pass
                         
                 cpo_testing_flag = 'Yes'
                 for pending_item in pending_delivery_items :
@@ -2226,18 +2229,18 @@ def generated_invoice_delete(request,invoice_no=None):
                                 pending_delivery.pending_quantity = pending_delivery.pending_quantity + item.quantity
                                 pending_delivery.save() 
 
-                                if invoice.cpo.processing_type == 'direct':
-                                        invoice.cpo.status = 'po_processed'
-                                        invoice.cpo.save()
+                if invoice.cpo.processing_type == 'direct':
+                        invoice.cpo.status = 'po_processed'
+                        invoice.cpo.save()
                                 
-                                if invoice.cpo.processing_type == 'indirect':
-                                        invoice.cpo.status = 'direct_processing'
-                                        invoice.cpo.save()
+                if invoice.cpo.processing_type == 'indirect':
+                        invoice.cpo.status = 'direct_processing'
+                        invoice.cpo.save()
                                 
-                                invoice.generating_status = 'Deleted'
-                                invoice.save()
+                invoice.generating_status = 'Deleted'
+                invoice.save()
 
-                                return JsonResponse({'Message':'Success'})
+                return JsonResponse({'Message':'Success'})
 
 
 

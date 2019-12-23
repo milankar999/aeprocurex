@@ -48,6 +48,7 @@ def rfp_pending_list(request):
                 if request.method == "GET":
                         rfp = RFP.objects.filter(opportunity_status='Open',enquiry_status='Approved',rfp_assign1__assign_to1=user).values(
                                 'rfp_no',
+                                'product_heading',
                                 'customer__name',
                                 'customer__location',
                                 'rfp_creation_details__creation_date',
@@ -283,7 +284,12 @@ def offer_reference(request,rfp_no=None,vendor_id=None,contact_person_id=None):
                 if request.method == "POST":
                         data = request.POST
                         sourcing_id = rfp_no + vendor_id
-                        sourcing = Sourcing.objects.create(id=sourcing_id,rfp=RFP.objects.get(rfp_no=rfp_no),supplier=SupplierProfile.objects.get(id=vendor_id),supplier_contact_person=SupplierContactPerson.objects.get(id=contact_person_id),offer_reference=data['reference'],offer_date=data['oDate'],created_by=user)
+
+                        try:
+                                sourcing = Sourcing.objects.create(id=sourcing_id,rfp=RFP.objects.get(rfp_no=rfp_no),supplier=SupplierProfile.objects.get(id=vendor_id),supplier_contact_person=SupplierContactPerson.objects.get(id=contact_person_id),offer_reference=data['reference'],offer_date=data['oDate'],created_by=user)
+                        except:
+                                return HttpResponseRedirect(reverse('vendor-selection', args=[rfp_no]))
+
                         rfp = RFP.objects.get(rfp_no = rfp_no)
                         
                         if rfp.rfp_type == 'PSP':
@@ -1145,6 +1151,9 @@ def vendor_quotation_edit(request,rfp_no=None,sourcing_id=None):
                         sourcing_lineitems = SourcingLineitem.objects.filter(sourcing__id=sourcing_id)
                         context['sourcing_lineitems'] = sourcing_lineitems
 
+                        sourcing = Sourcing.objects.get(id = sourcing_id)
+                        context['unloading_point'] = sourcing.delivery_point
+
                         context['supplier_name'] = Sourcing.objects.filter(id=sourcing_id).values('supplier__name')[0]['supplier__name']
 
 
@@ -1184,6 +1193,28 @@ def vendor_quotation_edit(request,rfp_no=None,sourcing_id=None):
                                 attachment = document
                         )
                         return HttpResponseRedirect(reverse('vendor-quotation-edit', args=[rfp_no,sourcing_id]))
+
+#Add unloading point
+@login_required(login_url="/employee/login/")
+def vendor_quotation_chnage_unloading_point(request,rfp_no=None,sourcing_id=None):
+        context={}
+        context['sourcing'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+        type = u.profile.type
+
+        if request.method == 'POST':
+                data = request.POST
+                if data['unloading_point'] == 'None' or data['unloading_point']=='':
+                        return JsonResponse({'message':'please select proper option'})
+                sourcing = Sourcing.objects.get(id = sourcing_id)
+                sourcing.delivery_point = data['unloading_point']
+                sourcing.save()
+
+                return HttpResponseRedirect(reverse('vendor-quotation-edit', args=[rfp_no,sourcing_id]))
+
+
 
 #Add other charges
 @login_required(login_url="/employee/login/")
@@ -1491,7 +1522,7 @@ def vendor_quotation_price_delete(request,rfp_no=None,sourcing_id=None,price_id=
 
         if type == 'Sourcing':
                 if request.method == "GET":
-                        price = SourcingLineitem.objects.filter(id=price_id)[0]
+                        price = SourcingLineitem.objects.get(id=price_id)
                         context['price'] = price
                         return render(request,"Sourcing/Sourcing/supplier_price_delete.html",context)
 
@@ -1572,6 +1603,12 @@ def sourcing_completed(request,rfp_no=None):
                                 attach_count = SourcingAttachment.objects.filter(sourcing__rfp = rfp).count()
                                 if attach_count == 0:
                                         context['error'] = "Please attach the negotiated vendor quotation, as this is a PSP Enquiry"
+                                        return render(request,"Sourcing/Sourcing/error.html",context)
+
+                                sourcing = Sourcing.objects.filter(rfp__rfp_no = rfp_no)
+                                so_obj = sourcing[0]
+                                if not(so_obj.delivery_point):
+                                        context['error'] = "Delivery Point is missing"
                                         return render(request,"Sourcing/Sourcing/error.html",context)
 
                         ##Price CHeck by lineitem

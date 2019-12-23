@@ -148,4 +148,14 @@ class VPOStatus(models.Model):
 
         def __str__(self):
                 return self.vpo.po_number + ' - ' + self.order_status
+
+class NegotiatedAttachment(models.Model):
+        id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+        vpo = models.ForeignKey(VendorPO, on_delete=models.CASCADE)
+        attachment = models.FileField(upload_to='negotiated_quotation/',null=True,blank=True)
+        quotation_link = models.TextField(null=True, blank=True)
+
+        def __str__(self):
+                return self.id
                 

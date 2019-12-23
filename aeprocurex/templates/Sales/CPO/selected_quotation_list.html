@@ -1,0 +1,16 @@
+
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <h2>Provided Customer Quotation Details</h2>
+        {% for item in selected_quotation %}
+          <a href="/api/media/quotation/{{item.quotation.quotation_no}}.pdf/"  target="-blank">{{item.quotation.quotation_no}}</a><br>
+        {% endfor %}
+    </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable();
+            } );
+            </script>     
+{% endblock content %}

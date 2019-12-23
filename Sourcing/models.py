@@ -10,7 +10,9 @@ class Sourcing(models.Model):
     supplier = models.ForeignKey(SupplierProfile, on_delete=models.CASCADE)
     supplier_contact_person = models.ForeignKey(SupplierContactPerson, on_delete = models.CASCADE)
     offer_reference = models.CharField(max_length=200)
-    offer_date = models.DateField()
+    offer_date = models.DateField(auto_now_add=True)
+
+    delivery_point = models.CharField(max_length = 200, null=True, blank=True)
 
     creation_date = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User,on_delete = models.CASCADE)

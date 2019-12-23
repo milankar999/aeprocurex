@@ -1,0 +1,166 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Management Panel</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+</head>
+<body>
+
+
+    <div class="container-fluid">
+        <div class="card border-primary rounded-0">
+            <div class="card-header p-0">
+                <div class="bg-info text-white text-center py-2">
+                    <h2><b>Enquiry Details for RFP No : {{rfp.rfp_no}}</b></h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-primary rounded-0">
+            <div class="card-header p-0">
+                <div class="bg-success text-white py-2">
+                    <p>Customer : {{rfp.customer.name}} / {{rfp.customer.location}}</p>
+                    <p>Customer Contact Person : {{rfp.customer_contact_person.name}} / {{rfp.customer_contact_person.email1}}</p>
+                    <p>Enquiry Reference : {{rfp.reference}}</p>
+                    <p>Products Heading : {{rfp.product_heading}}</p>
+                    <p>Creation Deatils : {{rfp.rfp_creation_details.creation_date}} / {{rfp.rfp_creation_details.created_by.first_name}} {{rfp.rfp_creation_details.created_by.last_name}}</p>
+                    <p>Sourcing Person Deatils : {{rfp.rfp_assign1.assign_to1.first_name}} {{rfp.rfp_assign1.assign_to1.last_name}}</p>
+
+                    {% if rfp.rfp_type == 'PSP' %}
+                      <label>Enquiry Type : PSP // Value of {{psp_enquiry_value}}</label><br>
+                      <label>PSP Vendor Freight Charges : {{rfp.freight_charges}}</label><br>
+                      <label>PSP Vendor PF Charges : {{rfp.pf_charges}}</label>
+                    {% elif rfp.rfp_type == 'Non PSP' %}
+                    <label>Enquiry Type : Non PSP</label>
+                    {% endif %}
+                    
+                    {% if rfp.enquiry_status == 'Approved' %}
+                    <p>Current Enquiry Status : Sourcing Pending</p>
+
+                    {% elif rfp.enquiry_status == '' %}
+                    <p>Current Enquiry Status : Creation-In-Progress</p>
+                    
+                    {% elif rfp.enquiry_status == 'Created' %}
+                    <p>Current Enquiry Status : Waiting for Enquiry Approval</p>
+                    
+                    {% elif rfp.enquiry_status == 'Rejected' %}
+                    <p>Current Enquiry Status : Rejected</p>
+
+                    {% elif rfp.enquiry_status == 'Sourcing_Completed' %}
+                    <p>Current Enquiry Status : Quotation Generation Pending</p>
+
+                    {% elif rfp.enquiry_status == 'COQ Done' %}
+                    <p>Current Enquiry Status : Quotation Generation Pending</p>
+
+                    {% elif rfp.enquiry_status == 'Quoted' %}
+                    <p>Current Enquiry Status : Quoted</p>
+
+                    {% else %}
+                    <p>Current Enquiry Status : Closed</p>
+                    {% endif %}
+
+                    {% ifnotequal rfp.document1 "" %}
+                      <label>Enquiry Supporting Document <a href="/api/media/{{rfp.document1}}" target="-blank">Click Here</a></label><br>
+                    {% endifnotequal %}
+
+                    
+                </div>
+            </div>
+        </div>
+        
+        <div class="container">
+                {% if message %}
+                <div class="alert alert-{{message_type}}">
+                    <strong>{{message}}</strong>
+                </div>
+                {% endif %}
+ 
+        </div>
+            <div class="table-responsive">          
+                    <table id="lineitems" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Product Title</th>
+                          <th>Description</th>
+                          <th>Model</th>
+                          <th>Brand</th>
+                          <th>Product Code</th>
+                          <th>Part no</th>
+                          <th>Category</th>
+                          <th>HSN Code</th>
+                          <th>GST</th>
+                          <th>UOM</th>
+                          <th>Quantity</th>
+                          <th>Target Price</th>
+                          <th>Remarks</th>
+                          <th>Customer Lead Time</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for item in rfp_lineitems %}
+                            <tr>
+                                <td>
+                                  {{forloop.counter}}
+                                </td>
+                                <td>{{item.product_title}}</td>
+                                <td>{{item.description}}</td>
+                                <td>{{item.model}}</td>
+                                <td>{{item.brand}}</td>
+                                <td>{{item.product_code}}</td>
+                                <td>{{item.part_no}}</td>
+                                <td>{{item.category}}</td>
+                                <td>{{item.hsn_code}}</td>
+                                <td>{{item.gst}}</td>
+                                <td>{{item.uom}}</td>
+                                <td>{{item.quantity}}</td>
+                                <td>{{item.target_price}}</td>
+                                <td>{{item.remarks}}</td>
+                                <td>{{item.customer_lead_time}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Enquiry Items Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+       <br>
+       <a class="btn btn-info pull-left" href="/reporting/enquiry/{{rfp.rfp_no}}/sourcing_details/">Check Sourcing Details</a>
+       <a class="btn btn-info pull-right" href="/reporting/enquiry/{{rfp.rfp_no}}/quotation_details/">Check Generated Quotation Details</a>
+  </div>
+
+
+
+        
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#lineitems').DataTable();
+            } );
+        </script> 
+        <style>
+          html *
+          {
+             font-size: 12px !important;
+          }
+      </style>
+        
+</body>
+</html>

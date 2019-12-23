@@ -7,7 +7,15 @@
         <div class="alert alert-{{message_type}}">
             <strong>{{message}}</strong>
         </div>
-        {% endif %}      
+        {% endif %}   
+        <div class="alert alert-success">
+          <strong><a class="pull-left" id='preceed' type="button" onclick="window.open(
+            '/api/po_to_vendor/vendor_po_prepare/{{cpo_id}}/vendor_product_segmentation/sourcing_references/', 
+            'newwindow', 
+            'width=0,height=0'); 
+            return false;" value="Get Values">Click For Checking Vendor Quotation Details </a> </strong>
+        </div>
+        
        
         <h1 style="text-align: center">Vendor Product Segmentation</h1>
         {% for vpo in vendor_po %}

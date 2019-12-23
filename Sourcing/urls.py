@@ -20,6 +20,10 @@ urlpatterns = [
 
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/add_other_charges/',vendor_quotation_add_other_cost,name='vendor-quotation-add-other-cost'),
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/<cost_id>/delete/',vendor_quotation_other_cost_delete,name='vendor-quotation-other-cost-delete'),
+    
+    #Change Unloading Point
+    path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/change_unloading_point/',vendor_quotation_chnage_unloading_point,name='vendor-quotation-change-unloading-point'),
+
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/<document_id>/delete/',vendor_quotation_document_delete,name='vendor-quotation-document-delete'),
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/all_price_delete/',vendor_quotation_all_price_delete,name='vendor-quotation-all-price-delete'),
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/price_upload/',vendor_quotation_price_upload,name='vendor-quotation-price-upload'),
@@ -27,7 +31,7 @@ urlpatterns = [
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/view/',vendor_quotation_view,name='vendor-quotation-view'),
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/<lineitem_id>/add/',vendor_quotation_price_add,name='vendor-quotation-price-add'),
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/<price_id>/edit/',vendor_quotation_price_edit,name='vendor-quotation-price-edit'),
-    path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/<price_id>/delete/',vendor_quotation_price_delete,name='vendor-quotation-price-delete'),
+    path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/<price_id>/price_delete/',vendor_quotation_price_delete,name='vendor-quotation-price-delete'),
     path('<rfp_no>/lineitems/vendor_quotation/<sourcing_id>/edit/<price_id>/round2/',round2,name='round2'),
     path('<rfp_no>/lineitems/vendor_selection/mark_as_completed/',sourcing_completed,name='sourcing-completed'),
     path('single_vendor/approval_list/pending/',single_vendor_approval_list,name='single-vendor-approval-list'),

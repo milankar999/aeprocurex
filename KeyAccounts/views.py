@@ -24,6 +24,7 @@ def enquiry_list(request):
             if request.method == "GET":
                     rfp_list = RFP.objects.filter(rfp_keyaccounts_details__key_accounts_manager=user).values(
                         'rfp_no',
+                        'product_heading',
                         'customer__name',
                         'customer__location',
                         'customer_contact_person__name',

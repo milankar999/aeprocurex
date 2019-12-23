@@ -84,9 +84,18 @@ urlpatterns = [
 
     #Assign a unselected lineitem
     path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/assign_product/',VPOAssignProduct,name='vpo-vendor-product-segmentation-assign-product'),
+
+
+    #View sourcing References
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/sourcing_references/',VPOSourcingReferences,name='vpo-vendor-product-segmentation-sourcing-references'),
     
     #Add Order Information
     path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/add_order_info/',VPOAddOrderInformation,name='vpo-vendor-product-segmentation-add-order-information'),
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/add_order_info/add_negotiated_quotation/',VPOAddNegotiatedQuotation,name='vpo-vendor-product-segmentation-add-negotiated-quotation'),
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/add_order_info/<attachment_id>/delete/',VPONegotiatedAttachmentDelete,name='vpo-vendor-product-segmentation-negotiated-quotation-delete'),
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/add_order_info/cpo_contact_details/',CPOContactDetails,name='cpo-contact-details'),
+    path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/add_order_info/payment_terms_history/',VPOPaymentTermsHistory,name='vpo-payment-terms-history'),
+
     path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/add_order_info/vendor_info_change/',VPOVendorInfoChange,name='vpo-vendor-info-change'),
     path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/add_order_info/vendor_contact_person_edit/',VPOVendorContactPersonEdit,name='vpo-vendor-contact-person-edit'),
     path('vendor_po_prepare/<cpo_id>/vendor_product_segmentation/<vpo_id>/add_other_expences/',VPOAddOtherExpences,name='vpo-add-other-expences'),
@@ -145,6 +154,8 @@ urlpatterns = [
     path('vendor_po_prepare/independent_po_generation/<vpo_id>/product_selection/<item_id>/delete/',IVPOProductdelete,name='indepen-vpo-product-delete'),
 
     path('vendor_po_prepare/independent_po_generation/<vpo_id>/add_order_info/',IVPOAddOrderInformation,name='indepen-vpo-add-order-info'),
+    path('vendor_po_prepare/independent_po_generation/<vpo_id>/add_order_info/add_negotiated_quotation/',IVPOAddNegotiatedQuotation,name='indepen-vpo-vendor-product-segmentation-add-negotiated-quotation'),
+    path('vendor_po_prepare/independent_po_generation/<vpo_id>/add_order_info/<attachment_id>/delete/',IVPONegotiatedAttachmentDelete,name='indepen-vpo-vendor-product-segmentation-negotiated-quotation-delete'),
     
     path('vendor_po_prepare/independent_po_generation/<vpo_id>/add_order_info/vendor_info_change/',IVPOVendorInfoChange,name='indepen-vpo-vendor-info-change'),
     path('vendor_po_prepare/independent_po_generation/<vpo_id>/add_order_info/vendor_contact_person_edit/',IVPOVendorContactPersonEdit,name='indepen-vpo-vendor-contact-person-edit'),

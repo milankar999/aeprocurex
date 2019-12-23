@@ -11,6 +11,8 @@ class Profile(models.Model):
     supplier_payment_user_type = models.CharField(max_length = 50, default = 'user')
     cpo_editing = models.CharField(max_length = 50, default = 'no')
     rfp_editing = models.CharField(max_length = 50, default = 'no')
+    creating_customer = models.CharField(max_length = 50, default = 'no')
+    customer_editing = models.CharField(max_length = 50, default = 'no')
     designation = models.CharField(max_length=50, null = True, blank = True)
     personal_email = models.CharField(max_length=100, null = True, blank = True)
     office_email = models.CharField(max_length=100, null = True, blank = True)

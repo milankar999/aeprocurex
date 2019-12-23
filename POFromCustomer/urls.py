@@ -24,6 +24,7 @@ urlpatterns = [
     #Approval List
     path('cpo_approval/list/',cpo_approval_list,name='cpo-approval-list'),
     path('cpo_approval/<cpo_id>/lineitem/',cpo_approval_lineitem,name='cpo-approval-lineitem'),
+    path('cpo_approval/<cpo_id>/lineitem/check_quotation_reference/',cpo_approval_quotation_reference,name='cpo-approval-quotation-reference'),
     path('cpo_approval/<cpo_id>/reject/',cpo_reject,name='cpo-reject'),
     path('cpo_approval/<cpo_id>/approve/',cpo_approve,name='cpo-approve'),
 

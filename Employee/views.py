@@ -77,6 +77,9 @@ def user_login(request):
 
                 if type == 'Accounts':
                         return render(request,"Accounts/accounts_home.html",context)
+
+                if type == 'Management':
+                        return HttpResponseRedirect(reverse('management_home_load'))
         except:
                 context={}
                 if request.method=="POST":
@@ -167,6 +170,9 @@ def success(request):
 
         if type == 'Accounts':
                 return render(request,"Accounts/accounts_home.html",context)
+
+        if type == 'Management':
+                return HttpResponseRedirect(reverse('management_home_load'))
 
 @login_required(login_url="/employee/login/")
 def crm_home_load(request):
@@ -260,6 +266,19 @@ def sales_home_load(request):
 
 
                 return render(request,"Sales/sales_home.html",context)
+
+#Management Home load
+@login_required(login_url="/employee/login/")
+def management_home_load(request):
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context={}
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if type == 'Management':
+
+                return render(request,"Management/management_home.html",context)
+
 
 
 #API Views

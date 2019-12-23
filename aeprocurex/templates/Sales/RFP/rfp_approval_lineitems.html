@@ -96,7 +96,7 @@
                           <th>GST</th>
                           <th>UOM</th>
                           <th>Quantity</th>
-                          <th>Target Price</th>
+                          <th>PSP Price</th>
                           <th>Remarks</th>
                           <th>Customer Lead Time</th>
                         </tr>
@@ -127,6 +127,24 @@
             </div>
 
         <div class="container">
+          {% for info in rfp_details %}
+            {% ifnotequal info.rfp_type "Non PSP" %}
+            <div class="card-header p-0">
+                <div class="bg-info text-white text-center py-2">
+                    <label>PSP Vendor Quotation Details</label>
+                </div>
+            </div>
+            <label>Vendor :: {{psp_vendor_details.supplier.name}}</label>
+            <br>
+            <label>Contact Person :: {{psp_vendor_details.supplier_contact_person.name}} // {{psp_vendor_details.supplier_contact_person.email1}}</label><br>
+              {% ifnotequal info.document1 "" %}
+                 <label>Supporting Document <a href="/api/media/{{info.document1}}" target="-blank">Click Here</a></label><br>
+              {% endifnotequal %}<br>
+              <a style="color: red">Note :: If you Approve this purchase order automated product enquiry will be send to Vendor</a><br>
+              <a style="color: red">Note :: Kindly Check all the information properly before approving this purchase order</a><br>
+            {% endifnotequal %}
+          {% endfor %}
+          <br>
             <button class="btn btn-danger" data-toggle="modal" data-target="#reject">Reject &nbsp;<span class="glyphicon glyphicon-remove"></span></button>
             <div class="modal fade" id="reject" role="dialog">
                 <div class="modal-dialog">
@@ -184,7 +202,11 @@
                                                     <option>{{user.username}}</option>
                                                     {% endfor %}
                                                 </select>
-                                                
+                                                {% for info in rfp_details %}
+                                                {% ifnotequal info.rfp_type "Non PSP" %}
+                                                <input type="checkbox" name="mark" value="mark"> Send Enquiry to Vendor
+                                                {% endifnotequal %}
+                                                {% endfor %}
                                             </div>
                                     </div>
                                     <div class="modal-footer">

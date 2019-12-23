@@ -1,0 +1,197 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Management Panel</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+</head>
+<body>
+
+
+    <div class="container-fluid">
+        <div class="card border-primary rounded-0">
+            <div class="card-header p-0">
+                <div class="bg-info text-white text-center py-2">
+                    <h2><b>Current Invoicing Status for Cutomer Order No :<a href="/reporting/cpo/{{cpo.id}}/details/">{{cpo.customer_po_no}}</a></b></h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-primary rounded-0">
+            <div class="card-header p-0">
+                <div class="bg-success text-center text-white py-2">
+                  <label>Pending Delivery of this Order</label>                    
+                </div>
+            </div>
+        </div>
+        
+ 
+            <div class="table-responsive">          
+                    <table id="lineitems" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th>Sl No</th>
+                          <th>Product Title</th>
+                          <th>Description</th>
+                          <th>Model</th>
+                          <th>Brand</th>
+                          <th>Product Code</th>
+                          <th>Part no</th>
+                          <th>Pack Size</th>
+                          <th>HSN Code</th>
+                          <th>UOM</th>
+                          <th>Quantity</th>
+                          <th>Unit Price</th>
+                          <th>Total Basic Value</th>
+                          <th>GST (%)</th>
+                          <th>Including GST Value</th>
+                          <th>Pending Invoicing Quantity</th>
+                          <th>Pending Indirect Invoicing Quantity</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for item in pending_delivery %}
+                            <tr>
+
+                                <td>{{forloop.counter}}</td>
+                                <td>{{item.cpo_lineitem.product_title}}</td>
+                                <td>{{item.cpo_lineitem.description}}</td>
+                                <td>{{item.cpo_lineitem.model}}</td>
+                                <td>{{item.cpo_lineitem.brand}}</td>
+                                <td>{{item.cpo_lineitem.product_code}}</td>
+                                <td>{{item.cpo_lineitem.part_no}}</td>      
+                                <td>{{item.cpo_lineitem.pack_size}}</td>
+                                <td>{{item.cpo_lineitem.hsn_code}}</td>
+                                <td>{{item.cpo_lineitem.uom}}</td>
+                                <td>{{item.cpo_lineitem.quantity}}</td>
+                                <td>{{item.cpo_lineitem.unit_price}}</td>
+                                <td>{{item.cpo_lineitem.total_basic_price}}</td>
+                                <td>{{item.cpo_lineitem.gst}}</td>
+                                <td>{{item.cpo_lineitem.total_price}}</td>
+                                <td>{{item.pending_quantity}}</td>
+                                <td>{{item.pending_indirect_quantity}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Pending item found, all the items are deliverd for this order</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+
+        <div class="card border-primary rounded-0">
+          <div class="card-header p-0">
+            <div class="bg-danger text-center text-white py-2">
+              <label>Generated Invoices of this Order</label>                    
+            </div>
+          </div>
+        </div>
+        <br>
+        {% for item in invoice_list %}
+        <div class="card border-primary rounded-0">
+          <div class="card-header p-0">
+              <div class="bg-success text-white py-2">
+                <label>Invoice No : {{item.invoice_no}}</label><br>
+                <p>Invoice Date : {{item.invoice_date}}</p>
+                <p>Customer : {{item.customer.name}}/{{item.customer.location}}</p>
+                <p>Contact Person : {{item.customer_contact_person.name}}</p>
+                <p>Order Reference : {{item.po_reference}}</p>
+                <p>Order Date : {{item.po_date}}</p>
+                <p>Total Basic : {{item.basic_value}}</p>
+                <p>Grand Total : {{item.total_value}}</p>
+                <p>Quotation Generation Status : {{item.generating_status}}</p>  
+                <a target="-b" href="/api/media/invoice/{{item.invoice_no}}.pdf">Get Portable Copy of Invoice</a>                  
+              </div>
+          </div>
+        </div>
+
+        <table id="pending_items" class="table table-hover table-bordered table-sm" width="100%">
+          <thead>
+            <tr>
+              <th></th>
+              <th>SL No</th>
+              <th>Product Title</th>
+              <th>Description</th>
+              <th>Model</th>
+              <th>Brand</th>
+              <th>Product Code</th>
+              <th>Part No</th>
+              <th>Quantity</th>
+              <th>UOM</th>
+              <th>Unit Price</th>
+              <th>Total Basic Value</th>
+              <th>GST %</th>
+              <th>Total Value</th>
+            </tr>
+          </thead>
+          <tbody>   
+              {% for litem in invoice_lineitems %}
+              {% if litem.invoice.invoice_no == item.invoice_no %}
+                <tr>
+                   <td>
+                   </td>
+                   <td>{{forloop.counter}}</td>
+                   <td>{{litem.product_title}}</td>
+                   <td>{{litem.description}}</td>
+                   <td>{{litem.model}}</td>
+                   <td>{{litem.brand}}</td>
+                   <td>{{litem.product_code}}</td>
+                   <td>{{litem.part_number}}</td>
+                   <td>{{litem.quantity}}</td>
+                   <td>{{litem.uom}}</td>
+                   <td>{{litem.unit_price}}</td>
+                   <td>{{litem.total_basic_price}}</td>
+                   <td>{{litem.gst}}</td>
+                   <td>{{litem.total_price}}</td>
+                </tr>
+              {% endif %}
+              {% empty %}
+                <p>No End User Found</p>
+              {% endfor %}
+          </tbody>
+        </table>
+
+        <br>
+        {% empty %}
+        <div class="card border-primary rounded-0">
+          <div class="card-header p-0">
+              <div class="bg-danger text-center text-white py-2">
+                <label>Still No Invoices Created for This Order</label>                    
+              </div>
+          </div>
+        </div>
+        {% endfor %}
+
+       <br>
+
+  </div>
+
+
+
+        
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        <style>
+          html *
+          {
+             font-size: 12px !important;
+          }
+      </style>
+        
+</body>
+</html>

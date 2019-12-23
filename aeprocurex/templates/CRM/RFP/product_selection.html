@@ -192,6 +192,10 @@
                 {% csrf_token %}
                 <div class="form-group">
 
+                        <label class="form-input" for="product_heading">Product Heading <a style="color: red">* (Maximum length should be 50)</a></label>
+                        <input type="text" class="form-control" id="product_heading" name="product_heading" required>
+
+
                         <label class="form-input" for="rfp_reference">Enquiry Reference <a style="color: red">*</a></label>
                         <input type="text" class="form-control" id="rfp_reference" name="rfp_reference" required>
                         

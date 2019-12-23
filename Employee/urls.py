@@ -9,6 +9,7 @@ urlpatterns = [
     path('crm_home/',crm_home_load,name='crm_home_load'),
     path('sourcing_home/',sourcing_home_load,name='sourcing_home_load'),
     path('sales_home/',sales_home_load,name='sales_home_load'),
+    path('management_home/',management_home_load,name='management_home_load'),
 
     #API Urls
     path('api/login/',LoginView.as_view()),

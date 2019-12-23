@@ -51,6 +51,7 @@ urlpatterns = [
     path('order_tracker/',include('OrderTracker.urls')),
 
     path('supplier_payment/',include('SupplierPayment.urls')),
+    path('reporting/',include('Reporting.urls')),
 ]
 
 if settings.DEBUG:

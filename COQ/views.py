@@ -22,6 +22,7 @@ def coq_pending_list(request):
         if request.method == "GET":
             rfp = RFP.objects.filter(opportunity_status='Open',enquiry_status='Sourcing_Completed').values(
                             'rfp_no',
+                            'product_heading',
                             'rfp_type',
                             'customer__name',
                             'customer__location',
@@ -272,3 +273,5 @@ def resourcing(request,rfp_no=None,quotation_no=None):
             rfp_object.enquiry_status = 'Approved'
             rfp_object.save()
             return HttpResponseRedirect(reverse('coq_pending_list'))
+
+            

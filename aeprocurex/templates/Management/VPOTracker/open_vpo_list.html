@@ -1,0 +1,80 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="">
+        
+      
+      <div class="card border-primary rounded-0">
+        <div class="card-header p-0">
+            <div class="bg-info text-white text-center py-2">
+                <h2><b>Open Vendor Purchase Order List</b></h2>
+            </div>
+        </div>
+      </div>
+            <div class="table-responsive">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th></th>
+                          <th>Vendor Name</th>
+                          <th>Location</th>
+                          <th>PO No</th>
+                          <th>PO Date</th>
+                          <th>PO For</th>
+                          <th>Basic Amount ₹</th>
+                          <th>Total Basic Amount ₹</th>
+                          <th>All Total Amount ₹</th>
+                          <th>Currency</th>
+                          <th>PO Type</th>
+                          <th>Delivery Date</th>
+                          <th>Order Status</th>
+                          <th>Remarks</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for item in vpo_list %}
+                            <tr>
+
+                                <td>
+                                  <a
+                                  data-toggle="tooltip"
+                                  data-placement="top"
+                                  title="Check This Order Details"
+                                  onclick="window.open(
+                                 '/reporting/vpo/{{item.po_number}}/details/', 
+                                 'newwindow', 
+                                 'height=1600,width=1800,resizable=yes,scrollbars=yes,toolbar=yes,menubar=yes,location=yes'); 
+                                 return false;"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>    
+                                </td>
+                                <td>{{forloop.counter}}</td>
+                                <td>{{item.vpo__vendor__name}}</td>
+                                <td>{{item.vpo__vendor__location}}</td>
+                                <td>{{item.po_number}}</td>
+                                <td>{{item.po_date}}</td>
+                                <td>{{item.vpo__cpo__customer__name}}</td>
+                                <td>{{item.basic_value}}</td>
+                                <td>{{item.total_value}}</td>
+                                <td>{{item.all_total_value}}</td>
+                                <td>{{item.vpo__currency__currency_code}}</td>
+                                <td>{{item.vpo_type}}</td>
+                                <td>{{item.vpo__delivery_date}}</td>
+                                <td>{{item.order_status}}</td>
+                                <td>{{item.remarks}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Vendor PO Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+          $(document).ready( function () {
+              $('#dcustomer').DataTable({
+                "bPaginate": false
+              });
+          } );
+          </script>     
+{% endblock content %}

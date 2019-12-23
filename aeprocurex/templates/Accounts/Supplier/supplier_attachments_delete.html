@@ -1,0 +1,29 @@
+{% extends 'Sourcing/base.html' %}
+{% load static %}
+
+{% block content %}
+<div>
+        <style>
+            .content {
+                max-width: 500px;
+                margin: auto;
+                background: white;
+                padding: 10px;
+            }
+            </style>        
+            <div class="content">
+              <label>Do want to delete this Attachment ?</label>
+              <form type="submit" id="vendor-form" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                        
+                        
+                </div>
+            </div>
+            <div class="modal-footer">
+                    <input type="submit" class="btn btn-success" value="Confirm">
+              </form>
+            </div>
+    </div>
+
+{% endblock content %}

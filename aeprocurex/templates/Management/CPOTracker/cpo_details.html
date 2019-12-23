@@ -1,0 +1,154 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Management Panel</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+</head>
+<body>
+
+
+    <div class="container-fluid">
+        <div class="card border-primary rounded-0">
+            <div class="card-header p-0">
+                <div class="bg-info text-white text-center py-2">
+                    <h2><b>Order Details for Cutomer Order No : {{cpo.customer_po_no}}</b></h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-primary rounded-0">
+            <div class="card-header p-0">
+                <div class="bg-success text-white py-2">
+                    <p>Customer : {{cpo.customer.name}} / {{cpo.customer.location}}</p>
+                    <p>Customer Contact Person : {{cpo.customer_contact_person.name}} / {{cpo.customer_contact_person.email1}}</p>
+                    <p>Order Date : {{cpo.customer_po_date}}</p>
+                    <p>Billing Address : {{cpo.billing_address}}</p>
+                    <p>Shipping Address : {{cpo.shipping_address}}</p>
+                    <p>Inco Terms : {{cpo.inco_terms}}</p>
+                    <p>Payment Terms : {{cpo.payment_terms}}</p>
+                    <p><b>Current Status : {{cpo.status}}</b></p>
+
+                    <p>Order Processing Type : {{cpo.processing_type}}</p>
+                    <p>Order-enquiry type : {{cpo.po_type}}</p>
+                    <p>Product Heading : {{cpo.product_heading}}</p><br>
+                    
+                    <hr>
+                    <p>Order Creation Details : {{cpo.cpo_creation_detail.created_by.first_name}} {{cpo.cpo_creation_detail.created_by.last_name}} // {{cpo.cpo_creation_detail.creation_date}}</p>
+                    <p>Order Processing By : {{cpo.cpo_assign_detail.assign_to.first_name}} {{cpo.cpo_assign_detail.assign_to.last_name}}</p>
+                    <hr>
+
+                    <p>Basic Order Value : {{cpo.total_basic_value}}</p>
+                    <p>Total Order Value : {{cpo.total_value}}</p>
+
+
+                    {% ifnotequal cpo.document1 "" %}
+                      <label>Customer Order Attachment <a href="/api/media/{{cpo.document1}}" target="-blank">Click Here</a></label><br>
+                    {% endifnotequal %}
+
+                    {% ifnotequal cpo.document2 "" %}
+                      <label>Customer Order Attachment 2 <a href="/api/media/{{cpo.document2}}" target="-blank">Click Here</a></label><br>
+                    {% endifnotequal %}
+
+                    
+                </div>
+            </div>
+        </div>
+        
+        <div class="container">
+                {% if message %}
+                <div class="alert alert-{{message_type}}">
+                    <strong>{{message}}</strong>
+                </div>
+                {% endif %}
+ 
+        </div>
+            <div class="table-responsive">          
+                    <table id="lineitems" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th>Sl No</th>
+                          <th>Product Title</th>
+                          <th>Description</th>
+                          <th>Model</th>
+                          <th>Brand</th>
+                          <th>Product Code</th>
+                          <th>Part no</th>
+                          <th>Pack Size</th>
+                          <th>HSN Code</th>
+                          <th>UOM</th>
+                          <th>Quantity</th>
+                          <th>Unit Price</th>
+                          <th>Total Basic Value</th>
+                          <th>GST (%)</th>
+                          <th>Including GST Value</th>
+                          <th>Pending Delivery Quantity</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for item in cpo_lineitem %}
+                            <tr>
+
+                                <td>{{forloop.counter}}</td>
+                                <td>{{item.product_title}}</td>
+                                <td>{{item.description}}</td>
+                                <td>{{item.model}}</td>
+                                <td>{{item.brand}}</td>
+                                <td>{{item.product_code}}</td>
+                                <td>{{item.part_no}}</td>      
+                                <td>{{item.pack_size}}</td>
+                                <td>{{item.hsn_code}}</td>
+                                <td>{{item.uom}}</td>
+                                <td>{{item.quantity}}</td>
+                                <td>{{item.unit_price}}</td>
+                                <td>{{item.total_basic_price}}</td>
+                                <td>{{item.gst}}</td>
+                                <td>{{item.total_price}}</td>
+                                <td>{{item.pending_delivery_quantity}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Enquiry Items Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+       <br>
+       <a class="btn btn-info pull-left" href="/reporting/cpo/{{cpo.id}}/check_our_quotation/">Check Our Quotation Details</a>
+       <a class="btn btn-success pull-left" href="/reporting/cpo/{{cpo.id}}/check_released_vpo_details/">Check Released Vendor PO Details</a>
+       <a class="btn btn-info pull-left" href="/reporting/cpo/{{cpo.id}}/check_invoicing_details/">Check Invoicing Details</a>
+  </div>
+
+
+
+        
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#lineitems').DataTable();
+            } );
+        </script> 
+        <style>
+          html *
+          {
+             font-size: 12px !important;
+          }
+      </style>
+        
+</body>
+</html>

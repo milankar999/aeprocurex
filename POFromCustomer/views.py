@@ -777,6 +777,7 @@ def cpo_create_quotation_selection(request, cpo_id=None):
         if request.method == 'GET':
                 quotation_list = QuotationTracker.objects.all().values(
                         'quotation_no',
+                        'rfp__product_heading',
                         'customer__name',
                         'customer__location',
                         'quotation_date')
@@ -986,8 +987,6 @@ def calculate_cpo(cpo_id):
         cpo.total_value = round(all_total,2)
         cpo.save()
 
-
-
 #Cpo create lineitem selection
 @login_required(login_url="/employee/login/")
 def cpo_create_selected_lineitem(request, cpo_id=None):
@@ -1146,6 +1145,7 @@ def cpo_generate(request, cpo_id=None):
                         basic_value = basic_value + round(item.total_basic_price,2)
                         total_value = total_value + round(item.total_price,2)                
 
+                cpo.product_heading = data['product_heading']
                 cpo.customer_po_no = data['customer_po_no']
                 cpo.customer_po_date = data['customer_po_date']
                 cpo.billing_address = data['billing_address']
@@ -1230,6 +1230,7 @@ def cpo_approval_list(request):
                         'id',
                         'customer__name',
                         'customer__location',
+                        'product_heading',
                         'customer_po_no',
                         'customer_po_date',
                         'customer_contact_person__name',
@@ -1260,8 +1261,35 @@ def cpo_approval_lineitem(request,cpo_id=None):
                 users = User.objects.filter(profile__type='Sourcing')
                 context['users'] = users
 
+                selected_quotation = CPOSelectedQuotation.objects.filter(customer_po = cpo)
+                try:
+                        f_quotation = selected_quotation[0]
+                        context['suggested_buyer'] = f_quotation.quotation.rfp.rfp_assign1.assign_to1
+                except:
+                        pass
+                
+
+
                 if type == 'Sales':
                         return render(request,"Sales/CPO/cpo_lineitem.html",context)
+
+#CPO Approval Lineitem
+@login_required(login_url="/employee/login/")
+def cpo_approval_quotation_reference(request,cpo_id=None):
+        context={}
+        context['po'] = 'active'
+        user = User.objects.get(username=request.user)
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                cpo = CustomerPO.objects.get(id = cpo_id)
+                selected_quotation = CPOSelectedQuotation.objects.filter(customer_po = cpo)              
+                context['selected_quotation'] = selected_quotation
+
+                return render(request,"Sales/CPO/selected_quotation_list.html",context)
+
 
 #CPO Reject
 @login_required(login_url="/employee/login/")
@@ -1304,8 +1332,76 @@ def cpo_approve(request,cpo_id=None):
                 cpo.save()
                 VendorProductSegmentation(cpo_id)
                 
+                send_po_approval_email(cpo_id, assign_user.email, assign_user.first_name)
                 print(data)
                 return HttpResponseRedirect(reverse('cpo-approval-list'))
+
+def send_po_approval_email(cpo_id = None, receiver = None, receiver_name = None):
+        try:
+                cpo = CustomerPO.objects.get(id = cpo_id)
+                cpo_lineitems = CPOLineitem.objects.filter(cpo = cpo)
+
+                if 1 > 0:
+                        email_body = '<head>'\
+                        '<style>'\
+                        'table {'\
+                        'width:100%;'\
+                        '}'\
+                        'table, th, td {'\
+                        'border: 1px solid black;'\
+                        'border-collapse: collapse;'\
+                        '}'\
+                        'th, td {'\
+                        'padding: 15px;'\
+                        'text-align: left;'\
+                        '}'\
+                        'table#t01 tr:nth-child(even) {'\
+                        'background-color: #eee;'\
+                        '}'\
+                        'table#t01 tr:nth-child(odd) {'\
+                        'background-color: #fff;'\
+                        '}'\
+                        'table#t01 th {'\
+                        'background-color: #1E2DFF;'\
+                        'color: white;'\
+                        '}'\
+                        '</style>'\
+                        '</head>'\
+                        '<body>'\
+                        '<h1 style="text-align: center;"><span style="color: #0000ff;"><strong>AEPROCUREX ERP</strong></span></h1>'\
+                        '<h2><span style="color: #008000;">Hello, ' + receiver_name  + '</span></h2>'\
+                        '<h2><span style="color: #008000;">&nbsp; &nbsp; &nbsp; One New CUstomer Purchase Order Has Been Assigned to You, Please Negotiatiate and release the purchase order</span></h2>'\
+                        '</strong></span><span style="color: #0000ff;">'\
+                        '<p><span style="color: #0000ff;"><strong>Customer : '+ cpo.customer.name +'</strong></span></p>'\
+                        '<p><span style="color: #0000ff;"><strong>Requester : '+ cpo.customer_contact_person.name + ' : ' + cpo.customer_contact_person.mobileNo1 +'</strong></span></p>'\
+                        '<br>'\
+                        '<label>Shipping Address : '+ cpo.shipping_address +'</label>'\
+                        '<table id="t01">'\
+                        '<tr>'\
+                        '<th align="Centre">Sl #</th>'\
+                        '<th align="Centre">Product Title</th>'\
+                        '<th align="Centre">Description</th>' \
+                        '<th align="Centre">Quantity</th>'\
+                        '<th align="Centre">UOM</th>'\
+                        '</tr>'
+                        i = 1
+
+                        for items in cpo_lineitems:
+                                email_body = email_body + '<tr>'\
+                                '<td>'+ str(i) +'</td>'\
+                                '<td>'+ items.product_title +'</td>'\
+                                '<td>'+ items.description +'</td>'\
+                                '<td>'+ str(items.quantity) +'</td>'\
+                                '<td>'+ items.uom +'</td>'\
+                                '</tr>'
+                                i = i + 1
+                        email_body = email_body + '</table>'\
+                        '</body>'
+                        msg = EmailMessage(subject=cpo.customer_po_no, body=email_body, from_email = settings.DEFAULT_FROM_EMAIL,to = ['milan.kar@aeprocurex.com',receiver])
+                        msg.content_subtype = "html"  # Main content is now text/html
+                        msg.send()
+        except:
+                pass
 
 #Mark as Direct Material processing
 @login_required(login_url="/employee/login/")
@@ -1428,6 +1524,7 @@ def DuplicateVPORemover(cpo_id):
                                 if i != 1:
                                         vpo_item.delete()
                                 i = i + 1
+
 
 
 #CPO Rejection List

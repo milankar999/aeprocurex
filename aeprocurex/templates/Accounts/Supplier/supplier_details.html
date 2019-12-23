@@ -1,0 +1,27 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+        <div class="panel panel-primary ">
+                <div class="panel-heading">{{Supplier.name}}</div>
+                <div class="panel-body">
+                    <h4>Location : {{Supplier.location}}</h4>
+                    <h4>Address : {{Supplier.address}}</h4>
+                    <h4>City : {{Supplier.city}}</h4>
+                    <h4>State : {{Supplier.state}}</h4>
+                    <h4>Pin : {{Supplier.pin}}</h4>
+                    <h4>Country : {{Supplier.country}}</h4>
+                    <h4>Office Email : {{Supplier.office_email1}}</h4>
+                    <h4>Office Email (Optional) : {{Supplier.office_email2}}</h4>
+                    <h4>Office phone : {{Supplier.office_phone1}}</h4>
+                    <h4>Office phone (Optional) : {{Supplier.office_phone2}}</h4>
+                    <h4>GST # : {{Supplier.gst_number}}</h4>
+                    <h4>Vendor Code : {{Supplier.advance_persentage}}</h4>
+                    <h4>Payment Term (in Days): {{Supplier.payment_term}}</h4>
+                    <h4>Inco Term : {{Supplier.inco_term}}</h4>
+                </div>
+        </div>
+</div>
+
+{% endblock content %}

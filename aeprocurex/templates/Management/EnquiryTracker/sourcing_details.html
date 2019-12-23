@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Management Panel</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+</head>
+<body>
+
+
+    <div class="container-fluid">
+    <a class="btn btn-success" href="/reporting/enquiry/{{rfp_no}}/details/">Back</a>
+      
+        <div class="card border-primary rounded-0">
+            <div class="card-header p-0">
+                <div class="bg-info text-white text-center py-2">
+                    <h2><b>Sourcing Details for RFP No : <a href="/reporting/enquiry/{{rfp_no}}/details/">{{rfp_no}}</a></b></h2>
+                </div>
+            </div>
+        </div>
+      {% for source in sourcing %}
+        <div class="card border-primary rounded-0">
+            <div class="card-header p-0">
+                <div class="bg-success text-white py-2">
+                    <p><b>Supplier : {{source.supplier.name}} / {{source.supplier.location}}</b></p>
+                    <p>Customer Contact Person : {{source.supplier_contact_person.name}} / {{source.supplier_contact_person.email1}}</p>
+                    <p>Offer Reference : {{source.offer_reference}}</p>
+                    <p>Offer Date : {{source.offer_date}}</p>
+                    <p>Material Unloading Point : {{source.delivery_point}}</p>
+                    
+                    <p>Sourcing Person Deatils : {{source.rfp.rfp_assign1.assign_to1.first_name}} {{source.rfp.rfp_assign1.assign_to1.last_name}}</p>
+
+                    <hr>
+                    <label>Supplier Quotation Attachment</label>
+                    {% for attach in supplier_quotation %}
+                      {% if attach.sourcing.id == source.id %}
+                        {% ifnotequal atattach.attachment "" %}
+                          <br><a href="/api/media/{{attach.attachment}}" target="-b">Click Here</a>
+                        {% endifnotequal %}
+                        {% ifnotequal atattach.quotation_link "" %}
+                          <br><a href="{{attach.quotation_link}}" target="-b">{{attach.quotation_link}}</a>
+                        {% endifnotequal %}
+                      {% endif %}
+                    {% empty %}
+                      <label>Not Found</label>
+                    {% endfor %}
+                    <hr>
+                    <label>Other Charges from Supplier End</label>
+                    {% for charges in other_charges %}
+                      {% if charges.sourcing.id == source.id %}
+                        <p>{{charges.cost_description}} : {{charges.value}}</p>
+                      {% endif %}
+                    {% empty %}
+                      <label>Not Found</label>
+                    {% endfor %}
+                    <br>
+                    
+
+                    
+                </div>
+            </div>
+        </div>
+
+            <div class="table-responsive">          
+                    <table id="lineitems" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Product Title</th>
+                          <th>Description</th>
+                          <th>Model</th>
+                          <th>Brand</th>
+                          <th>Product Code</th>
+                          <th>Part no</th>
+                          <th>Round 1 Price</th>
+                          <th>Round 2 Price</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for item in sourcing_lineitem %}
+                            {% if item.sourcing.id == source.id %}
+                            <tr>
+                                <td>
+                                  {{forloop.counter}}
+                                </td>
+                                <td>{{item.product_title}}</td>
+                                <td>{{item.description}}</td>
+                                <td>{{item.model}}</td>
+                                <td>{{item.brand}}</td>
+                                <td>{{item.product_code}}</td>
+                                <td>{{item.part_no}}</td>
+                                <td>{{item.price1}}</td>
+                                <td>{{item.price2}}</td>
+                            </tr>
+                            {% endif %}
+                          {% empty %}
+                            <p>No Enquiry Items Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+       <br>
+
+       <br><br><br><hr>
+      {% empty %}
+      <div class="card border-primary rounded-0">
+          <div class="card-header p-0">
+              <div class="bg-danger text-white text-center py-2">
+                  <h2><b>No Source Found</b></h2>
+              </div>
+          </div>
+      </div>
+      {% endfor %}
+    </div>
+
+
+
+        
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        <style>
+          html *
+          {
+             font-size: 12px !important;
+          }
+      </style>
+        
+</body>
+</html>

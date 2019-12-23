@@ -1,0 +1,82 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+
+        {% if message %}
+        <div class="alert alert-{{message_type}}">
+            <strong>{{message}}</strong>
+        </div>
+        {% endif %}
+
+    <h2>Manage Supplier Registration Attachment for {{SupplierName}} <button class="btn btn-success" data-toggle="modal" data-target="#ADDNew">ADD New &nbsp;<span class="glyphicon glyphicon-plus"></span></button></h2> 
+    
+        <!-- Modal -->
+    <div class="modal fade" id="ADDNew" role="dialog">
+           <div class="modal-dialog">
+           
+             <!-- Modal content-->
+             <div class="modal-content">
+               <div class="modal-header">
+                 <button type="button" class="close" data-dismiss="modal">&times;</button>
+                 <h4 class="modal-title">Fill the Contact Person Contact Details</span></h4>
+               </div>
+               <div class="modal-body">
+                 <form type="submit" id="customer-form" method="POST" enctype="multipart/form-data">
+                   {% csrf_token %}
+                   <div class="form-group">
+                           
+                           <label class="form-input" for="name">Attachment Description <a style="color: red">*</a></label>
+                           <input type="text" class="form-control" id="description" name="description" required>
+
+                           <label class="form-input" for="attachment">Attachment </label>
+                           <input required type="file" id="attachment" name="attachment">
+   
+                           
+
+                   </div>
+               </div>
+               <div class="modal-footer">
+                   <input type="button" class="btn btn-danger" data-dismiss="modal" value="Cancel">
+                       <input type="submit" class="btn btn-success" value="Confirm">
+                 </form>
+               </div>
+             </div>
+             
+           </div>
+         </div>
+        
+       <div class="table-responsive">          
+               <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                 <thead>
+                   <tr>
+                     <th></th>
+                     <th>Document</th>
+                     <th>Link</th>
+                   </tr>
+                 </thead>
+                 <tbody>   
+                     {% for item in doc %}
+                       <tr>
+                          <td class="list-inline">
+                              <a href="/supplier/{{supplier_id}}/view_attachments/{{item.id}}/delete/" data-toggle="tooltip" data-placement="top" title="delete"> <span class="glyphicon glyphicon-trash" style="color: red"></span></a> &nbsp;    
+                          </td>
+                           <td>{{item.description}}</td>
+                           <td><a target="-b" href="/api/media/{{item.attachment}}">Attachment</a></td>
+                       </tr>
+                     {% empty %}
+                       <p>No attachment Found</p>
+                     {% endfor %}
+                 </tbody>
+               </table>
+       </div>
+   </div>
+   <script type="text/javascript">
+       $(document).ready( function () {
+           $('#dcustomer').DataTable();
+       } );
+       </script>
+</div>
+
+{% endblock content %}

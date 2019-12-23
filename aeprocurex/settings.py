@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'Inventory',
     'OrderTracker',
     'SupplierPayment',
+    'Reporting',
 ]
 
 MIDDLEWARE = [
@@ -206,6 +207,6 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'website.aep.milan@gmail.com'
+EMAIL_HOST_USER = 'auto.gen.erp@gmail.com'
 EMAIL_HOST_PASSWORD = ''
-DEFAULT_FROM_EMAIL = 'website.aep.milan@gmail.com'
+DEFAULT_FROM_EMAIL = 'auto.gen.erp@gmail.com'

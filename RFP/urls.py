@@ -12,6 +12,11 @@ urlpatterns = [
     path('create/product_selection/1/2/3/<rfp_no>/<lineitem_id>/',lineitem_edit,name='lineitem-edit'),
     path('create/product_selection/1/2/3/<rfp_no>/<lineitem_id>/delete/',lineitem_delete,name='lineitem-delete'),
     path('<rfp_no>/generate/',rfp_generate,name='rfp_generate'),
+
+    #PSP Data
+    path('<rfp_no>/generate/psp_vendor_selection/<vendor_id>/contact_person_selection/',psp_contact_person_selection,name='rfp_generate_psp_vendor_contact_person_selection'),
+    path('<rfp_no>/generate/psp_vendor_selection/<vendor_id>/contact_person_selection/<contact_person_id>/confirmation/',psp_vendor_selection_confirmation,name='rfp_generate_psp_vendor_confirmation'),
+
     path('approval/list/',rfp_approval_list,name='rfp-approval-list'),
     path('approval/<rfp_no>/lineitems/',rfp_approval_lineitems,name='rfp-approval-lineitems'),
     path('<rfp_no>/reject/',rfp_reject,name='rfp-reject'),

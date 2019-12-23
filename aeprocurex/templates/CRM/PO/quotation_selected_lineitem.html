@@ -155,6 +155,9 @@
                 {% csrf_token %}
                 <div class="form-group">
 
+                        <label class="form-input" for="product_heading">Product Heading <a style="color: red">* (Maximum Length Should be less than 50 Characters)</a></label>
+                        <input type="text" class="form-control" id="product_heading" name="product_heading" required>
+
                         <label class="form-input" for="customer_po_no">Customer PO Number <a style="color: red">*</a></label>
                         <input type="text" class="form-control" id="customer_po_no" name="customer_po_no" required>
 

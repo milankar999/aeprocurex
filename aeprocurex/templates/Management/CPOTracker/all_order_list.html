@@ -1,0 +1,104 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="">
+
+        <div class="card border-primary rounded-0">
+          <div class="card-header p-0">
+              <div class="bg-info text-white text-center py-2">
+                  <h2><b>All Customer Order List</b></h2>
+              </div>
+          </div>
+      </div>
+
+
+
+
+
+            <div class="table-responsive">          
+                    <table id="dcustomer" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>SL #</th>
+                          <th>Order Status</th>
+                          <th>Customer</th>
+                          <th>Location</th>
+                          <th>Contact Person</th>
+                          <th>Type</th>
+                          <th>PO Number</th>
+                          <th>PO Date</th>
+                          <th>Delivery Date</th>
+                          <th>Buyer</th>
+                          <th>Basic Value</th>
+                          <th>Total Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for cpo in pending_cpo_list %}
+                            <tr>
+                                <td>                                  
+                                   <a
+                                   data-toggle="tooltip"
+                                   data-placement="top"
+                                   title="Check This Order Details"
+                                   onclick="window.open(
+                                  '/reporting/cpo/{{cpo.id}}/details/', 
+                                  'newwindow', 
+                                  'height=1600,width=1800,resizable=yes,scrollbars=yes,toolbar=yes,menubar=yes,location=yes'); 
+                                  return false;"> <span class="glyphicon glyphicon-forward" style="color: blue"></span></a>
+                                </td>
+                                <td>{{forloop.counter}}</td>
+
+                                {% if cpo.status == 'Created' %}
+                                <td>Waiting For Approval</td>
+
+                                {% elif cpo.status == 'approved' %}
+                                <td>Order Releasing Pending</td>
+                                
+                                {% elif cpo.status == 'direct_processing' %}
+                                <td>
+                                  Direct Processing
+                                </td>
+                                
+                                {% elif cpo.status == 'po_processed' %}
+                                <td>
+                                  Vendor PO Released
+
+                                </td> 
+                                
+                                {%else%}  
+                                <td>
+                                  {{cpo.status}}
+
+                                </td>
+                                
+                                {% endif %}
+                                
+                                <td>{{cpo.customer__name}}</td>
+                                <td>{{cpo.customer__location}}</td>
+                                <td>{{cpo.customer_contact_person__name}}</td>
+                                <td>{{cpo.po_type}}</td>
+                                <td>{{cpo.customer_po_no}}</td>
+                                <td>{{cpo.customer_po_date}}</td>
+                                <td>{{cpo.delivery_date}}</td>
+                                <td>{{cpo.cpo_assign_detail__assign_to__first_name}}&nbsp{{cpo.cpo_assign_detail__assign_to__last_name}}</td>
+                                <td>{{cpo.total_basic_value}}</td>
+                                <td>{{cpo.total_value}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Pending Order</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#dcustomer').DataTable({
+                  "bPaginate": false
+                });
+            } );
+            </script>     
+{% endblock content %}

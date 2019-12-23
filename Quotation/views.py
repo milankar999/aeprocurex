@@ -36,6 +36,7 @@ def generate_quotation_list(request):
         if request.method == "GET":
             rfp = RFP.objects.filter(opportunity_status='Open',enquiry_status='COQ Done').values(
                             'rfp_no',
+                            'product_heading',
                             'rfp_type',
                             'customer__name',
                             'customer__location',
@@ -57,6 +58,13 @@ def generate_quotation_lineitem(request,rfp_no=None):
         
     if type == 'Sales':
         if request.method == "GET":
+            
+            rfp = RFP.objects.get(rfp_no = rfp_no)
+            if rfp.rfp_type == 'PSP':
+                sourcing = Sourcing.objects.filter(rfp = rfp)
+                sourcing = sourcing[0]
+                unloading_point = sourcing.delivery_point
+                context['unloading_point'] = unloading_point
 
             other_charges = OtherCharges.objects.filter(rfp__rfp_no = rfp_no).values(
                 'id',
@@ -445,10 +453,10 @@ def generate_quotation_process(request,rfp_no=None):
                     return render(request,"Sales/Quotation/error.html",context)
             
             #Pack Size Check
-            pack_size_count = COQLineitem.objects.filter(rfp_no=rfp_no,pack_size='').count()
-            if pack_size_count != 0:
-                context['error'] = 'Empty Pack Size found'
-                return render(request,"Sales/Quotation/error.html",context)
+            #pack_size_count = COQLineitem.objects.filter(rfp_no=rfp_no,pack_size='').count()
+            #if pack_size_count != 0:
+            #    context['error'] = 'Empty Pack Size found'
+            #    return render(request,"Sales/Quotation/error.html",context)
 
             #Data Extraction           
             rfp_info = RFP.objects.filter(rfp_no=rfp_no).values(
@@ -1554,6 +1562,7 @@ def quoted_list(request):
             quoted_list = QuotationTracker.objects.filter(rfp__opportunity_status='Open',status='Generated').values(
                             'quotation_no',
                             'rfp__rfp_no',
+                            'rfp__product_heading',
                             'rfp__rfp_type',
                             'customer__name',
                             'customer__location',
@@ -1580,6 +1589,7 @@ def quoted_quotation_list(request,rfp_no=None):
             quoted_quotation_list = QuotationTracker.objects.filter(rfp__rfp_no=rfp_no).values(
                             'quotation_no',
                             'rfp__rfp_no',
+                            'rfp__product_heading',
                             'customer__name',
                             'customer__location',
                             'customer_contact_person__name',
@@ -1602,6 +1612,23 @@ def quotation_lineitems(request,rfp_no=None,quotation_no=None):
         
     if type == 'Sales':
         if request.method == "GET":
+
+            rfp = RFP.objects.get(rfp_no = rfp_no)
+            if rfp.rfp_type == 'PSP':
+                sourcing = Sourcing.objects.filter(rfp = rfp)
+                sourcing = sourcing[0]
+                unloading_point = sourcing.delivery_point
+                context['unloading_point'] = unloading_point
+
+            other_charges = OtherCharges.objects.filter(rfp__rfp_no = rfp_no).values(
+                'id',
+                'cost_description',
+                'value'
+            )
+            context['other_charges'] = other_charges
+
+            sourcing_attachment = SourcingAttachment.objects.filter(sourcing__rfp__rfp_no = rfp_no)
+            context['sourcing_attachment'] = sourcing_attachment
             quotation_obj = QuotationTracker.objects.get(quotation_no=quotation_no)
             quotation_lineitem = QuotationLineitem.objects.filter(quotation = quotation_obj)
             context['quotation_lineitem'] = quotation_lineitem

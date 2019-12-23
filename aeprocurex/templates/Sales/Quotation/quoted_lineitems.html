@@ -94,6 +94,80 @@
   
 
     </div>
+
+
+
+    
+
+    <div class="container">
+        <div class="row">
+          {% ifnotequal unloading_point "" %}
+            <label>unloading point : {{unloading_point}} </label>
+          {% endifnotequal %}
+        </div>
+  
+        <div class="row">
+        <div class="col-sm-6">
+          <div class="card-header p-0">
+              <div class="bg-info text-white text-center py-2">
+                  <label>Supplier Quotation Reference</label>
+              </div>
+          </div>
+        
+       
+        <br>
+        <hr>
+  
+  
+  
+        {% for attachment in sourcing_attachment %}
+        
+          {% ifnotequal attachment.attachment "" %}
+          <label>Supporting Document <a href="/api/media/{{attachment.attachment}}" target="-blank">Click Here</a></label><br>
+          {% endifnotequal %}
+  
+  
+          {% ifnotequal attachment.quotation_link "" %}
+          <label>Quotation Link <a href="{{attachment.quotation_link}}" target="-blank">{{attachment.quotation_link}}</a></label><br>
+          {% endifnotequal %}
+  
+        <hr>
+        {% empty %}
+        <label>No Attachment Found</label>
+        {% endfor %}
+  
+        <hr>
+        </div>
+  
+        <div class="col-sm-6">
+            <div class="card-header p-0">
+                <div class="bg-info text-white text-center py-2">
+                    <label>Other Charges applicable for quotation</label>
+                </div>
+            </div>
+            <br>
+        <hr>
+  
+  
+  
+        {% for cost in other_charges %}
+          
+          <label> {{cost.cost_description}} &nbsp;//&nbsp; {{cost.value}}</label>          
+        <hr>
+        {% empty %}
+        <label>No cost Found</label>
+        {% endfor %}
+  
+        <hr>
+        
+        </div>
+        </div>
+      </div>
+  
+  
+
+
+
     <br>
     <div class="table-responsive">          
           <table class="table table-hover table-bordered table-sm" id="uotation" width="100%">
@@ -171,13 +245,13 @@
                 {% endfor %}
               </tbody>
            </table>
-      </div> <br>   
+    </div> <br>   
       <lavel>{{grand_buying_price}}</lavel>
       <label>{{grand_buying_price_with_gst}}</label>
       <label>{{grand_selling_price}}</label>
       <label>{{grand_selling_price_with_gst}}</label> 
     <div class="modal-footer">
-        <button type="submit" class="btn btn-success" data-toggle="modal" data-target="#CopyQuotation">Generate the Same Copy Of this Qoutation &nbsp;<span class="glyphicon glyphicon-retweet"></span></button>
+        <a  class="btn btn-success" href="/api/media/quotation/{{quotation_no}}.pdf" target="-b">Get Copy Of this Quotation &nbsp;<span class="glyphicon glyphicon-download"></span></a>
     </div>
     <div class="modal fade" id="CopyQuotation" role="dialog">
         <div class="modal-dialog">

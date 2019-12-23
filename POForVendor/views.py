@@ -318,7 +318,6 @@ def VPOMarkProductDirectProcessing(request,cpo_id=None):
                 
                 return JsonResponse({"message":"success"})
 
-
 #Mark cpo lineitem as direct processing item remove
 @login_required(login_url="/employee/login/")
 def DirectProcessingItemRemove(request,cpo_id=None,cpo_lineitem_id=None):
@@ -337,8 +336,31 @@ def DirectProcessingItemRemove(request,cpo_id=None,cpo_lineitem_id=None):
 
                 return HttpResponseRedirect(reverse('vpo-vendor-product-segmentation',args=[cpo_id]))
 
+#View Sourcing References
+@login_required(login_url="/employee/login/")
+def VPOSourcingReferences(request,cpo_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
 
-                
+        if request.method == 'GET':
+                cpo = CustomerPO.objects.get(id = cpo_id)
+                selected_quotation_list = CPOSelectedQuotation.objects.filter(customer_po = cpo)
+
+                flag = 1
+                sourcing_attachment = ''
+                for item in selected_quotation_list:
+                        if flag == 1:
+                                sourcing_attachment = SourcingAttachment.objects.filter(sourcing__rfp = item.quotation.rfp.rfp_no)
+                                flag = 0
+                        else:
+                                sourcing_attachment = sourcing_attachment.union(SourcingAttachment.objects.filter(sourcing__rfp = item.quotation.rfp.rfp_no))
+                context['sourcing_attachment'] = sourcing_attachment
+
+                if type == 'Sourcing':
+                        return render(request,"Sourcing/VPO/PrepareVPO/sourcing_reference.html",context)
 
 #VPO Assign Product
 @login_required(login_url="/employee/login/")
@@ -415,6 +437,9 @@ def VPOAddOrderInformation(request,cpo_id=None,vpo_id=None):
 
                 pterms_list = PaymentTerms.objects.all()
                 context['pterms_list'] = pterms_list
+
+                sourcing_attachment = NegotiatedAttachment.objects.filter(vpo = vendor_po)
+                context['sourcing_attachment'] = sourcing_attachment
         
                 if type == 'Sourcing':
                         return render(request,"Sourcing/VPO/PrepareVPO/add_order_info.html",context)
@@ -484,6 +509,84 @@ def VPOAddOrderInformation(request,cpo_id=None,vpo_id=None):
 
                 return HttpResponseRedirect(reverse('vpo-vendor-product-segmentation',args=[cpo_id]))                
 
+#VPO add negotiated quotation
+@login_required(login_url="/employee/login/")
+def VPOAddNegotiatedQuotation(request,cpo_id=None,vpo_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                data = request.POST
+                vpo = VendorPO.objects.get(id = vpo_id)
+
+                try:
+                        document = request.FILES['attachment']
+                except:
+                        try:
+                                if data['link'] == '':
+                                        return JsonResponse({'Message':'There is no Valid Link and attachment1'})
+
+                                NegotiatedAttachment.objects.create(
+                                        vpo = vpo,
+                                        quotation_link = data['link']
+                                )
+                                return HttpResponseRedirect(reverse('vpo-vendor-product-segmentation-add-order-information', args=[cpo_id,vpo_id]))
+                        except:
+                                return JsonResponse({'Message':'There is no Valid Link and attachment1'})
+
+                        
+                document = request.FILES['attachment']
+                NegotiatedAttachment.objects.create(
+                        vpo = vpo,
+                        quotation_link = data['link'],
+                        attachment = document
+                )
+                return HttpResponseRedirect(reverse('vpo-vendor-product-segmentation-add-order-information', args=[cpo_id,vpo_id]))
+
+#VPO delete negotiated quotation
+@login_required(login_url="/employee/login/")
+def VPONegotiatedAttachmentDelete(request,cpo_id=None,vpo_id=None,attachment_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                na = NegotiatedAttachment.objects.get(id = attachment_id)
+                na.delete()
+
+                return HttpResponseRedirect(reverse('vpo-vendor-product-segmentation-add-order-information', args=[cpo_id,vpo_id]))
+
+#Get customer Contact details
+def CPOContactDetails(request,cpo_id=None,vpo_id=None):
+        if request.method == 'GET':
+                context={}
+                cpo = CustomerPO.objects.get(id = cpo_id)
+                context['cpo'] = cpo
+
+                return render(request,"Sourcing/VPO/PrepareVPO/cpo_contact_details.html",context)
+
+#Get payment terms history
+def VPOPaymentTermsHistory(request,cpo_id=None,vpo_id=None):
+        if request.method == 'GET':
+                context={}
+                vpo = VendorPO.objects.get(id = vpo_id)
+                vpot_list = VendorPOTracker.objects.filter(vpo__vendor = vpo.vendor).values(
+                        'po_number',
+                        'po_date',
+                        'status',
+                        'vpo__terms_of_payment',
+                        'basic_value'
+                ).order_by('-po_date')
+                context['vpot_list'] = vpot_list
+                #print(vpot_list)
+
+                return render(request,"Sourcing/VPO/PrepareVPO/payment_terms_history.html",context)
+
 #Add New Payment terms
 @login_required(login_url="/employee/login/")
 def AddNewPaymentTerms(request,cpo_id = None, vpo_id = None):
@@ -510,7 +613,6 @@ def AddNewPaymentTerms(request,cpo_id = None, vpo_id = None):
                 )
 
                 return HttpResponseRedirect(reverse('vpo-vendor-product-segmentation-add-order-information',args=[cpo_id,vpo_id]))
-
 
 #VPO edit vendor data
 @login_required(login_url="/employee/login/")
@@ -775,6 +877,11 @@ def VPOMarkRegular(request,cpo_id=None,vpo_id=None):
 
                         vpo_lineitem_count = VendorPOLineitems.objects.filter(vpo = vpo).count()
 
+                        attachment_count = NegotiatedAttachment.objects.filter(vpo = vpo).count()
+
+                        if attachment_count == 0:
+                                return JsonResponse({'Message': 'Please Add Negotiated Vendor quotation or Link or any screenshot'})
+
                         if vpo.vendor.gst_number == '' or vpo.vendor.gst_number == 'None':
                                 if vpo.vendor.country == 'India' :
                                         return JsonResponse({'Message': 'GST No Not Found'})
@@ -910,6 +1017,12 @@ def VPOMarkDirectBuying(request,cpo_id=None,vpo_id=None):
                         vpo_lineitem = VendorPOLineitems.objects.filter(vpo=vpo)
 
                         vpo_lineitem_count = VendorPOLineitems.objects.filter(vpo = vpo).count()
+
+
+                        attachment_count = NegotiatedAttachment.objects.filter(vpo = vpo).count()
+
+                        if attachment_count == 0:
+                                return JsonResponse({'Message': 'Please Add Negotiated Vendor quotation or Link or any screenshot'})
 
                         if vpo_lineitem_count == 0:
                                 return JsonResponse({'Message': 'No Lineitem Found'})
@@ -1900,7 +2013,6 @@ def VPOPendingApprovalList(request):
                 if type == 'Sales':
                         return render(request,"Sales/VPO/approval_list.html",context)
 
-
 #VPO Regular Pending Approval List
 @login_required(login_url="/employee/login/")
 def VPOPendingApprovalLineitems(request,po_number=None):
@@ -1917,6 +2029,9 @@ def VPOPendingApprovalLineitems(request,po_number=None):
                 context['vpo_lineitem'] = vpo_lineitem
                 PO_Generator(po_number)
 
+                sourcing_attachment = NegotiatedAttachment.objects.filter(vpo = vpo.vpo)
+                context['sourcing_attachment'] = sourcing_attachment
+
                 if type == 'Sales':
                         return render(request,"Sales/VPO/vpo_lineitem.html",context)
 
@@ -1932,7 +2047,6 @@ def VPOPendingApprovalGetCopy(request,po_number=None):
         if request.method == 'GET':
                 PO_Generator(po_number)
                 return FileResponse('/api/media/po/'+po_number+'.pdf', as_attachment=True, filename= po_number + '.pdf')
-
 
 #VPO Approve
 @login_required(login_url="/employee/login/")
@@ -1974,8 +2088,11 @@ def VPOReject(request,po_number=None):
                 vpo_tracker.vpo.po_status = 'Rejected'
                 vpo_tracker.vpo.save()
                 vpo_tracker.save()
-                vpo_tracker.vpo.cpo.status = 'approved'
-                vpo_tracker.vpo.cpo.save()
+                try:
+                        vpo_tracker.vpo.cpo.status = 'approved'
+                        vpo_tracker.vpo.cpo.save()
+                except:
+                        pass
 
                 if type == 'Sales':
                         return HttpResponseRedirect(reverse('vpo-pending-approval-list'))
@@ -2162,6 +2279,9 @@ class VPOReadyChangeInfo(APIView):
                 except :
                         return Response({'Message': 'Error Occured'})
 
+#claculate all values
+
+
 #Add Front Page Header
 def Add_Header(pdf):
         pdf.drawInlineImage("static/image/aeprocurex.jpg",360,750,220,70)
@@ -2343,17 +2463,16 @@ def Add_Table_Header(pdf,y):
         pdf.rect(10,y-31,570,30, stroke=0, fill=1)
         #Colum headers
         pdf.setFillColor(HexColor('#000000'))
-        pdf.setFont('Helvetica-Bold', 8)
+        pdf.setFont('Helvetica-Bold', 7)
         pdf.drawString(12,y-17,'SL #')
         pdf.drawString(60,y-17,'Material / Description / Specification')
         pdf.drawString(230,y-17,'Quantity')
         pdf.drawString(283,y-17,'UOM')
-        pdf.drawString(330,y-11,'Initial Basic Price')
-        pdf.drawString(345,y-22,'/ UOM ')
-        pdf.drawString(420,y-11,'Discount')
-        pdf.drawString(430,y-22,'(%)')
-        pdf.drawString(480,y-11,'Final Basic Price')
-        pdf.drawString(495,y-22,' / UOM')
+        pdf.drawString(330,y-11,'Basic Price')
+        pdf.drawString(337,y-22,'/ UOM ')
+        pdf.drawString(400,y-17,'Total Basic')
+        pdf.drawString(460,y-17,'GST(%)')
+        pdf.drawString(520,y-17,'All Total Price')
         y = y - 31
         pdf.rect(10,y,570,0.1, stroke=1, fill=1)
         y = y - 10
@@ -2414,21 +2533,22 @@ def format_us_currency(value):
 #Add Lineitem
 def add_lineitem(pdf,y,i,po_number,product_title,description,model,brand,product_code,hsn_code,gst,quantity,uom,unit_price,discount,discounted_price,total_discounted_price,gst_value,total_value,currency_code):
         
-        pdf.setFont('Helvetica', 9)
+        pdf.setFont('Helvetica', 7)
         pdf.drawString(12,y,str(i))
         pdf.drawString(230,y,str(quantity))
         pdf.drawString(283,y,uom.upper())
         if currency_code == 'INR':
-                pdf.drawString(330,y,currency_code + ' ' + currencyInIndiaFormat(str(unit_price)))
+                pdf.drawString(330,y,currency_code + ' ' + currencyInIndiaFormat(str(discounted_price)))
+                pdf.drawString(400,y,currency_code + ' ' + currencyInIndiaFormat(str(total_discounted_price)))
+                pdf.drawString(460,y, str(gst) + " %")
+                pdf.drawString(460,y-10, currency_code + ' ' + str(currencyInIndiaFormat(str(gst_value))))
+                pdf.drawString(520,y, currency_code + ' ' + str(currencyInIndiaFormat(str(total_value))))
         else:
-                pdf.drawString(330,y,currency_code + ' ' + format_us_currency(unit_price))
-        pdf.drawString(420,y,discount)
+                pdf.drawString(330,y,currency_code + ' ' + format_us_currency(discounted_price))
+                pdf.drawString(400,y,currency_code + ' ' + format_us_currency(total_discounted_price))
+                pdf.drawString(460,y,"NA")
+                pdf.drawString(520,y, currency_code + ' ' + str(currencyInIndiaFormat(str(total_value))))
         
-        if currency_code == 'INR':
-                pdf.drawString(480,y,currency_code + ' ' + currencyInIndiaFormat(str(discounted_price)))
-        else:
-                pdf.drawString(480,y,currency_code + ' ' + format_us_currency(discounted_price))
-
         material_wrapper = textwrap.TextWrapper(width=45)
         #Product title
         if product_title != 'added_by_buyer':
@@ -2439,89 +2559,50 @@ def add_lineitem(pdf,y,i,po_number,product_title,description,model,brand,product
                 if y < 50:
                         y = add_new_page(pdf,po_number)
                         y = Add_Table_Header(pdf,y)
-                        pdf.setFont('Helvetica', 9)
+                        pdf.setFont('Helvetica', 7)
 
                 for element in title_word_list:
                         pdf.drawString(40,y,element)
-                        y = y - 11
+                        y = y - 10
         
         
                         #Page Break
                         if y < 50:
                                 y = add_new_page(pdf,po_number)
                                 y = Add_Table_Header(pdf,y)
-                                pdf.setFont('Helvetica', 9)
+                                pdf.setFont('Helvetica', 7)
         
-                y = y + 10
+                y = y + 9
         
         #Description
+        try:
+                if brand != '' and brand != 'None':
+                        description = description + ', Brand ' + brand 
+        except:
+                pass
+
+        try:
+                if model != '' and model != 'None':
+                        description = description + ', Model ' + model
+        except:
+                pass
+        try:
+                if product_code != '' and product_code != 'None':
+                        description = description + ', Product Code ' + product_code
+        except:
+                pass
+
         description_word_list = material_wrapper.wrap(description)
         for element in description_word_list:
                 pdf.drawString(40,y-10,element)
-                y = y - 11
+                y = y - 10
     
                 #Page Break
                 if y < 50:
                         y = add_new_page(pdf,po_number)
                         y = Add_Table_Header(pdf,y)
-                        pdf.setFont('Helvetica', 9)
+                        pdf.setFont('Helvetica', 7)
         y=y-3
-        #Make
-        if brand != '' and brand != 'None':
-                try:
-                        brand_word_list = material_wrapper.wrap('Make :' + brand)
-                        for element in brand_word_list:
-                
-                                pdf.drawString(40,y-10,element)
-                                y = y - 11
-
-                                #Page Break
-                                if y < 50:
-                                        y = add_new_page(pdf,po_number)
-                                        y = Add_Table_Header(pdf,y)
-                                        pdf.setFont('Helvetica', 9)
-                                
-                        y=y-3
-                except:
-                        pass
-
-        #Model
-        if model != '' and model != 'None':
-                try:
-                        model_word_list = material_wrapper.wrap('Model :' + model)
-                        for element in model_word_list:
-                
-                                pdf.drawString(40,y-10,element)
-                                y = y - 11
-
-                                #Page Break
-                                if y < 50:
-                                        y = add_new_page(pdf,po_number)
-                                        y = Add_Table_Header(pdf,y)
-                                        pdf.setFont('Helvetica', 9)
-                                
-                        y=y-3
-                except:
-                        pass
-
-        #Product Code
-        if product_code != '' and product_code != 'None':
-                try:
-                        product_code_word_list = material_wrapper.wrap('Product Code :' + product_code)
-                        for element in product_code_word_list:
-                
-                                pdf.drawString(40,y-10,element)
-                                y = y - 11
-
-                                #Page Break
-                                if y < 50:
-                                        y = add_new_page(pdf,po_number)
-                                        y = Add_Table_Header(pdf,y)
-                                        pdf.setFont('Helvetica', 9)
-                                
-                        y=y-3
-                except:
-                        pass
 
         #HSN COde
         if hsn_code != '' and hsn_code != 'None':
@@ -2542,53 +2623,6 @@ def add_lineitem(pdf,y,i,po_number,product_title,description,model,brand,product
                 except:
                         pass
 
-        y = y - 10
-        #Page Break
-        if y < 50:
-                y = add_new_page(pdf,po_number)
-                y = Add_Table_Header(pdf,y)
-                
-        pdf.setFont('Helvetica-Bold', 8)
-
-        pdf.drawString(350,y,"Total Basic Value")
-
-        if currency_code == 'INR':
-                pdf.drawString(490,y,currency_code + ' ' + currencyInIndiaFormat(total_discounted_price))
-        else:
-                pdf.drawString(490,y,currency_code + ' ' + format_us_currency(total_discounted_price))
-        y = y - 10
-        
-        #Page Break
-        if y < 50:
-                y = add_new_page(pdf,po_number)
-                y = Add_Table_Header(pdf,y)
-                
-        if currency_code == 'INR':
-                pdf.setFont('Helvetica-Bold', 8)
-                pdf.drawString(350,y,"Applicable GST "+ str(gst) + " %")
-                pdf.drawString(490,y,currency_code + ' ' +str(currencyInIndiaFormat(str(gst_value))))
-                y = y - 10
-
-                #Page Break
-                if y < 50:
-                        y = add_new_page(pdf,po_number)
-                        y = Add_Table_Header(pdf,y)
-                
-                pdf.setFont('Helvetica-Bold', 8)
-                pdf.rect(350,y,228,0.2, stroke=1, fill=1)
-                y = y - 10
-
-        #Page Break
-        if y < 50:
-                y = add_new_page(pdf,po_number)
-                y = Add_Table_Header(pdf,y)
-        
-        pdf.setFont('Helvetica-Bold', 8)
-
-        if currency_code == 'INR':
-                pdf.drawString(350,y,"Total")
-                pdf.drawString(490,y,currency_code +' '+ str(currencyInIndiaFormat(str(total_value))))
-                y = y - 5
         pdf.rect(10,y,568,0.1, stroke=1, fill=1)
         y = y - 10
         #Page Break
@@ -2733,6 +2767,26 @@ def add_comments(pdf,y,po_number,comments):
                                 y = y - 8
                 except:
                         pass
+        return(y)
+
+#Add Delivery Note
+def add_delivery_note(pdf,y,po_number,po_type):
+        print('dfcv')
+        if po_type == "PSP":
+                y = y-2
+                
+                comments = 'Billing & Delivery Notes (Applicable only for PSP Orders) :: Materials / Serivices must be delivered through Aeprocurex Invoice Only (In case you are directly delivering to the end user), or else Payment Issue May Happen.'
+                
+                pdf.setFont('Helvetica-Bold', 8)
+                pdf.setFillColorRGB(255,0,0)
+                      
+                wrapper = textwrap.TextWrapper(width=150) 
+                print(po_type)
+                word_list = wrapper.wrap(text=comments)
+                for element in word_list:
+                        pdf.drawString(10,y,element)
+                        y = y - 8
+                y = y - 2
         return(y)
 
 #Terms and Conditions
@@ -2927,7 +2981,7 @@ def add_delivery_instruction(pdf,y,po_number,di1,di2,di3,di4,di5,di6,di7,di8,di9
 #add requester
 def add_requester(pdf,y,po_number,requester_name,email,phone):
         #Page Break
-        if y < 100:
+        if y < 50:
                 y = add_new_page(pdf,po_number)
                 pdf.setFont('Helvetica', 9)
         pdf.setFont('Helvetica-Bold', 8)
@@ -3090,6 +3144,13 @@ def PO_Generator(po_number):
         words = num2words('{0:.2f}'.format(grand_total))
         y = add_amount_in_word(pdf, y,po_number,'Amount In Words : ' + words.title() + ' ' + currency_name + ' only')
         y = add_comments(pdf,y,po_number,vpo_object.comments)
+        
+        try:
+                po_type = vpo_object.cpo.po_type
+                y = add_delivery_note(pdf,y,po_number,po_type)
+        except:
+                pass
+        
         y = add_terms_conditions(
                 pdf,
                 y,
@@ -3512,8 +3573,6 @@ def IVPOCreationInProgressList(request):
                 if type == 'Sourcing':
                         return render(request,"Sourcing/VPO/IndependentVPO/creation_in_progress_list.html",context)
 
-
-
 #Independent VPO Vendor Selection
 @login_required(login_url="/employee/login/")
 def IVPOVendorSelection(request):
@@ -3684,6 +3743,9 @@ def IVPOAddOrderInformation(request,vpo_id=None):
 
                 pterms_list = PaymentTerms.objects.all()
                 context['pterms_list'] = pterms_list
+
+                sourcing_attachment = NegotiatedAttachment.objects.filter(vpo = vendor_po)
+                context['sourcing_attachment'] = sourcing_attachment
         
                 if type == 'Sourcing':
                         return render(request,"Sourcing/VPO/IndependentVPO/add_order_info.html",context)
@@ -3751,6 +3813,60 @@ def IVPOAddOrderInformation(request,vpo_id=None):
                 vendor_po.save()
                 return HttpResponseRedirect(reverse('indepen-vpo-product-selection',args=[vpo_id]))
 
+#VPO add negotiated quotation
+@login_required(login_url="/employee/login/")
+def IVPOAddNegotiatedQuotation(request,vpo_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'POST':
+                data = request.POST
+                vpo = VendorPO.objects.get(id = vpo_id)
+
+                try:
+                        document = request.FILES['attachment']
+                except:
+                        try:
+                                if data['link'] == '':
+                                        return JsonResponse({'Message':'There is no Valid Link and attachment1'})
+
+                                NegotiatedAttachment.objects.create(
+                                        vpo = vpo,
+                                        quotation_link = data['link']
+                                )
+                                return HttpResponseRedirect(reverse('indepen-vpo-add-order-info', args=[vpo_id]))
+                        except:
+                                return JsonResponse({'Message':'There is no Valid Link and attachment1'})
+
+                        
+                document = request.FILES['attachment']
+                NegotiatedAttachment.objects.create(
+                        vpo = vpo,
+                        quotation_link = data['link'],
+                        attachment = document
+                )
+                return HttpResponseRedirect(reverse('indepen-vpo-add-order-info', args=[vpo_id]))
+
+#VPO delete negotiated quotation
+@login_required(login_url="/employee/login/")
+def IVPONegotiatedAttachmentDelete(request,vpo_id=None,attachment_id=None):
+        context={}
+        context['PO'] = 'active'
+        u = User.objects.get(username=request.user)
+        type = u.profile.type
+        context['login_user_name'] = u.first_name + ' ' + u.last_name
+
+        if request.method == 'GET':
+                na = NegotiatedAttachment.objects.get(id = attachment_id)
+                na.delete()
+
+                return HttpResponseRedirect(reverse('indepen-vpo-add-order-info', args=[vpo_id]))
+
+
+
 #Add New Payment terms
 @login_required(login_url="/employee/login/")
 def IAddNewPaymentTerms(request, vpo_id = None):
@@ -3777,7 +3893,6 @@ def IAddNewPaymentTerms(request, vpo_id = None):
                 )
 
                 return HttpResponseRedirect(reverse('indepen-vpo-add-order-info',args=[vpo_id]))
-
 
 #Vendor info change
 @login_required(login_url="/employee/login/")
@@ -4010,7 +4125,6 @@ def IVPOProductdelete(request,vpo_id=None,item_id=None):
 
                 return HttpResponseRedirect(reverse('indepen-vpo-product-selection',args=[vpo_id]))
 
-
 #VPO Approval_request
 @login_required(login_url="/employee/login/")
 def IVPOApprovalRequest(request,vpo_id=None):
@@ -4045,6 +4159,11 @@ def IVPOMarkRegular(request,vpo_id=None):
                         vpo_lineitem = VendorPOLineitems.objects.filter(vpo=vpo)
 
                         vpo_lineitem_count = VendorPOLineitems.objects.filter(vpo = vpo).count()
+
+                        attachment_count = NegotiatedAttachment.objects.filter(vpo = vpo).count()
+
+                        if attachment_count == 0:
+                                return JsonResponse({'Message': 'Please Add Negotiated Vendor quotation or Link or any screenshot'})
 
                         if vpo.vendor.gst_number == '' or vpo.vendor.gst_number == 'None':
                                 if vpo.vendor.country == 'India' :
@@ -4181,6 +4300,11 @@ def IVPOMarkDirectBuying(request, vpo_id=None):
                         
         
                         vpo_lineitem_count = VendorPOLineitems.objects.filter(vpo = vpo).count()
+
+                        attachment_count = NegotiatedAttachment.objects.filter(vpo = vpo).count()
+
+                        if attachment_count == 0:
+                                return JsonResponse({'Message': 'Please Add Negotiated Vendor quotation or Link or any screenshot'})
 
                         if vpo_lineitem_count == 0:
                                 return JsonResponse({'Message': 'No Lineitem Found'})

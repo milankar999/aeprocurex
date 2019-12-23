@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Sourcing Home</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+</head>
+<body>
+
+
+<div class="container">
+
+       <h2>All Released Purchase Order for this Vendor</h2>    
+
+       <div class="table-responsive">          
+               <table class="table table-hover table-bordered table-sm" width="100%">
+                 <thead>
+                   <tr>
+                     <th>SL #</th>
+                     <th>PO Number</th>
+                     <th>PO Date</th>
+                     <th>status</th>
+                     <th>Payment Terms</th>
+                     <th>Basic Value</th>
+                   </tr>
+                 </thead>
+                 <tbody>   
+                     {% for item in vpot_list %}
+                       <tr>
+                          <td>
+                            {{forloop.counter}} 
+                           </td>
+                           <td>{{item.po_number}}</td>
+                           <td>{{item.po_date}}</td>
+                           <td>{{item.status}}</td>
+                           <td>{{item.vpo__terms_of_payment}}</td>
+                           <td>{{item.basic_value}}</td>
+                        </tr>
+                     {% empty %}
+                       <p>No Item Found</p>
+                     {% endfor %}
+                 </tbody>
+               </table>
+       </div>
+   </div>
+   <script type="text/javascript">
+       $(document).ready( function () {
+           $('#dcustomer').DataTable();
+       } );
+   </script> 
+   <style>
+    html *
+    {
+       font-size: 12px !important;
+    }
+   </style>
+  </body>
+</html>

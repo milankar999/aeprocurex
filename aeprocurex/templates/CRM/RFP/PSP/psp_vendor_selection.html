@@ -1,0 +1,55 @@
+{% extends 'CRM/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="">
+        
+        <div class="container">
+ 
+            <h2>Select Vendor from this Vendor Master</h2> 
+            <div class="table-responsive">          
+                    <table id="vendor_list" class="table table-hover table-bordered table-sm" width="100%">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Supplier Name</th>
+                          <th>Location</th>
+                          <th>Contact No</th>
+                          <th>Email ID</th>
+                          <th>City</th>
+                          <th>State</th>
+                          <th>Country</th>
+                        </tr>
+                      </thead>
+                      <tbody>   
+                          {% for supplier in supplier_list %}
+                            <tr>
+                              <td>
+                                  <a href="psp_vendor_selection/{{supplier.id}}/contact_person_selection/" data-toggle="tooltip" data-placement="top" title="Select this vendor for Entering new quotation"> <span class="glyphicon glyphicon-arrow-right" style="color: green"></span></a> &nbsp;
+                              </td>
+                              <td>{{supplier.name}}</td>
+                              <td>{{supplier.location}}</td>
+                              <td>{{supplier.office_phone1}}</td>
+                              <td>{{supplier.office_email1}}</td>
+                              <td>{{supplier.city}}</td>
+                              <td>{{supplier.state}}</td>
+                              <td>{{supplier.country}}</td>
+                            </tr>
+                          {% empty %}
+                            <p>No Vendor Found</p>
+                          {% endfor %}
+                      </tbody>
+                    </table>
+            </div>  
+        </div>
+<br><br>
+        
+        <br>
+        </div>
+        <script type="text/javascript">
+            $(document).ready( function () {
+                $('#quotation_list').DataTable();
+                $('#vendor_list').DataTable();
+            } );
+            </script>     
+{% endblock content %}

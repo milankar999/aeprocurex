@@ -10,8 +10,21 @@
         {% endif %}
         <h2>Customer PO Lineitem
           <button class="btn btn-success" data-toggle="modal" data-target="#ViewDetails">View Details &nbsp;<span class="glyphicon glyphicon-plus"></span></button>
+          <a class="btn btn-success pull-right" href="check_quotation_reference/" target="-blank">View Quotation Details </a>
+          <br>
+          <div class="card border-primary rounded-0">
+            <div class="card-header p-0">
+                <div class="bg-info text-white text-center py-2">
+                  <label style="text-align:center;">Suggested Buyer for this PO : {{suggested_buyer}}</label>
+                </div>
+            </div>
+          </div>
+          
         </h2> 
         
+
+
+
     <!--New Product Modal -->
     <div class="modal fade" id="ViewDetails" role="dialog">
       <div class="modal-dialog">
