@@ -36,7 +36,7 @@ pycparser==2.19
 Pygments==2.3.1
 Pyphen==0.9.5
 pytz==2018.7
-PyYAML==3.13
+PyYAML==5.4
 reportlab==3.5.12
 requests==2.21.0
 six==1.12.0
